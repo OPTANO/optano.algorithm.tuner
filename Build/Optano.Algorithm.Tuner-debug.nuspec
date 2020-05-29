@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>OPTANO.Algorithm.Tuner</id>
+    <version>0.0.0.1</version>
+    <title>OPTANO Algorithm Tuner</title>
+    <authors>OPTANO GmbH</authors>
+	<owners>OPTANO GmbH</owners>
+    <copyright>OPTANO GmbH</copyright>
+	<license type="expression">MIT</license>
+    <projectUrl>https://github.com/OPTANO/optano.algorithm.tuner</projectUrl>
+    <iconUrl>https://optano.com/wp-content/uploads/2016/07/OPTANO_Logo_weiss_auf_violett_quadr.png</iconUrl>
+	<icon>logo.png</icon>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+	<tags>algorithm tuning configuration gurobi ubisat bbob lingelin saps application optimization automatic</tags>
+    <description>This package provides an algorithm which is a able to tune (improve the performance of) an algorithm.</description>
+    <summary>In order to tune an algorithm, the user needs to provide the parameter tree for her algorithm. The parameter tree specifies which parameters the algorithm exposes and how they interact with each other. 
+
+	Documentation: https://docs.optano.com/algorithm.tuner/current
+	
+	Source Code: https://github.com/OPTANO/optano.algorithm.tuner
+	
+	License details: https://optano.com/en/algorithm-tuner-mit-license</summary>
+    <releaseNotes>http://docs.optano.com/algorithm.tuner/current/changelog.html</releaseNotes>
+    <language>en-US</language>
+    <dependencies>
+      <group targetFramework="netstandard21">
+        <dependency id="Akka.Cluster" version="1.4.3" />
+        <dependency id="Akka.Logger.NLog" version="1.3.5" />
+        <dependency id="Akka.Serialization.Hyperion" version="1.4.3" />
+        <dependency id="MathNet.Numerics" version="4.9.0" />
+        <dependency id="NDesk.Options" version="0.2.1" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+	<file src="..\Source\Optano.Algorithm.Tuner\bin\Release\netstandard2.1\Optano.Algorithm.Tuner.dll" target="lib\netstandard21" />
+	<file src="..\Source\Optano.Algorithm.Tuner\bin\Release\netstandard2.1\Optano.Algorithm.Tuner.pdb" target="lib\netstandard21" />
+	<file src="..\Source\Optano.Algorithm.Tuner\bin\Release\netstandard2.1\Optano.Algorithm.Tuner.xml" target="lib\netstandard21" />
+	<file src="..\Tools\SharpLearningCustom\SharpLearningCustom.dll" target="lib\netstandard21" />
+	<file src="..\Source\Optano.Algorithm.Tuner\parameterTree.xsd" target="content" />
+	<file src="..\Source\Optano.Algorithm.Tuner\optano.algorithm.tuner.targets" target="build" />
+	<file src="..\nuget\LICENSE.txt" target="content" />
+	<file src="..\nuget\install.ps1" target="tools" />
+	<file src="..\nuget\readme.txt" target="" />
+	<file src="..\nuget\logo.png" target="" />
+  </files>
+</package>

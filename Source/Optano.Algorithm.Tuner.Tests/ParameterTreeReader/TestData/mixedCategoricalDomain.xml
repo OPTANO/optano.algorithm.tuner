@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<node xsi:type="value" id="symmetry" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<!-- Categorical domains should never consist of different types. -->
+	<domain xsi:type="categorical" ints="-1 0 1 2" booleans="false true"/>
+</node>

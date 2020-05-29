@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Queries>
+  <Group Name="ORC Metrics" Active="True" ShownInReport="False">    
+    <Group Name="Coding Style" Active="True" ShownInReport="False">
+      <Query Active="True" DisplayList="True" DisplayStat="True" DisplaySelectionView="False" IsCriticalRule="True"><![CDATA[// <Name>Don't use dangerous method A.Equals(B). Use Equals(A,B) instead.</Name>
+  // <Id>OPT9001:A.Equals</Id>
+warnif count > 0 
+
+let wrongMethods = ThirdParty.Methods.WithFullNameIn(
+  "System.Object.Equals(Object)"
+)
+
+from m in Application.Methods.UsingAny(wrongMethods)
+where !(m.OverriddensBase.Any()) // Should filter calls of base.Equals()
+select new { m, calls = m.MethodsCalled.Intersect(wrongMethods) }
+
+//<Description>
+// Do not use A.Equals(B), because A might be null.
+//</Description>
+
+//<HowToFix>
+// Use object.Equals(A,B) instead
+//</HowToFix>
+]]></Query>
+      <Query Active="True" DisplayList="True" DisplayStat="True" DisplaySelectionView="False" IsCriticalRule="True"><![CDATA[// <Name>Instance fields should be prefixed with a '_'</Name>
+// <Id>OPT9002:FieldPrefixNeeded</Id>
+warnif count > 0 from f in JustMyCode.Fields where 
+  !f.NameLike (@"^_") && 
+  !f.IsStatic && 
+  !f.IsLiteral && 
+  f.IsPrivate &&
+  !f.IsGeneratedByCompiler  && 
+  !f.IsSpecialName && 
+  !f.IsEventDelegateObject
+select new { f, f.SizeOfInst } 
+
+// This naming convention provokes debate.
+// Don't hesitate to customize the regex of 
+// NameLike to your preference.]]></Query>
+      <Query Active="True" DisplayList="True" DisplayStat="True" DisplaySelectionView="False" IsCriticalRule="True"><![CDATA[// <Name>Instance fields should not contain a '_' but be prefixed with a '_'</Name>
+      // <Id>OPT9003:NoUnderScore</Id>
+warnif count > 0 from f in JustMyCode.Fields where 
+  f.NameLike (@"^_.*_.*") && 
+  !f.IsStatic && 
+  !f.IsLiteral && 
+  f.IsPrivate &&
+  !f.IsGeneratedByCompiler  && 
+  !f.IsSpecialName && 
+  !f.IsEventDelegateObject
+select new { f, f.SizeOfInst } 
+
+// This naming convention provokes debate.
+// Don't hesitate to customize the regex of 
+// NameLike to your preference.]]></Query>
+      <Query Active="False" DisplayList="True" DisplayStat="True" DisplaySelectionView="False" IsCriticalRule="False"><![CDATA[//<Name>Check that all namespaces begins with Orconomy.ProductName</Name>
+warnif count > 0 from n in JustMyCode.Namespaces where 
+  !n.NameLike (@"^Orconomy.ProductName")
+select new { n, n.NbLinesOfCode } ]]></Query>
+    </Group>
+    <Group Name="Info" Active="True" ShownInReport="False">
+      <Query Active="True" DisplayList="True" DisplayStat="True" DisplaySelectionView="False" IsCriticalRule="False"><![CDATA[// <Name>Attributes used</Name>
+from t in ThirdParty.Types
+   where t.IsAttributeClass
+select t]]></Query>
+      <Query Active="False" DisplayList="True" DisplayStat="True" DisplaySelectionView="False" IsCriticalRule="False"><![CDATA[// <Name>Types SupressMessage Attribute used</Name>
+from t in JustMyCode.Types
+where t.HasAttribute("System.Diagnostics.CodeAnalysis.SuppressMessageAttribute")
+select t
+]]></Query>
+      <Query Active="False" DisplayList="True" DisplayStat="True" DisplaySelectionView="False" IsCriticalRule="False"><![CDATA[// <Name>Fields SupressMessage Attribute used</Name>
+from t in JustMyCode.Fields
+where t.HasAttribute("System.Diagnostics.CodeAnalysis.SuppressMessageAttribute")
+select t]]></Query>
+      <Query Active="False" DisplayList="True" DisplayStat="True" DisplaySelectionView="False" IsCriticalRule="False"><![CDATA[// <Name>Methods SupressMessage Attribute used</Name>
+from t in JustMyCode.Types.TaggedWithAnyAttributes(
+   ThirdParty.Types.Where(t => t.IsAttributeClass))
+where t.HasAttribute("System.Diagnostics.CodeAnalysis.SuppressMessageAttribute")
+select t]]></Query>
+      <Query Active="True" DisplayList="True" DisplayStat="True" DisplaySelectionView="False" IsCriticalRule="False"><![CDATA[// <Name>Fields with GeneratedCode Attribute</Name>
+from m in Fields
+where m.HasAttribute("System.CodeDom.Compiler.GeneratedCodeAttribute".AllowNoMatch())
+select new {m, m.ParentType}]]></Query>
+      <Query Active="True" DisplayList="True" DisplayStat="True" DisplaySelectionView="False" IsCriticalRule="False"><![CDATA[// <Name>Methods with GeneratedCode Attribute</Name>
+from m in Methods
+where m.HasAttribute("System.CodeDom.Compiler.GeneratedCodeAttribute".AllowNoMatch())
+select new {m, m.ParentType}
+]]></Query>
+      <Query Active="True" DisplayList="True" DisplayStat="True" DisplaySelectionView="False" IsCriticalRule="False"><![CDATA[// <Name>Types with GeneratedCode Attribute</Name>
+from m in Types
+where m.HasAttribute("System.CodeDom.Compiler.GeneratedCodeAttribute".AllowNoMatch())
+select new {m}
+]]></Query>
+      <Query Active="True" DisplayList="True" DisplayStat="True" DisplaySelectionView="False" IsCriticalRule="False"><![CDATA[// <Name>Assemblieswith GeneratedCode Attribute</Name>
+from m in Assemblies
+where m.HasAttribute("System.CodeDom.Compiler.GeneratedCodeAttribute".AllowNoMatch())
+select new {m}
+]]></Query>
+    </Group>
+  </Group>
+</Queries>

@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Comment CommentText="Use NLog for Logging (less coupling than using LoggingHelper)">
+    <Position X="0.5" Y="7.625" Height="0.75" Width="1.7" />
+  </Comment>
+  <Comment CommentText="Handles:&#xD;&#xA;* Invalidity (no boundaries, but extra rules, categories and integers)">
+    <Position X="11.198" Y="1.291" Height="0.802" Width="1.7" />
+  </Comment>
+  <Class Name="Optano.Algorithm.Tuner.ContinuousOptimization.CovarianceMatrixAdaptation.CmaEs&lt;TSearchPoint&gt;">
+    <Position X="0.5" Y="0.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>ACBAkQAAAAICAQFAQAIQACgIAASAAAAAMAAAVQICSAA=</HashCode>
+      <FileName>ContinuousOptimization\CovarianceMatrixAdaptation\CmaEs.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.ContinuousOptimization.CovarianceMatrixAdaptation.CmaEsElements">
+    <Position X="3.25" Y="0.5" Width="2.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAECAAAMAAAAgIAAAACAAQAAAAEAAAoAAAQAAACBA=</HashCode>
+      <FileName>ContinuousOptimization\CovarianceMatrixAdaptation\CmaEsElements.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.ContinuousOptimization.CovarianceMatrixAdaptation.CmaEsConfiguration">
+    <Position X="3.25" Y="3.75" Width="2.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>QACAIAQIhAgQIAAAAGEQAAIAAAAEAAAAAkQAAAEAAAQ=</HashCode>
+      <FileName>ContinuousOptimization\CovarianceMatrixAdaptation\CmaEsConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.ContinuousOptimization.SearchPoint">
+    <Position X="9.75" Y="2.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAIAAgAAAAAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>ContinuousOptimization\SearchPoint.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.ContinuousOptimization.CovarianceMatrixAdaptation.CmaEsStatus">
+    <Position X="6.25" Y="3.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAABAAAAAAAAAAAAAAABAAAAAAAABAAAA=</HashCode>
+      <FileName>ContinuousOptimization\CovarianceMatrixAdaptation\CmaEsStatus.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.ContinuousOptimization.CovarianceMatrixAdaptation.BoundedSearchPoint">
+    <Position X="9.75" Y="4.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAgAAAAAAAAAABAAAAACBAAAAAAAAA=</HashCode>
+      <FileName>ContinuousOptimization\CovarianceMatrixAdaptation\BoundedSearchPoint.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="Optano.Algorithm.Tuner.ContinuousOptimization.CovarianceMatrixAdaptation.ITerminationCriterion">
+    <Position X="6.25" Y="0.5" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAA=</HashCode>
+      <FileName>ContinuousOptimization\CovarianceMatrixAdaptation\ITerminationCriterion.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Optano.Algorithm.Tuner.ContinuousOptimization.ISearchPointSorter&lt;TSearchPoint&gt;">
+    <Position X="9.75" Y="0.5" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAQAAAAAAQAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ContinuousOptimization\ISearchPointSorter.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

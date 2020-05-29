@@ -1,0 +1,205 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Optano.Algorithm.Tuner.CmaEs.CmaEsConfiguration">
+    <Position X="14.75" Y="2.5" Width="2.75" />
+    <Compartments>
+      <Compartment Name="Properties" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier />
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.ParticleSwarmOptimization.ParticleSwarmOptimizationConfiguration">
+    <Position X="13" Y="2.5" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.Configuration.ArgumentParsers.HelpSupportingArgumentParser&lt;TConfigBuilder&gt;">
+    <Position X="20.25" Y="3" Width="3.25" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAEAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAA=</HashCode>
+      <FileName>Configuration\ArgumentParsers\HelpSupportingArgumentParser.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.Configuration.ArgumentParsers.HelpSupportingArgumentParserBase">
+    <Position X="23.75" Y="0.75" Width="3.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>CgQAAAAxAAAAAQAQAIIDEAAAAAAAAAABAAAAAARAAEA=</HashCode>
+      <FileName>Configuration\ArgumentParsers\HelpSupportingArgumentParserBase.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.DistributedExecution.WorkerArgumentParser">
+    <Position X="21.5" Y="5.75" Width="3" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>CAAAAAAIAAAACAAAAIIAAAAAqAAAAKgAAAAAAAAAAAA=</HashCode>
+      <FileName>DistributedExecution\WorkerArgumentParser.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.DistributedExecution.MasterArgumentParser">
+    <Position X="17.75" Y="5.75" Width="3.5" />
+    <Members>
+      <Field Name="ownHostName" Hidden="true" />
+      <Field Name="pathToInstanceFolder" Hidden="true" />
+      <Field Name="port" Hidden="true" />
+      <Field Name="specifiedMaximumNumberParallelEvaluations" Hidden="true" />
+      <Field Name="startFromExistingStatus" Hidden="true" />
+      <Field Name="statusFileDirectory" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>CQAIAAAACABgAAAAAEIAAAhAiCACAIgAAACAAAAAIAA=</HashCode>
+      <FileName>DistributedExecution\MasterArgumentParser.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.Configuration.ArgumentParsers.ArgumentParserUtils">
+    <Position X="17.75" Y="0.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Configuration\ArgumentParsers\ArgumentParserUtils.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.Configuration.AlgorithmTunerConfiguration">
+    <Position X="0.5" Y="2.5" Width="3.5" />
+    <Compartments>
+      <Compartment Name="Properties" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Class Name="Optano.Algorithm.Tuner.Configuration.AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder">
+        <Compartments>
+          <Compartment Name="Fields" Collapsed="true" />
+          <Compartment Name="Properties" Collapsed="true" />
+        </Compartments>
+        <TypeIdentifier>
+          <NewMemberFileName>Configuration\AlgorithmTunerConfiguration.cs</NewMemberFileName>
+        </TypeIdentifier>
+        <Lollipop Position="0.2" />
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>EAkMItCkCgCAAQCAAAEQACgUAAAQACACAgQQSAhEIAQ=</HashCode>
+      <FileName>Configuration\AlgorithmTunerConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.MachineLearning.RandomForest.Configuration.GenomePredictionRandomForestConfig">
+    <Position X="4.25" Y="2.5" Width="4" />
+    <Compartments>
+      <Compartment Name="Properties" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Class Name="Optano.Algorithm.Tuner.MachineLearning.RandomForest.Configuration.GenomePredictionRandomForestConfig.GenomePredictionRandomForestConfigBuilder">
+        <Compartments>
+          <Compartment Name="Fields" Collapsed="true" />
+          <Compartment Name="Properties" Collapsed="true" />
+        </Compartments>
+        <TypeIdentifier>
+          <NewMemberFileName>MachineLearning\RandomForest\Configuration\GenomePredictionRandomForestConfig.cs</NewMemberFileName>
+        </TypeIdentifier>
+        <Lollipop Position="0.2" />
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>ADgAAACAASAAAAAAAABAAAAAAAAAAAAAAAACAAAAAAE=</HashCode>
+      <FileName>MachineLearning\RandomForest\Configuration\GenomePredictionRandomForestConfig.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.Configuration.ConfigurationBase">
+    <Position X="3.25" Y="0.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAgAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAA=</HashCode>
+      <FileName>Configuration\ConfigurationBase.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.MachineLearning.RandomForest.Configuration.RegressionForestArgumentParser">
+    <Position X="24.75" Y="5.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>IIAAAQAAAAAABAAAAIIAAQAAAAAAAAAAAAAAQIAABAA=</HashCode>
+      <FileName>MachineLearning\RandomForest\Configuration\RegressionForestArgumentParser.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.PopulationUpdateStrategies.DifferentialEvolution.DifferentialEvolutionStrategyArgumentParser">
+    <Position X="27.5" Y="5.75" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>CAAAAAAAAAAAAAAAAIIAAAAAAAAAAAAAAAACQAAAAAA=</HashCode>
+      <FileName>PopulationUpdateStrategies\DifferentialEvolution\DifferentialEvolutionStrategyArgumentParser.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.PopulationUpdateStrategies.DifferentialEvolution.DifferentialEvolutionStrategyConfiguration">
+    <Position X="8.5" Y="2.5" Width="4.25" />
+    <Compartments>
+      <Compartment Name="Properties" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Class Name="Optano.Algorithm.Tuner.PopulationUpdateStrategies.DifferentialEvolution.DifferentialEvolutionStrategyConfiguration.DifferentialEvolutionStrategyConfigurationBuilder">
+        <Compartments>
+          <Compartment Name="Fields" Collapsed="true" />
+        </Compartments>
+        <TypeIdentifier>
+          <NewMemberFileName>PopulationUpdateStrategies\DifferentialEvolution\DifferentialEvolutionStrategyConfiguration.cs</NewMemberFileName>
+        </TypeIdentifier>
+        <Lollipop Position="0.2" />
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAgAAACAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAgg=</HashCode>
+      <FileName>PopulationUpdateStrategies\DifferentialEvolution\DifferentialEvolutionStrategyConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.ContinuousOptimization.DifferentialEvolution.DifferentialEvolutionArgumentParser">
+    <Position X="27.5" Y="8.75" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIIAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ContinuousOptimization\DifferentialEvolution\DifferentialEvolutionArgumentParser.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.ContinuousOptimization.DifferentialEvolution.DifferentialEvolutionConfiguration">
+    <Position X="8.5" Y="6.75" Width="3.75" />
+    <Compartments>
+      <Compartment Name="Properties" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Class Name="Optano.Algorithm.Tuner.ContinuousOptimization.DifferentialEvolution.DifferentialEvolutionConfiguration.DifferentialEvolutionConfigurationBuilder">
+        <Compartments>
+          <Compartment Name="Fields" Collapsed="true" />
+        </Compartments>
+        <TypeIdentifier>
+          <NewMemberFileName>ContinuousOptimization\DifferentialEvolution\DifferentialEvolutionConfiguration.cs</NewMemberFileName>
+        </TypeIdentifier>
+        <Lollipop Position="0.2" />
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAgAAACgAAAAAAQAAAAAAAAAAgAAAAAAAAAAACAAAAA=</HashCode>
+      <FileName>ContinuousOptimization\DifferentialEvolution\DifferentialEvolutionConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="Optano.Algorithm.Tuner.Configuration.ArgumentParsers.IConfigurationParser">
+    <Position X="20.25" Y="0.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>CAAAAAAAAAAAAAAQAAAAAAAAAAAAAIAAAAAAAAAAAAA=</HashCode>
+      <FileName>Configuration\ArgumentParsers\IConfigurationParser.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Optano.Algorithm.Tuner.Configuration.IConfigBuilder&lt;TConfiguration&gt;">
+    <Position X="0.5" Y="0.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAA=</HashCode>
+      <FileName>Configuration\IConfigBuilder.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

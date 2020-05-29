@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<node xsi:type="or" id="a" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<domain xsi:type="categorical" booleans="true false" />
+	<choice>
+		<int>1</int>
+		<child xsi:type="value" id="b">
+			<domain xsi:type="discrete" start="0" end="100" />
+		</child>
+	</choice>
+</node>

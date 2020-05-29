@@ -1,0 +1,4 @@
+# What is _OPTANO Algorithm Tuner_?
+_OPTANO Algorithm Tuner_ is a .Net Standard 2.1 compliant .Net-API that helps tuning any given target algorithm. The tuning can be executed for arbitrary optimization functions and has especially good performance for runtime optimization. It can deal with tuning continuous, discrete and categorical parameters and is able to consider relationships between them.
+
+Moreover it provides [several different tuning algorithms](userDoc/algorithms.md): GGA and GGA++ for general-purpose tuning, and JADE and active CMA-ES as specialized algorithms for continuous parameters. *OAT* already comes with an [out-of-the-box tuning application](userDoc/basic_usage.md) that is able to handle runtime or performance tuning for algorithms accepting files as input data. It can be executed on a single computing node, but can also [easily be scaled up by starting additional workers](userDoc/distributed.md).

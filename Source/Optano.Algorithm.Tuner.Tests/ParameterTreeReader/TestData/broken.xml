@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<node xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="and">
+	<!-- Missing closing bracket. -->
+	<node xsi:type="value" id="a"
+		<domain xsi:type="continuous" start="0" end="1" />
+	</node>
+</node>

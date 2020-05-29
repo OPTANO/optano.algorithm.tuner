@@ -1,0 +1,18 @@
+type project
+title OPTANO Algorithm.Tuner
+licenseUrl https://optano.com/en/algorithm-tuner-mit-license
+projectUrl https://optano.com/en/algorithm-tuner
+releaseNotes http://docs.optano.com/algorithm-tuner/current/changelog.html
+iconUrl https://optano.com/wp-content/uploads/2016/07/OPTANO_Logo_weiss_auf_violett_quadr.png
+requireLicenseAcceptance true
+language en-US
+include-pdbs false
+summary In order to tune an algorithm, the user needs to provide the parameter tree for her algorithm. The parameter tree specifies which parameters the algorithm exposes and how they interact with each other.
+files
+	readme.txt
+	parameterTree.xsd ==> content
+	optano.algorithm.tuner.targets ==> build
+	LICENSE.txt
+	3RD-PARTY-LICENSES.txt
+	../../Tools/SharpLearningCustom/Obfuscated/SharpLearningCustom.dll ==> lib/net461
+	../../Tools/SharpLearningCustom/Obfuscated/SharpLearningCustom.dll ==> lib/netcoreapp2.0

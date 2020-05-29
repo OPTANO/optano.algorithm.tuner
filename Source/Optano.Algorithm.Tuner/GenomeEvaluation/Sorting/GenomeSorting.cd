@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Optano.Algorithm.Tuner.GenomeEvaluation.Sorting.Messages.SortResult">
+    <Position X="3.5" Y="2.25" Width="2.25" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAA=</HashCode>
+      <FileName>GenomeEvaluation\Sorting\Messages\SortResult.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.GenomeEvaluation.Sorting.Messages.SortCommand&lt;TInstance&gt;">
+    <Position X="3.5" Y="0.5" Width="2.25" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAQAAAAAAAAAA=</HashCode>
+      <FileName>GenomeEvaluation\Sorting\Messages\SortCommand.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.GenomeEvaluation.Sorting.GenomeSorter&lt;TInstance, TResult&gt;">
+    <Position X="6" Y="0.5" Width="4.25" />
+    <Members>
+      <Method Name="GenomeSorter" Hidden="true" />
+    </Members>
+    <Compartments>
+      <Compartment Name="Properties" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAACAgCAEAAAAAGAAAABAECAAAAAABAAAAAIQAAAAAA=</HashCode>
+      <FileName>GenomeEvaluation\Sorting\GenomeSorter.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation.EvaluationActor&lt;TTargetAlgorithm, TInstance, TResult&gt;">
+    <Position X="10.5" Y="0.5" Width="4" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>ABBAAgAgoAAQAQkQAAAAEEAAAACgBAAAAwACAAEAAAg=</HashCode>
+      <FileName>GenomeEvaluation\Evaluation\EvaluationActor.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation.GenomeEvaluationDelegatorBase&lt;TResult&gt;">
+    <Position X="3" Y="4" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAACAgCBEACAIEkAAAABAAAEAAQAABAAAAgIACIAABA=</HashCode>
+      <FileName>GenomeEvaluation\Evaluation\GenomeEvaluationDelegatorBase.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments.Actors.MiniTournamentActor&lt;TTargetAlgorithm, TInstance, TResult&gt;">
+    <Position X="6" Y="4.5" Width="4.25" />
+    <Members>
+      <Method Name="MiniTournamentActor" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AgACIgCAAACACCEAAAABEAAAAACgABAIAAAABAAAABE=</HashCode>
+      <FileName>GenomeEvaluation\MiniTournaments\Actors\MiniTournamentActor.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.ContinuousOptimization.SearchPointSorterBase&lt;TSearchPoint&gt;">
+    <Position X="0.5" Y="2.25" Width="2.75" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAQAAAAAAQAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ContinuousOptimization\SearchPointSorterBase.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Interface Name="Optano.Algorithm.Tuner.ContinuousOptimization.ISearchPointSorter&lt;TSearchPoint&gt;">
+    <Position X="0.5" Y="0.5" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAQAAAAAAQAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ContinuousOptimization\ISearchPointSorter.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

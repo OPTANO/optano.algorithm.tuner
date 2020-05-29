@@ -1,0 +1,30 @@
+﻿{
+  // ACTION REQUIRED: This file was automatically added to your project, but it
+  // will not take effect until additional steps are taken to enable it. See the
+  // following page for additional information:
+  //
+  // https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/EnableConfiguration.md
+
+  "$schema": "https://raw.githubusercontent.com/DotNetAnalyzers/StyleCopAnalyzers/master/StyleCop.Analyzers/StyleCop.Analyzers/Settings/stylecop.schema.json",
+  "settings": {
+    "documentationRules": {
+      "xmlHeader": false,
+      "companyName": "ORCONOMY GmbH",
+      "copyrightText":
+        "\t ORCONOMY GmbH Source Code \n \t Copyright (c) 2010-2015 ORCONOMY GmbH \n \t ALL RIGHTS RESERVED.",
+      "headerDecoration": "////////////////////////////////////////////////////////////////////////////////",
+	  "documentPrivateElements": true,
+	  "documentPrivateFields" : true
+    },
+    "namingRules": {
+        "allowedHungarianPrefixes": [
+          "db",
+          "dx",
+          "my",
+          "to",
+          "ui",
+          "xy"
+        ]
+      }
+    }
+}

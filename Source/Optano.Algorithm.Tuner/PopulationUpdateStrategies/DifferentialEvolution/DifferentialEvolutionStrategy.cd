@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Optano.Algorithm.Tuner.PopulationUpdateStrategies.DifferentialEvolution.DifferentialEvolutionStrategy&lt;TInstance, TResult&gt;" BaseTypeListCollapsed="true">
+    <Position X="4.5" Y="1.5" Width="3.5" />
+    <Members>
+      <Field Name="configuration" Hidden="true" />
+      <Field Name="genomeBuilder" Hidden="true" />
+      <Field Name="parameterTree" Hidden="true" />
+      <Field Name="searchPointFactory" Hidden="true" />
+      <Field Name="targetRunResultStorage" Hidden="true" />
+    </Members>
+    <Compartments>
+      <Compartment Name="Properties" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>ICBAAgCQACAAIQCAAIAAAAAAAACEAAAiAAAIAAqAQAE=</HashCode>
+      <FileName>PopulationUpdateStrategies\DifferentialEvolution\DifferentialEvolutionStrategy.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.PopulationUpdateStrategies.DifferentialEvolution.DifferentialEvolutionStrategyArgumentParser" Collapsed="true">
+    <Position X="0.5" Y="0.5" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>CAAAAAAAAAAAAAAAAIIAAAAAAAAAAAAAAAACQAAAAAA=</HashCode>
+      <FileName>PopulationUpdateStrategies\DifferentialEvolution\DifferentialEvolutionStrategyArgumentParser.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.PopulationUpdateStrategies.DifferentialEvolution.DifferentialEvolutionStrategyConfiguration">
+    <Position X="0.5" Y="1.25" Width="3.5" />
+    <Compartments>
+      <Compartment Name="Properties" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Class Name="Optano.Algorithm.Tuner.PopulationUpdateStrategies.DifferentialEvolution.DifferentialEvolutionStrategyConfiguration.DifferentialEvolutionStrategyConfigurationBuilder">
+        <Compartments>
+          <Compartment Name="Fields" Collapsed="true" />
+        </Compartments>
+        <TypeIdentifier>
+          <NewMemberFileName>PopulationUpdateStrategies\DifferentialEvolution\DifferentialEvolutionStrategyConfiguration.cs</NewMemberFileName>
+        </TypeIdentifier>
+        <Lollipop Position="0.2" />
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAgAAACAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAgg=</HashCode>
+      <FileName>PopulationUpdateStrategies\DifferentialEvolution\DifferentialEvolutionStrategyConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.PopulationUpdateStrategies.DifferentialEvolution.DifferentialEvolutionStrategyStatus&lt;TInstance&gt;">
+    <Position X="11.75" Y="0.5" Width="3.25" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAAQAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAABAAAA=</HashCode>
+      <FileName>PopulationUpdateStrategies\DifferentialEvolution\DifferentialEvolutionStrategyStatus.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.PopulationUpdateStrategies.DifferentialEvolution.GenomeSearchPoint" BaseTypeListCollapsed="true">
+    <Position X="8.25" Y="3.5" Width="3.25" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>EAAAAAEAAAAACAAAAAoCgABAAAAAQAAASAAAAAAAAAA=</HashCode>
+      <FileName>PopulationUpdateStrategies\DifferentialEvolution\GenomeSearchPoint.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.PopulationUpdateStrategies.DifferentialEvolution.GenomeSearchPointSorter&lt;TInstance&gt;">
+    <Position X="8.25" Y="1.5" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAEAAAAAAAA=</HashCode>
+      <FileName>PopulationUpdateStrategies\DifferentialEvolution\GenomeSearchPointSorter.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.ContinuousOptimization.DifferentialEvolution.DifferentialEvolutionConfiguration">
+    <Position X="0.5" Y="5.5" Width="3.5" />
+    <Compartments>
+      <Compartment Name="Properties" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Class Name="Optano.Algorithm.Tuner.ContinuousOptimization.DifferentialEvolution.DifferentialEvolutionConfiguration.DifferentialEvolutionConfigurationBuilder">
+        <Compartments>
+          <Compartment Name="Fields" Collapsed="true" />
+        </Compartments>
+        <TypeIdentifier>
+          <NewMemberFileName>ContinuousOptimization\DifferentialEvolution\DifferentialEvolutionConfiguration.cs</NewMemberFileName>
+        </TypeIdentifier>
+        <Lollipop Position="0.2" />
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAgAAACgAAAAAAQAAAAAAAAAAgAAAAAAAAAAACAAAAA=</HashCode>
+      <FileName>ContinuousOptimization\DifferentialEvolution\DifferentialEvolutionConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.GenomeEvaluation.Sorting.GenomeSorter&lt;TInstance, TResult&gt;" Collapsed="true">
+    <Position X="8.25" Y="0.5" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>AAACAgCAEAAAAAGAAAABAECAAAAAABAAAAAIQAAAAAA=</HashCode>
+      <FileName>GenomeEvaluation\Sorting\GenomeSorter.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.ContinuousOptimization.DifferentialEvolution.DifferentialEvolutionStatus&lt;TSearchPoint&gt;" Collapsed="true">
+    <Position X="11.75" Y="2.5" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>AAAgAAAAACAAAAAAAAAAAAAEQIAAAAAAAAAAAIBAAAA=</HashCode>
+      <FileName>ContinuousOptimization\DifferentialEvolution\DifferentialEvolutionStatus.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="Optano.Algorithm.Tuner.PopulationUpdateStrategies.IPopulationUpdateStrategy&lt;TInstance, TResult&gt;" Collapsed="true">
+    <Position X="4.5" Y="0.5" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>ICBAAACAACAAAQAAAAAAAAAAAAAAAAAgAAAAAAAAQAA=</HashCode>
+      <FileName>PopulationUpdateStrategies\IPopulationUpdateStrategy.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

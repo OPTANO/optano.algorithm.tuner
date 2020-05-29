@@ -1,0 +1,22 @@
+This project links to the following nuget packages:
+
+Akka.Cluster, https://www.nuget.org/packages/Akka.Cluster/
+Akka.Logger.NLog, https://www.nuget.org/packages/Akka.Logger.NLog/
+Akka.Serialization.Hyperion, https://www.nuget.org/packages/Akka.Serialization.Hyperion/
+MathNet.Numerics, https://www.nuget.org/packages/MathNet.Numerics/
+NDesk.Options, https://www.nuget.org/packages/NDesk.Options/
+OPTANO.Modeling.Gurobi, https://www.nuget.org/packages/OPTANO.Modeling.Gurobi/
+StyleCop.Analyzers, https://www.nuget.org/packages/StyleCop.Analyzers/
+
+Moreover its test project links to the following nuget packages:
+
+Accord.Statistics, https://www.nuget.org/packages/Accord.Statistics/
+Akka.TestKit.Xunit2, https://www.nuget.org/packages/Akka.TestKit.Xunit2/
+coverlet.collector, https://www.nuget.org/packages/coverlet.collector/
+Microsoft.NET.Test.Sdk, https://www.nuget.org/packages/Microsoft.NET.Test.Sdk/
+Shouldly, https://www.nuget.org/packages/Shouldly/
+xunit, https://www.nuget.org/packages/xunit/
+xunit.runner.visualstudio, https://www.nuget.org/packages/xunit.runner.visualstudio/
+Xunit.SkippableFact, https://www.nuget.org/packages/Xunit.SkippableFact/
+
+Please refer to the named nuget pages for further license information and indirectly used nuget packages.

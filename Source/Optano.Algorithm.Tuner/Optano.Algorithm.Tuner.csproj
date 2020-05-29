@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>netstandard2.1</TargetFramework>
+	<CodeAnalysisRuleSet>..\..\StyleCopRuleset.ruleset</CodeAnalysisRuleSet>
+	<Version>0.0.1.1</Version>
+	<Authors>OPTANO GmbH</Authors>
+    <Copyright>OPTANO GmbH</Copyright>
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>Optano.Algorithm.Tuner.xml</DocumentationFile>
+    <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>Optano.Algorithm.Tuner.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="AkkaConfiguration\Common.conf" />
+    <None Remove="AkkaConfiguration\ExtensiveAkkaLogging.conf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Akka.Cluster" Version="1.4.3" />
+    <PackageReference Include="Akka.Logger.NLog" Version="1.3.5" />
+    <PackageReference Include="Akka.Serialization.Hyperion" Version="1.4.3" />
+    <PackageReference Include="MathNet.Numerics" Version="4.9.0" />
+    <PackageReference Include="NDesk.Options" Version="0.2.1" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="AkkaConfiguration\Common.conf" />
+    <EmbeddedResource Include="AkkaConfiguration\ExtensiveAkkaLogging.conf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="SharpLearningCustom">
+      <HintPath>..\..\Tools\SharpLearningCustom\SharpLearningCustom.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="parameterTree.xsd">
+      <CopyToOutputDirectory>CopyAlways</CopyToOutputDirectory>
+    </None>
+	<AdditionalFiles Include="..\..\stylecop.json" />
+  </ItemGroup>
+
+</Project>

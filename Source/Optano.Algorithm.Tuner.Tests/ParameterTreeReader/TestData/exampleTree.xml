@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- Root is an AND node. -->
+<node xsi:type="and" xsi:noNamespaceSchemaLocation="../../../../Optano.Algorithm.Tuner/parameterTree.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<!-- AND node's children are a double OR node and a double value node. -->
+	<node xsi:type="or" id="or">
+		<domain xsi:type="categorical" doubles="0.1 0.3 0.5" />
+		<!-- OR node's children is an AND node activated on 0.1 and a discrete value node activated on 0.5. -->
+		<choice>
+			<double>0.1</double>
+			<child xsi:type="and" />
+		</choice>
+		<choice>
+			<double>0.5</double>
+			<child xsi:type="value" id="value1">
+				<domain xsi:type="discrete" start="-2" end="3"/>
+			</child>
+		</choice>
+	</node>
+	<node xsi:type="value" id="value2">
+		<domain xsi:type="continuous" start="-0.1" end="0.0"/>
+		<!-- 1st level value node has another value node with a log domain as child. -->
+		<node xsi:type="value" id="value3">
+			<domain xsi:type="continuous" log="true" start="10" end="100"/>
+		</node>
+	</node>
+</node>

@@ -1,0 +1,98 @@
+.navbar-inverse {
+    background-color: #522583;
+    border-color: #847ab2;
+  }
+  .navbar-inverse .navbar-brand {
+    color: #adafaf;
+  }
+  .navbar-inverse .navbar-brand:hover,
+  .navbar-inverse .navbar-brand:focus {
+    color: #fcf8ff;
+  }
+  .navbar-inverse .navbar-text {
+    color: #adafaf;
+  }
+  .navbar-inverse .navbar-nav > li > a {
+    color: #adafaf;
+  }
+  .navbar-inverse .navbar-nav > li > a:hover,
+  .navbar-inverse .navbar-nav > li > a:focus {
+    color: #fcf8ff;
+  }
+  .navbar-inverse .navbar-nav > .active > a,
+  .navbar-inverse .navbar-nav > .active > a:hover,
+  .navbar-inverse .navbar-nav > .active > a:focus {
+    color: #fcf8ff;
+    background-color: #847ab2;
+  }
+  .navbar-inverse .navbar-nav > .open > a,
+  .navbar-inverse .navbar-nav > .open > a:hover,
+  .navbar-inverse .navbar-nav > .open > a:focus {
+    color: #fcf8ff;
+    background-color: #847ab2;
+  }
+  .navbar-inverse .navbar-toggle {
+    border-color: #847ab2;
+  }
+  .navbar-inverse .navbar-toggle:hover,
+  .navbar-inverse .navbar-toggle:focus {
+    background-color: #847ab2;
+  }
+  .navbar-inverse .navbar-toggle .icon-bar {
+    background-color: #adafaf;
+  }
+  .navbar-inverse .navbar-collapse,
+  .navbar-inverse .navbar-form {
+    border-color: #adafaf;
+  }
+  .navbar-inverse .navbar-link {
+    color: #adafaf;
+  }
+  .navbar-inverse .navbar-link:hover {
+    color: #fcf8ff;
+  }
+  
+  @media (max-width: 767px) {
+    .navbar-inverse .navbar-nav .open .dropdown-menu > li > a {
+      color: #adafaf;
+    }
+    .navbar-inverse .navbar-nav .open .dropdown-menu > li > a:hover,
+    .navbar-inverse .navbar-nav .open .dropdown-menu > li > a:focus {
+      color: #fcf8ff;
+    }
+    .navbar-inverse .navbar-nav .open .dropdown-menu > .active > a,
+    .navbar-inverse .navbar-nav .open .dropdown-menu > .active > a:hover,
+    .navbar-inverse .navbar-nav .open .dropdown-menu > .active > a:focus {
+      color: #fcf8ff;
+      background-color: #847ab2;
+    }
+  }
+  /* Word wrap setting*/
+  h1, h2, h3, h4, h5, h6, span.xref {
+      word-wrap: break-word;
+      word-break: initial;
+  }
+  
+  /* Customize navigation */
+  .toc .level3 {
+      font-size: 13px;
+      margin-top: 7px;
+    margin-left: 7px;
+    margin-bottom: 7px;	
+  }
+  .toc .level3 > li {  
+      margin-top: 3px
+  }
+  .toc .level4 > li {  
+      margin-top: 3px
+  }
+  .toc .level4 {
+      font-size: 12px;
+      margin-top: 7px;
+    margin-left: 7px;
+    margin-bottom: 7px;
+  }
+  
+  /* Customize tables */
+  table{border-spacing:5px;border-collapse:collapse;padding-left:5px;padding-right:5px}
+  td,th{border-spacing:5px;border-collapse:collapse;padding-left:5px;padding-right:5px}

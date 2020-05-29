@@ -1,0 +1,47 @@
+﻿akka
+{
+	stdout-loglevel = DEBUG
+	loglevel = DEBUG
+	actor
+	{
+		# Imitate real distributed situation by serializing messages.
+		serialize-messages = on
+		serializers.hyperion = "Akka.Serialization.HyperionSerializer, Akka.Serialization.Hyperion"				
+		serialization-bindings
+		{
+			"System.Object" = hyperion
+		}
+
+	debug {
+		receive = on 
+		autoreceive = on
+		lifecycle = on
+		event-stream = on
+		unhandled = on
+		router-misconfiguration = on
+	}
+					
+		provider = "Akka.Cluster.ClusterActorRefProvider, Akka.Cluster"			
+		deployment
+		{
+			/TournamentSelector/MiniTournamentWorkers
+			{
+				router = round-robin-pool # routing strategy
+				nr-of-instances = 1
+			}
+/GenomeSorter/SortingGroup
+{
+	router = broadcast-group
+	routees.paths = ["/*/*/*/*/EvaluationActors/*"]
+}
+		}
+	}
+	remote.dot-netty.tcp {
+		hostname = 0.0.0.0
+		port = 8081
+	}
+remote {
+log-sent-messages = on
+log-received-messages = on
+	}
+}

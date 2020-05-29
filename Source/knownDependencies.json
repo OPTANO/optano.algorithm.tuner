@@ -1,0 +1,1769 @@
+{
+  "PackageWithVersions": [
+    {
+      "PackageId": "Accord",
+      "VersionString": "3.8.0",
+      "LicenceUrl": "http://accord-framework.net/license.txt",
+      "ProjectUrl": "http://accord-framework.net/",
+      "CopyrightOrOwner": "Accord.NET",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "Accord.Math",
+      "VersionString": "3.8.0",
+      "LicenceUrl": "http://accord-framework.net/license.txt",
+      "ProjectUrl": "http://accord-framework.net/",
+      "CopyrightOrOwner": "Accord.NET",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "Accord.Statistics",
+      "VersionString": "3.8.0",
+      "LicenceUrl": "http://accord-framework.net/license.txt",
+      "ProjectUrl": "http://accord-framework.net/",
+      "CopyrightOrOwner": "Accord.NET",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "Akka",
+      "VersionString": "1.4.3",
+      "LicenceUrl": "https://github.com/akkadotnet/akka.net/blob/master/LICENSE",
+      "ProjectUrl": "https://github.com/akkadotnet/akka.net",
+      "CopyrightOrOwner": "Copyright © 2013-2020 Akka.NET Team",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": "https://github.com/akkadotnet/akka.net",
+      "Comment": null
+    },
+    {
+      "PackageId": "Akka.Cluster",
+      "VersionString": "1.4.3",
+      "LicenceUrl": "https://github.com/akkadotnet/akka.net/blob/master/LICENSE",
+      "ProjectUrl": "https://github.com/akkadotnet/akka.net",
+      "CopyrightOrOwner": "Copyright © 2013-2020 Akka.NET Team",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": "https://github.com/akkadotnet/akka.net",
+      "Comment": null
+    },
+    {
+      "PackageId": "Akka.Logger.NLog",
+      "VersionString": "1.3.5",
+      "LicenceUrl": "https://github.com/AkkaNetContrib/Akka.Logger.Nlog/blob/master/LICENSE",
+      "ProjectUrl": "https://github.com/AkkaNetContrib/Akka.Logger.Nlog",
+      "CopyrightOrOwner": "Copyright © 2013-2020 Akka.NET Contrib Team",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "Akka.Remote",
+      "VersionString": "1.4.3",
+      "LicenceUrl": "https://github.com/akkadotnet/akka.net/blob/master/LICENSE",
+      "ProjectUrl": "https://github.com/akkadotnet/akka.net",
+      "CopyrightOrOwner": "Copyright © 2013-2020 Akka.NET Team",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": "https://github.com/akkadotnet/akka.net",
+      "Comment": null
+    },
+    {
+      "PackageId": "Akka.Serialization.Hyperion",
+      "VersionString": "1.4.3",
+      "LicenceUrl": "https://github.com/akkadotnet/akka.net/blob/master/LICENSE",
+      "ProjectUrl": "https://github.com/akkadotnet/akka.net",
+      "CopyrightOrOwner": "Copyright © 2013-2020 Akka.NET Team",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": "https://github.com/akkadotnet/akka.net",
+      "Comment": null
+    },
+    {
+      "PackageId": "Akka.TestKit",
+      "VersionString": "1.4.3",
+      "LicenceUrl": "https://github.com/akkadotnet/akka.net/blob/master/LICENSE",
+      "ProjectUrl": "https://github.com/akkadotnet/akka.net",
+      "CopyrightOrOwner": "Copyright © 2013-2020 Akka.NET Team",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": "https://github.com/akkadotnet/akka.net",
+      "Comment": null
+    },
+    {
+      "PackageId": "Akka.TestKit.Xunit2",
+      "VersionString": "1.4.3",
+      "LicenceUrl": "https://github.com/akkadotnet/akka.net/blob/master/LICENSE",
+      "ProjectUrl": "https://github.com/akkadotnet/akka.net",
+      "CopyrightOrOwner": "Copyright © 2013-2020 Akka.NET Team",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": "https://github.com/akkadotnet/akka.net",
+      "Comment": null
+    },
+    {
+      "PackageId": "coverlet.collector",
+      "VersionString": "1.2.0",
+      "LicenceUrl": "https://licenses.nuget.org/MIT",
+      "ProjectUrl": "http://github.com/tonerdo/coverlet",
+      "CopyrightOrOwner": "tonerdo",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": "https://github.com/tonerdo/coverlet.git",
+      "Comment": null
+    },
+    {
+      "PackageId": "DotNetty.Buffers",
+      "VersionString": "0.6.0",
+      "LicenceUrl": "https://github.com/Azure/DotNetty/blob/master/LICENSE.txt",
+      "ProjectUrl": "https://github.com/Azure/DotNetty/",
+      "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": "https://github.com/Azure/DotNetty/",
+      "Comment": null
+    },
+    {
+      "PackageId": "DotNetty.Codecs",
+      "VersionString": "0.6.0",
+      "LicenceUrl": "https://github.com/Azure/DotNetty/blob/master/LICENSE.txt",
+      "ProjectUrl": "https://github.com/Azure/DotNetty/",
+      "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": "https://github.com/Azure/DotNetty/",
+      "Comment": null
+    },
+    {
+      "PackageId": "DotNetty.Common",
+      "VersionString": "0.6.0",
+      "LicenceUrl": "https://github.com/Azure/DotNetty/blob/master/LICENSE.txt",
+      "ProjectUrl": "https://github.com/Azure/DotNetty/",
+      "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": "https://github.com/Azure/DotNetty/",
+      "Comment": null
+    },
+    {
+      "PackageId": "DotNetty.Handlers",
+      "VersionString": "0.6.0",
+      "LicenceUrl": "https://github.com/Azure/DotNetty/blob/master/LICENSE.txt",
+      "ProjectUrl": "https://github.com/Azure/DotNetty/",
+      "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": "https://github.com/Azure/DotNetty/",
+      "Comment": null
+    },
+    {
+      "PackageId": "DotNetty.Transport",
+      "VersionString": "0.6.0",
+      "LicenceUrl": "https://github.com/Azure/DotNetty/blob/master/LICENSE.txt",
+      "ProjectUrl": "https://github.com/Azure/DotNetty/",
+      "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": "https://github.com/Azure/DotNetty/",
+      "Comment": null
+    },
+    {
+      "PackageId": "Google.Protobuf",
+      "VersionString": "3.11.4",
+      "LicenceUrl": "https://github.com/protocolbuffers/protobuf/blob/master/LICENSE",
+      "ProjectUrl": "https://github.com/protocolbuffers/protobuf",
+      "CopyrightOrOwner": "Copyright 2015, Google Inc.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": "https://github.com/protocolbuffers/protobuf.git",
+      "Comment": null
+    },
+    {
+      "PackageId": "Hyperion",
+      "VersionString": "0.9.15",
+      "LicenceUrl": "https://github.com/akkadotnet/Hyperion/blob/master/LICENSE",
+      "ProjectUrl": "https://github.com/akkadotnet/Hyperion",
+      "CopyrightOrOwner": "Copyright © 2016-2017 Akka.NET Team",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "MathNet.Numerics",
+      "VersionString": "4.9.0",
+      "LicenceUrl": "https://numerics.mathdotnet.com/License.html",
+      "ProjectUrl": "https://numerics.mathdotnet.com/",
+      "CopyrightOrOwner": "Copyright Math.NET Project",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": "https://github.com/mathnet/mathnet-numerics",
+      "Comment": null
+    },
+    {
+      "PackageId": "Microsoft.CodeCoverage",
+      "VersionString": "16.5.0",
+      "LicenceUrl": "http://www.microsoft.com/web/webpi/eula/net_library_eula_enu.htm",
+      "ProjectUrl": "https://github.com/microsoft/vstest/",
+      "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "Microsoft.CSharp",
+      "VersionString": "4.7.0",
+      "LicenceUrl": "https://licenses.nuget.org/MIT",
+      "ProjectUrl": "https://github.com/dotnet/corefx",
+      "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "Microsoft.Extensions.DependencyInjection.Abstractions",
+      "VersionString": "1.1.0",
+      "LicenceUrl": "http://www.microsoft.com/web/webpi/eula/net_library_eula_enu.htm",
+      "ProjectUrl": "http://www.asp.net/",
+      "CopyrightOrOwner": "Copyright © Microsoft Corporation",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "Microsoft.Extensions.Logging",
+      "VersionString": "1.1.1",
+      "LicenceUrl": "http://www.microsoft.com/web/webpi/eula/net_library_eula_enu.htm",
+      "ProjectUrl": "http://www.asp.net/",
+      "CopyrightOrOwner": "Copyright © Microsoft Corporation",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "Microsoft.Extensions.Logging.Abstractions",
+      "VersionString": "1.1.1",
+      "LicenceUrl": "http://www.microsoft.com/web/webpi/eula/net_library_eula_enu.htm",
+      "ProjectUrl": "http://www.asp.net/",
+      "CopyrightOrOwner": "Copyright © Microsoft Corporation",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "Microsoft.NET.Test.Sdk",
+      "VersionString": "16.5.0",
+      "LicenceUrl": "http://www.microsoft.com/web/webpi/eula/net_library_eula_enu.htm",
+      "ProjectUrl": "https://github.com/microsoft/vstest/",
+      "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "Microsoft.NETCore.Platforms",
+      "VersionString": "1.1.1",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "Microsoft.NETCore.Targets",
+      "VersionString": "1.1.3",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "Microsoft.TestPlatform.ObjectModel",
+      "VersionString": "16.5.0",
+      "LicenceUrl": "http://www.microsoft.com/web/webpi/eula/net_library_eula_enu.htm",
+      "ProjectUrl": "https://github.com/microsoft/vstest/",
+      "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "Microsoft.TestPlatform.TestHost",
+      "VersionString": "16.5.0",
+      "LicenceUrl": "http://www.microsoft.com/web/webpi/eula/net_library_eula_enu.htm",
+      "ProjectUrl": "https://github.com/microsoft/vstest/",
+      "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "Microsoft.Win32.Primitives",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "Microsoft.Win32.SystemEvents",
+      "VersionString": "4.7.0",
+      "LicenceUrl": "https://licenses.nuget.org/MIT",
+      "ProjectUrl": "https://github.com/dotnet/corefx",
+      "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Application.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "NDesk.Options",
+      "VersionString": "0.2.1",
+      "LicenceUrl": "http://www.opensource.org/licenses/mit-license.php",
+      "ProjectUrl": "",
+      "CopyrightOrOwner": "NDesk",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "NETStandard.Library",
+      "VersionString": "1.6.1",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "Newtonsoft.Json",
+      "VersionString": "12.0.3",
+      "LicenceUrl": "https://licenses.nuget.org/MIT",
+      "ProjectUrl": "https://www.newtonsoft.com/json",
+      "CopyrightOrOwner": "Copyright © James Newton-King 2008",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": "https://github.com/JamesNK/Newtonsoft.Json",
+      "Comment": null
+    },
+    {
+      "PackageId": "NLog",
+      "VersionString": "4.5.11",
+      "LicenceUrl": "https://github.com/NLog/NLog/blob/master/LICENSE.txt",
+      "ProjectUrl": "http://nlog-project.org/",
+      "CopyrightOrOwner": "Copyright (c) 2004-2018 NLog Project - http://nlog-project.org/",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": "git://github.com/NLog/NLog",
+      "Comment": null
+    },
+    {
+      "PackageId": "NuGet.Frameworks",
+      "VersionString": "5.0.0",
+      "LicenceUrl": "https://licenses.nuget.org/Apache-2.0",
+      "ProjectUrl": "https://aka.ms/nugetprj",
+      "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": "https://github.com/NuGet/NuGet.Client",
+      "Comment": null
+    },
+    {
+      "PackageId": "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl",
+      "VersionString": "4.3.2",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "runtime.fedora.23-x64.runtime.native.System.Security.Cryptography.OpenSsl",
+      "VersionString": "4.3.2",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "runtime.fedora.24-x64.runtime.native.System.Security.Cryptography.OpenSsl",
+      "VersionString": "4.3.2",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "runtime.native.System",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "runtime.native.System.IO.Compression",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "runtime.native.System.Net.Http",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "runtime.native.System.Net.Security",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "runtime.native.System.Security.Cryptography.Apple",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "runtime.native.System.Security.Cryptography.OpenSsl",
+      "VersionString": "4.3.2",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "runtime.opensuse.13.2-x64.runtime.native.System.Security.Cryptography.OpenSsl",
+      "VersionString": "4.3.2",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "runtime.opensuse.42.1-x64.runtime.native.System.Security.Cryptography.OpenSsl",
+      "VersionString": "4.3.2",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "runtime.osx.10.10-x64.runtime.native.System.Security.Cryptography.Apple",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "runtime.osx.10.10-x64.runtime.native.System.Security.Cryptography.OpenSsl",
+      "VersionString": "4.3.2",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "runtime.rhel.7-x64.runtime.native.System.Security.Cryptography.OpenSsl",
+      "VersionString": "4.3.2",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "runtime.ubuntu.14.04-x64.runtime.native.System.Security.Cryptography.OpenSsl",
+      "VersionString": "4.3.2",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "runtime.ubuntu.16.04-x64.runtime.native.System.Security.Cryptography.OpenSsl",
+      "VersionString": "4.3.2",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "runtime.ubuntu.16.10-x64.runtime.native.System.Security.Cryptography.OpenSsl",
+      "VersionString": "4.3.2",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "Shouldly",
+      "VersionString": "3.0.2",
+      "LicenceUrl": "https://github.com/shouldly/shouldly/blob/master/LICENSE.txt",
+      "ProjectUrl": "http://shouldly.github.com/",
+      "CopyrightOrOwner": "Shouldly",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": "https://github.com/shouldly/shouldly.git",
+      "Comment": null
+    },
+    {
+      "PackageId": "StyleCop.Analyzers",
+      "VersionString": "1.1.118",
+      "LicenceUrl": "https://licenses.nuget.org/Apache-2.0",
+      "ProjectUrl": "https://github.com/DotNetAnalyzers/StyleCopAnalyzers",
+      "CopyrightOrOwner": "Copyright 2015 Tunnel Vision Laboratories, LLC",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.AppContext",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Buffers",
+      "VersionString": "4.4.0",
+      "LicenceUrl": "https://github.com/dotnet/corefx/blob/master/LICENSE.TXT",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Collections",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Collections.Concurrent",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Collections.Immutable",
+      "VersionString": "1.7.0",
+      "LicenceUrl": "https://licenses.nuget.org/MIT",
+      "ProjectUrl": "https://github.com/dotnet/corefx",
+      "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.ComponentModel",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Configuration.ConfigurationManager",
+      "VersionString": "4.7.0",
+      "LicenceUrl": "https://licenses.nuget.org/MIT",
+      "ProjectUrl": "https://github.com/dotnet/corefx",
+      "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Console",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Diagnostics.Contracts",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Diagnostics.Debug",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Diagnostics.DiagnosticSource",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Diagnostics.StackTrace",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Diagnostics.Tools",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Diagnostics.Tracing",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Drawing.Common",
+      "VersionString": "4.7.0",
+      "LicenceUrl": "https://licenses.nuget.org/MIT",
+      "ProjectUrl": "https://github.com/dotnet/corefx",
+      "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Application.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Dynamic.Runtime",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Globalization",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Globalization.Calendars",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Globalization.Extensions",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.IO",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.IO.Compression",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.IO.Compression.ZipFile",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.IO.FileSystem",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.IO.FileSystem.Primitives",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Linq",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Linq.Expressions",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Memory",
+      "VersionString": "4.5.3",
+      "LicenceUrl": "https://github.com/dotnet/corefx/blob/master/LICENSE.TXT",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Net.Http",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Net.NameResolution",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Net.NetworkInformation",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Net.Primitives",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Net.Security",
+      "VersionString": "4.3.2",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Net.Sockets",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Numerics.Vectors",
+      "VersionString": "4.4.0",
+      "LicenceUrl": "https://github.com/dotnet/corefx/blob/master/LICENSE.TXT",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.ObjectModel",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Reflection",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Reflection.Emit",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Reflection.Emit.ILGeneration",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Reflection.Emit.Lightweight",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Reflection.Extensions",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Reflection.Metadata",
+      "VersionString": "1.4.1",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Reflection.Primitives",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Reflection.TypeExtensions",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Resources.ResourceManager",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Runtime",
+      "VersionString": "4.3.1",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Runtime.CompilerServices.Unsafe",
+      "VersionString": "4.5.2",
+      "LicenceUrl": "https://github.com/dotnet/corefx/blob/master/LICENSE.TXT",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Runtime.Extensions",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Runtime.Handles",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Runtime.InteropServices",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Runtime.InteropServices.RuntimeInformation",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Runtime.Numerics",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Security.AccessControl",
+      "VersionString": "4.7.0",
+      "LicenceUrl": "https://licenses.nuget.org/MIT",
+      "ProjectUrl": "https://github.com/dotnet/corefx",
+      "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Security.Claims",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Security.Cryptography.Algorithms",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Security.Cryptography.Cng",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Security.Cryptography.Csp",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Security.Cryptography.Encoding",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Security.Cryptography.OpenSsl",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Security.Cryptography.Primitives",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Security.Cryptography.ProtectedData",
+      "VersionString": "4.7.0",
+      "LicenceUrl": "https://licenses.nuget.org/MIT",
+      "ProjectUrl": "https://github.com/dotnet/corefx",
+      "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Security.Cryptography.X509Certificates",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Security.Permissions",
+      "VersionString": "4.7.0",
+      "LicenceUrl": "https://licenses.nuget.org/MIT",
+      "ProjectUrl": "https://github.com/dotnet/corefx",
+      "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Security.Principal",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Security.Principal.Windows",
+      "VersionString": "4.7.0",
+      "LicenceUrl": "https://licenses.nuget.org/MIT",
+      "ProjectUrl": "https://github.com/dotnet/corefx",
+      "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Text.Encoding",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Text.Encoding.Extensions",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Text.RegularExpressions",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Threading",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Threading.Overlapped",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Threading.Tasks",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Threading.Tasks.Extensions",
+      "VersionString": "4.5.1",
+      "LicenceUrl": "https://github.com/dotnet/corefx/blob/master/LICENSE.TXT",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Threading.Thread",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Threading.ThreadPool",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Threading.Timer",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Windows.Extensions",
+      "VersionString": "4.7.0",
+      "LicenceUrl": "https://licenses.nuget.org/MIT",
+      "ProjectUrl": "https://github.com/dotnet/corefx",
+      "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Application.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Xml.ReaderWriter",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Xml.XDocument",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "Validation",
+      "VersionString": "2.4.18",
+      "LicenceUrl": "https://raw.githubusercontent.com/AArnott/Validation/69e6a2c4f3/LICENSE.txt",
+      "ProjectUrl": "http://github.com/aarnott/Validation",
+      "CopyrightOrOwner": "Andrew Arnott",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": "http://github.com/aarnott/Validation",
+      "Comment": null
+    },
+    {
+      "PackageId": "xunit",
+      "VersionString": "2.4.1",
+      "LicenceUrl": "https://raw.githubusercontent.com/xunit/xunit/master/license.txt",
+      "ProjectUrl": "https://github.com/xunit/xunit",
+      "CopyrightOrOwner": "James Newkirk,Brad Wilson",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "xunit.abstractions",
+      "VersionString": "2.0.3",
+      "LicenceUrl": "https://raw.githubusercontent.com/xunit/xunit/master/license.txt",
+      "ProjectUrl": "https://github.com/xunit/xunit",
+      "CopyrightOrOwner": "James Newkirk,Brad Wilson",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "xunit.analyzers",
+      "VersionString": "0.10.0",
+      "LicenceUrl": "https://raw.githubusercontent.com/xunit/xunit.analyzers/master/LICENSE",
+      "ProjectUrl": "https://github.com/xunit/xunit.analyzers",
+      "CopyrightOrOwner": "Marcin Dobosz",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "xunit.assert",
+      "VersionString": "2.4.1",
+      "LicenceUrl": "https://raw.githubusercontent.com/xunit/xunit/master/license.txt",
+      "ProjectUrl": "https://github.com/xunit/xunit",
+      "CopyrightOrOwner": "James Newkirk,Brad Wilson",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "xunit.core",
+      "VersionString": "2.4.1",
+      "LicenceUrl": "https://raw.githubusercontent.com/xunit/xunit/master/license.txt",
+      "ProjectUrl": "https://github.com/xunit/xunit",
+      "CopyrightOrOwner": "James Newkirk,Brad Wilson",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "xunit.extensibility.core",
+      "VersionString": "2.4.1",
+      "LicenceUrl": "https://raw.githubusercontent.com/xunit/xunit/master/license.txt",
+      "ProjectUrl": "https://github.com/xunit/xunit",
+      "CopyrightOrOwner": "James Newkirk,Brad Wilson",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "xunit.extensibility.execution",
+      "VersionString": "2.4.1",
+      "LicenceUrl": "https://raw.githubusercontent.com/xunit/xunit/master/license.txt",
+      "ProjectUrl": "https://github.com/xunit/xunit",
+      "CopyrightOrOwner": "James Newkirk,Brad Wilson",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "xunit.runner.visualstudio",
+      "VersionString": "2.4.1",
+      "LicenceUrl": "https://raw.githubusercontent.com/xunit/xunit/master/license.txt",
+      "ProjectUrl": "https://github.com/xunit/xunit",
+      "CopyrightOrOwner": "James Newkirk, Brad Wilson",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "Xunit.SkippableFact",
+      "VersionString": "1.3.12",
+      "LicenceUrl": "https://raw.githubusercontent.com/AArnott/Xunit.SkippableFact/c7f20eaa78/LICENSE.txt",
+      "ProjectUrl": "https://github.com/AArnott/Xunit.SkippableFact",
+      "CopyrightOrOwner": "Copyright © Andrew Arnott",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    }
+  ],
+  "ProjectsWithoutNuget": [],
+  "PackagesToIgnore": [],
+  "DuplicatePackages": [
+    {
+      "PackageId": "Microsoft.NETCore.Platforms",
+      "VersionString": "3.1.0",
+      "LicenceUrl": "https://licenses.nuget.org/MIT",
+      "ProjectUrl": "https://github.com/dotnet/corefx",
+      "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Buffers",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Memory",
+      "VersionString": "4.5.2",
+      "LicenceUrl": "https://github.com/dotnet/corefx/blob/master/LICENSE.TXT",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    }
+  ],
+  "LicUrls": [
+    "http://accord-framework.net/license.txt",
+    "http://go.microsoft.com/fwlink/?LinkId=329770",
+    "http://www.microsoft.com/web/webpi/eula/net_library_eula_enu.htm",
+    "http://www.opensource.org/licenses/mit-license.php",
+    "https://github.com/akkadotnet/akka.net/blob/master/LICENSE",
+    "https://github.com/akkadotnet/Hyperion/blob/master/LICENSE",
+    "https://github.com/AkkaNetContrib/Akka.Logger.Nlog/blob/master/LICENSE",
+    "https://github.com/Azure/DotNetty/blob/master/LICENSE.txt",
+    "https://github.com/dotnet/corefx/blob/master/LICENSE.TXT",
+    "https://github.com/NLog/NLog/blob/master/LICENSE.txt",
+    "https://github.com/protocolbuffers/protobuf/blob/master/LICENSE",
+    "https://github.com/shouldly/shouldly/blob/master/LICENSE.txt",
+    "https://licenses.nuget.org/Apache-2.0",
+    "https://licenses.nuget.org/MIT",
+    "https://numerics.mathdotnet.com/License.html",
+    "https://raw.githubusercontent.com/AArnott/Validation/69e6a2c4f3/LICENSE.txt",
+    "https://raw.githubusercontent.com/AArnott/Xunit.SkippableFact/c7f20eaa78/LICENSE.txt",
+    "https://raw.githubusercontent.com/xunit/xunit.analyzers/master/LICENSE",
+    "https://raw.githubusercontent.com/xunit/xunit/master/license.txt"
+  ]
+}
