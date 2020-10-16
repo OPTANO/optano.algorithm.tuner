@@ -1,30 +1,30 @@
 ﻿#region Copyright (c) OPTANO GmbH
 
 // ////////////////////////////////////////////////////////////////////////////////
-// 
+//
 //        OPTANO GmbH Source Code
 //        Copyright (c) 2010-2020 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
-// 
+//
 //    The entire contents of this file is protected by German and
 //    International Copyright Laws. Unauthorized reproduction,
 //    reverse-engineering, and distribution of all or any portion of
 //    the code contained in this file is strictly prohibited and may
 //    result in severe civil and criminal penalties and will be
 //    prosecuted to the maximum extent possible under the law.
-// 
+//
 //    RESTRICTIONS
-// 
+//
 //    THIS SOURCE CODE AND ALL RESULTING INTERMEDIATE FILES
 //    ARE CONFIDENTIAL AND PROPRIETARY TRADE SECRETS OF
 //    OPTANO GMBH.
-// 
+//
 //    THE SOURCE CODE CONTAINED WITHIN THIS FILE AND ALL RELATED
 //    FILES OR ANY PORTION OF ITS CONTENTS SHALL AT NO TIME BE
 //    COPIED, TRANSFERRED, SOLD, DISTRIBUTED, OR OTHERWISE MADE
 //    AVAILABLE TO OTHER INDIVIDUALS WITHOUT WRITTEN CONSENT
 //    AND PERMISSION FROM OPTANO GMBH.
-// 
+//
 // ////////////////////////////////////////////////////////////////////////////////
 
 #endregion
@@ -32,6 +32,8 @@
 namespace Optano.Algorithm.Tuner.Parameters.Domains
 {
     using System;
+
+    using Optano.Algorithm.Tuner.Genomes.Values;
 
     /// <summary>
     /// A domain that contains a minimum and maximum value.
@@ -47,8 +49,19 @@ namespace Optano.Algorithm.Tuner.Parameters.Domains
         /// </summary>
         /// <param name="minimum">The minimum value.</param>
         /// <param name="maximum">The maximum value. Must be at least as large as minimum.</param>
-        /// <exception cref="ArgumentException">Thrown if the specified maximum value is smaller than the minimum one.</exception>
         protected NumericalDomain(T minimum, T maximum)
+            : this(minimum, maximum, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NumericalDomain{T}" /> class.
+        /// </summary>
+        /// <param name="minimum">The minimum value.</param>
+        /// <param name="maximum">The maximum value. Must be at least as large as minimum.</param>
+        /// <param name="defaultValue">The optional default value.</param>
+        protected NumericalDomain(T minimum, T maximum, Allele<T>? defaultValue)
+        : base(defaultValue)
         {
             if (maximum.CompareTo(minimum) < 0)
             {
@@ -57,6 +70,11 @@ namespace Optano.Algorithm.Tuner.Parameters.Domains
 
             this.Minimum = minimum;
             this.Maximum = maximum;
+
+            if (defaultValue.HasValue && !this.ContainsGeneValue(defaultValue.Value))
+            {
+                throw new ArgumentException($"{defaultValue.Value} is not a member of this domain.");
+            }
         }
 
         #endregion

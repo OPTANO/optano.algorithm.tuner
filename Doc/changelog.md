@@ -2,6 +2,20 @@
 
 _OPTANO Algorithm Tuner_ is a Genetic Algorithm implementation. It finds near-optimal parameters (a configuration) for any given target algorithm. 
 
+## Version 0.9.1 (2020-10-14)
+
+Changes:
+
+- Feature: Add option for specifying the default configuration of the target algorithm, in order to include it in the initial population when a new tuning is started.
+    - See [notes on usage here](userDoc/basic_usage.md#xml) or refer to [Gurobi's](userDoc/gurobi.md#parameter-tree) `parameterTree.xml` for an example on how to use the default value feature.
+- Improvement: The new [download page](download.md) now provides a _self-contained_ version of the [Tuner.Application](userDoc/basicUsage.md) for `win-x64`, `linux-x64` and `osx-x64`.
+- Improvement: Export the generation history after each generation.
+    - Previously, the generation history was only exported after the tuning was finished (and the optional evaluation of the test set has been completed).
+- Improvement: (More) Clean ups and refactoring for the [example projects](userDoc/examples.md). E.g.:
+    - [Gurobi](userDoc/gurobi.md) now targets Gurobi 9.0 and supports parsing of compressed instance- and start solution files.
+- Fix: The _logged_ age of the incumbent genome now is updated properly in the case that the incumbent did not change.
+    - This issue did not affect the behavior/performance of OAT and was simply related to logging.
+
 ## Version 0.9.0 (2020-05-29)
 
 Changes:

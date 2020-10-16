@@ -245,6 +245,12 @@
             model setting changes from false to true.
             </summary>
         </member>
+        <member name="M:Optano.Algorithm.Tuner.Tests.Configuration.AlgorithmTunerConfigurationTest.IsCompatibleReturnsFalseNewAddDefaultGenomeValue">
+            <summary>
+            Checks that <see cref="M:Optano.Algorithm.Tuner.Configuration.AlgorithmTunerConfiguration.IsCompatible(Optano.Algorithm.Tuner.Configuration.ConfigurationBase)"/> returns false if the
+            add default genome value is different.
+            </summary>
+        </member>
         <member name="M:Optano.Algorithm.Tuner.Tests.Configuration.AlgorithmTunerConfigurationTest.IsCompatibleReturnsFalseForIncompatibleRandomForestConfiguration">
             <summary>
             Checks that <see cref="M:Optano.Algorithm.Tuner.Configuration.AlgorithmTunerConfiguration.IsCompatible(Optano.Algorithm.Tuner.Configuration.ConfigurationBase)"/> returns false if associated
@@ -4954,17 +4960,23 @@
             in the <see cref="T:Optano.Algorithm.Tuner.Configuration.AlgorithmTunerConfiguration"/>.
             </summary>
         </member>
-        <member name="M:Optano.Algorithm.Tuner.Tests.Genomes.GenomeBuilderTest.CreateGenomeBuilder">
+        <member name="M:Optano.Algorithm.Tuner.Tests.Genomes.GenomeBuilderTest.DefaultGenomeUsesDefaultValues">
+            <summary>
+            Checks that the <see cref="M:Optano.Algorithm.Tuner.Genomes.GenomeBuilder.CreateDefaultGenome(System.Int32)"/> uses the specified domain default values.
+            </summary>
+        </member>
+        <member name="M:Optano.Algorithm.Tuner.Tests.Genomes.GenomeBuilderTest.CreateGenomeBuilder(System.Boolean)">
             <summary>
             Creates a simple <see cref="T:Optano.Algorithm.Tuner.Genomes.GenomeBuilder"/> that uses the parameter tree from
-            <see cref="M:Optano.Algorithm.Tuner.Tests.Genomes.GenomeBuilderTest.BuildParameterTree"/>.
+            <see cref="M:Optano.Algorithm.Tuner.Tests.Genomes.GenomeBuilderTest.BuildParameterTree(System.Boolean)"/>.
             </summary>
+            <param name="includeDefaultValues">Indicates whether to add default values to the domains.</param>
             <returns>The genome builder.</returns>
         </member>
         <member name="M:Optano.Algorithm.Tuner.Tests.Genomes.GenomeBuilderTest.CreateGenomeBuilderWithoutRandomMutation">
             <summary>
             Creates a simple <see cref="T:Optano.Algorithm.Tuner.Genomes.GenomeBuilder"/> that has a mutation rate of 0 and uses the parameter tree from
-            <see cref="M:Optano.Algorithm.Tuner.Tests.Genomes.GenomeBuilderTest.BuildParameterTree"/>.
+            <see cref="M:Optano.Algorithm.Tuner.Tests.Genomes.GenomeBuilderTest.BuildParameterTree(System.Boolean)"/>.
             </summary>
             <returns>The genome builder.</returns>
         </member>
@@ -4977,21 +4989,22 @@
             <param name="isValidFunction">What to check for <see cref="M:Optano.Algorithm.Tuner.Genomes.GenomeBuilder.IsGenomeValid(Optano.Algorithm.Tuner.Genomes.Genome)"/>.</param>
             <returns>The genome builder.</returns>
         </member>
-        <member name="M:Optano.Algorithm.Tuner.Tests.Genomes.GenomeBuilderTest.BuildParameterTree">
+        <member name="M:Optano.Algorithm.Tuner.Tests.Genomes.GenomeBuilderTest.BuildParameterTree(System.Boolean)">
             <summary>
             Builds the following parameter tree:
             - AND node as root
-            - 1st child of AND node: OR node with string either a or b
-            - 2nd child of AND node: value node with integer between 1 and 5
-            - OR node, a branch: value node with integer
-            - OR node, b branch: value node with double between 0.1 and 0.8.
+            - 1st child of AND node: OR node with string either a or b (default: "a")
+            - 2nd child of AND node: value node with integer between 1 and 5 (default: 1)
+            - OR node, a branch: value node with integer (default: 42).
+            - OR node, b branch: value node with double between 0.1 and 0.8 (default: 0.2).
             </summary>
+            <param name="includeDefaultValues">Indicates whether to add default values to the domains.</param>
             <returns>The build parameter tree.</returns>
         </member>
         <member name="M:Optano.Algorithm.Tuner.Tests.Genomes.GenomeBuilderTest.BuildFittingGenome">
             <summary>
             Builds a <see cref="T:Optano.Algorithm.Tuner.Genomes.Genome"/> that fits the <see cref="T:Optano.Algorithm.Tuner.Parameters.ParameterTree"/> built in
-            <see cref="M:Optano.Algorithm.Tuner.Tests.Genomes.GenomeBuilderTest.BuildParameterTree"/>.
+            <see cref="M:Optano.Algorithm.Tuner.Tests.Genomes.GenomeBuilderTest.BuildParameterTree(System.Boolean)"/>.
             </summary>
             <returns>The built <see cref="T:Optano.Algorithm.Tuner.Genomes.Genome"/>.</returns>
         </member>
@@ -6968,6 +6981,11 @@
             * On the next level, there is an OR node (0.1, 0.3 or 0.5) and a value node with values between -0.1 and 0
             * The OR node activates another AND node on 0.1 and a discrete value node with values between -2 and 3 on 0.5
             * The value whose parent is the root node has another value node with a log domain between 10 and 100 as a child.
+            </summary>
+        </member>
+        <member name="M:Optano.Algorithm.Tuner.Tests.ParameterTreeReader.ParameterTreeConverterTest.DomainsReturnXmlDefaultValues">
+            <summary>
+            Checks that all default values are parsed from the XML tree.
             </summary>
         </member>
         <member name="M:Optano.Algorithm.Tuner.Tests.ParameterTreeReader.ParameterTreeConverterTest.CheckConsoleOutput(System.String,System.Action{System.IO.StringReader})">
@@ -9357,6 +9375,32 @@
             Contains tests for the <see cref="T:Optano.Algorithm.Tuner.TargetAlgorithm.Instances.InstanceSeedFile"/> class.
             </summary>
         </member>
+        <member name="F:Optano.Algorithm.Tuner.Tests.TargetAlgorithm.Instances.InstanceSeedFileTest.ValidFileNames">
+            <summary>
+            The file names that should be translated into <see cref="T:Optano.Algorithm.Tuner.TargetAlgorithm.Instances.InstanceSeedFile"/>s on <see cref="M:Optano.Algorithm.Tuner.TargetAlgorithm.Instances.InstanceSeedFile.CreateInstanceSeedFilesFromDirectory(System.String,System.String[],System.Int32,System.Int32)"/>.
+            </summary>
+        </member>
+        <member name="F:Optano.Algorithm.Tuner.Tests.TargetAlgorithm.Instances.InstanceSeedFileTest.NonValidFileNames">
+            <summary>
+            The file names that should not be translated into <see cref="T:Optano.Algorithm.Tuner.TargetAlgorithm.Instances.InstanceSeedFile"/>s on <see cref="M:Optano.Algorithm.Tuner.TargetAlgorithm.Instances.InstanceSeedFile.CreateInstanceSeedFilesFromDirectory(System.String,System.String[],System.Int32,System.Int32)"/>.
+            </summary>
+        </member>
+        <member name="F:Optano.Algorithm.Tuner.Tests.TargetAlgorithm.Instances.InstanceSeedFileTest.ValidInstanceExtensions">
+            <summary>
+            The list of valid instance extensions.
+            </summary>
+        </member>
+        <member name="F:Optano.Algorithm.Tuner.Tests.TargetAlgorithm.Instances.InstanceSeedFileTest._pathToTestInstanceFolder">
+            <summary>
+            The path to the test instance folder. Has to be initialized.
+            </summary>
+        </member>
+        <member name="M:Optano.Algorithm.Tuner.Tests.TargetAlgorithm.Instances.InstanceSeedFileTest.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Optano.Algorithm.Tuner.Tests.TargetAlgorithm.Instances.InstanceSeedFileTest"/> class.
+            Behaves like the [TestInitialize] of MSTest framework.
+            </summary>
+        </member>
         <member name="M:Optano.Algorithm.Tuner.Tests.TargetAlgorithm.Instances.InstanceSeedFileTest.ConstructorThrowsOnPathNull">
             <summary>
             Checks that <see cref="T:Optano.Algorithm.Tuner.TargetAlgorithm.Instances.InstanceSeedFile"/> throws an <see cref="T:System.ArgumentNullException"/> if no path is
@@ -9423,6 +9467,37 @@
             Of course, this does not have to be the case necessarily, but it's still a nice property that should be
             true in most cases.
             </summary>
+        </member>
+        <member name="M:Optano.Algorithm.Tuner.Tests.TargetAlgorithm.Instances.InstanceSeedFileTest.CreateInstancesThrowsExceptionIfItCannotOpenFolder">
+            <summary>
+            Verifies that calling <see cref="M:Optano.Algorithm.Tuner.TargetAlgorithm.Instances.InstanceSeedFile.CreateInstanceSeedFilesFromDirectory(System.String,System.String[],System.Int32,System.Int32)"/> with a non existant directory throws
+            a <see cref="T:System.IO.DirectoryNotFoundException"/>.
+            </summary>
+        </member>
+        <member name="M:Optano.Algorithm.Tuner.Tests.TargetAlgorithm.Instances.InstanceSeedFileTest.CreateInstancesPrintsMessageIfItCannotOpenFolder">
+            <summary>
+            Verifies that calling <see cref="M:Optano.Algorithm.Tuner.TargetAlgorithm.Instances.InstanceSeedFile.CreateInstanceSeedFilesFromDirectory(System.String,System.String[],System.Int32,System.Int32)"/> with a non existant directory prints
+            out a message to the console telling the user the directory doesn't exist.
+            </summary>
+        </member>
+        <member name="M:Optano.Algorithm.Tuner.Tests.TargetAlgorithm.Instances.InstanceSeedFileTest.CreateInstancesCorrectlyExtractsPathsToValidFiles">
+            <summary>
+            Checks that <see cref="M:Optano.Algorithm.Tuner.TargetAlgorithm.Instances.InstanceSeedFile.CreateInstanceSeedFilesFromDirectory(System.String,System.String[],System.Int32,System.Int32)"/> creates an instance out of each valid file and
+            the instance's file name matches the complete path to that file.
+            </summary>
+        </member>
+        <member name="M:Optano.Algorithm.Tuner.Tests.TargetAlgorithm.Instances.InstanceSeedFileTest.CreateInstancesIgnoresNonValidFiles">
+            <summary>
+            Checks that <see cref="M:Optano.Algorithm.Tuner.TargetAlgorithm.Instances.InstanceSeedFile.CreateInstanceSeedFilesFromDirectory(System.String,System.String[],System.Int32,System.Int32)"/> ignores all non valid files.
+            </summary>
+        </member>
+        <member name="M:Optano.Algorithm.Tuner.Tests.TargetAlgorithm.Instances.InstanceSeedFileTest.SeedsToUseReturnsCorrectNumberOfSeeds">
+            <summary>
+            Checks that <see cref="M:Optano.Algorithm.Tuner.TargetAlgorithm.Instances.InstanceSeedFile.SeedsToUse(System.Int32,System.Int32)"/> returns the correct number of seeds.
+            </summary>
+        </member>
+        <member name="M:Optano.Algorithm.Tuner.Tests.TargetAlgorithm.Instances.InstanceSeedFileTest.Dispose">
+            <inheritdoc />
         </member>
         <member name="T:Optano.Algorithm.Tuner.Tests.TargetAlgorithm.InterfaceImplementations.DisposableNoOp">
             <summary>
@@ -9962,7 +10037,7 @@
         </member>
         <member name="T:Optano.Algorithm.Tuner.Tests.TargetAlgorithm.ValueGenomeBuilder">
             <summary>
-            A <see cref="T:Optano.Algorithm.Tuner.Genomes.GenomeBuilder"/> which uses predefined values to set for 
+            A <see cref="T:Optano.Algorithm.Tuner.Genomes.GenomeBuilder"/> which uses predefined values to set for
             <see cref="F:Optano.Algorithm.Tuner.Tests.TargetAlgorithm.InterfaceImplementations.ValueConsideration.ExtractIntegerValue.ParameterName"/> instead of creating totally random genomes in
             <see cref="M:Optano.Algorithm.Tuner.Tests.TargetAlgorithm.ValueGenomeBuilder.CreateRandomGenome(System.Int32)"/>.
             </summary>
@@ -9987,6 +10062,13 @@
             </summary>
             <param name="age">The new genome's age.</param>
             <returns>The created genome.</returns>
+        </member>
+        <member name="M:Optano.Algorithm.Tuner.Tests.TargetAlgorithm.ValueGenomeBuilder.CreateDefaultGenome(System.Int32)">
+            <summary>
+            Only use genomes with <see cref="F:Optano.Algorithm.Tuner.Tests.TargetAlgorithm.ValueGenomeBuilder._values"/>. Never use default.
+            </summary>
+            <param name="age">The desired age.</param>
+            <returns>A value genome.</returns>
         </member>
         <member name="T:Optano.Algorithm.Tuner.Tests.TestBase">
             <summary>
@@ -10255,6 +10337,12 @@
             <summary>
             Checks that <see cref="T:Optano.Algorithm.Tuner.Tracking.GenerationInformation"/>'s constructor throws a
             <see cref="T:System.ArgumentOutOfRangeException"/> if called with a negative generation number.
+            </summary>
+        </member>
+        <member name="M:Optano.Algorithm.Tuner.Tests.Tracking.GenerationInformationTest.ConstructorThrowsForNegativeTotalElapsedTime">
+            <summary>
+            Checks that <see cref="T:Optano.Algorithm.Tuner.Tracking.GenerationInformation"/>'s constructor throws a
+            <see cref="T:System.ArgumentOutOfRangeException"/> if called with a negative total elapsed time.
             </summary>
         </member>
         <member name="M:Optano.Algorithm.Tuner.Tests.Tracking.GenerationInformationTest.ConstructorThrowsForNegativeNumberEvaluations">

@@ -1,30 +1,30 @@
 ﻿#region Copyright (c) OPTANO GmbH
 
 // ////////////////////////////////////////////////////////////////////////////////
-// 
+//
 //        OPTANO GmbH Source Code
 //        Copyright (c) 2010-2020 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
-// 
+//
 //    The entire contents of this file is protected by German and
 //    International Copyright Laws. Unauthorized reproduction,
 //    reverse-engineering, and distribution of all or any portion of
 //    the code contained in this file is strictly prohibited and may
 //    result in severe civil and criminal penalties and will be
 //    prosecuted to the maximum extent possible under the law.
-// 
+//
 //    RESTRICTIONS
-// 
+//
 //    THIS SOURCE CODE AND ALL RESULTING INTERMEDIATE FILES
 //    ARE CONFIDENTIAL AND PROPRIETARY TRADE SECRETS OF
 //    OPTANO GMBH.
-// 
+//
 //    THE SOURCE CODE CONTAINED WITHIN THIS FILE AND ALL RELATED
 //    FILES OR ANY PORTION OF ITS CONTENTS SHALL AT NO TIME BE
 //    COPIED, TRANSFERRED, SOLD, DISTRIBUTED, OR OTHERWISE MADE
 //    AVAILABLE TO OTHER INDIVIDUALS WITHOUT WRITTEN CONSENT
 //    AND PERMISSION FROM OPTANO GMBH.
-// 
+//
 // ////////////////////////////////////////////////////////////////////////////////
 
 #endregion
@@ -160,9 +160,10 @@ namespace Optano.Algorithm.Tuner.Tests.Configuration
                 .SetEvaluationLimit(13)
                 .SetZipOldStatusFiles(true)
                 .SetScoreGenerationHistory(true)
+                .SetAddDefaultGenome(false)
                 .Build();
 
-            // Check the values in the configuration. 
+            // Check the values in the configuration.
             Assert.True(config.EnableRacing);
             Assert.Equal(45, config.PopulationSize);
             Assert.Equal(20, config.Generations);
@@ -259,6 +260,7 @@ namespace Optano.Algorithm.Tuner.Tests.Configuration
             Assert.Equal(
                 0.19,
                 randomForestConfig.FeaturesPerSplitRatio);
+            Assert.False(config.AddDefaultGenome);
         }
 
         /// <summary>
@@ -270,7 +272,7 @@ namespace Optano.Algorithm.Tuner.Tests.Configuration
             // Build the configuration without explicitly setting values.
             var config = this._builder.Build(maximumNumberParallelEvaluations: 1);
 
-            // Check the values in the configuration, that control parallel behaviour. 
+            // Check the values in the configuration, that control parallel behaviour.
             Assert.Equal(1, config.MaximumNumberParallelEvaluations);
             Assert.Equal(1, config.MaximumNumberParallelThreads);
 
@@ -346,6 +348,7 @@ namespace Optano.Algorithm.Tuner.Tests.Configuration
                 config.MaximumNumberGgaGenerationsWithSameIncumbent);
             Assert.False(config.ScoreGenerationHistory);
             Assert.False(config.ZipOldStatusFiles);
+            Assert.True(config.AddDefaultGenome);
         }
 
         /// <summary>
@@ -401,6 +404,7 @@ namespace Optano.Algorithm.Tuner.Tests.Configuration
                 .SetMaximumNumberGgaGenerationsWithSameIncumbent(16)
                 .SetScoreGenerationHistory(true)
                 .SetZipOldStatusFiles(true)
+                .SetAddDefaultGenome(false)
                 .Build();
 
             // Create a new builder based on it and let it build a configuration.
@@ -492,6 +496,9 @@ namespace Optano.Algorithm.Tuner.Tests.Configuration
             Assert.Equal(
                 fallback.ZipOldStatusFiles,
                 config.ZipOldStatusFiles);
+            Assert.Equal(
+                fallback.AddDefaultGenome,
+                config.AddDefaultGenome);
 
             // Only check a single value of the detailed config. Rest is tested in its own test.
             var randomForestConfig = (GenomePredictionRandomForestConfig)config.DetailedConfigurations["a"];
@@ -1021,6 +1028,22 @@ namespace Optano.Algorithm.Tuner.Tests.Configuration
                 .SetMaximumNumberParallelEvaluations(1)
                 .BuildWithFallback(defaultConfig);
             Assert.False(otherConfig.IsCompatible(defaultConfig), "Configurations should not be compatible.");
+        }
+
+        /// <summary>
+        /// Checks that <see cref="AlgorithmTunerConfiguration.IsCompatible"/> returns false if the
+        /// add default genome value is different.
+        /// </summary>
+        [Fact]
+        public void IsCompatibleReturnsFalseNewAddDefaultGenomeValue()
+        {
+            var defaultConfig = this._builder.SetTrainModel(false).Build(maximumNumberParallelEvaluations: 1);
+            var otherConfig = new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder()
+                .SetAddDefaultGenome(false)
+                .SetMaximumNumberParallelEvaluations(1)
+                .BuildWithFallback(defaultConfig);
+            Assert.False(otherConfig.IsCompatible(defaultConfig), "Configurations should not be compatible.");
+            Assert.False(defaultConfig.IsCompatible(otherConfig), "Configurations should not be compatible.");
         }
 
         /// <summary>

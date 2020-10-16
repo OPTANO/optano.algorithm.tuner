@@ -21,7 +21,9 @@ Since `ubcsat.exe` is referenced in `PathToTargetAlgorithm` (resp. `PathToExecut
 
 ### [BBOB Adapter](bbob.md)
 
-Since the BBOB adapter makes use of the BBOB python 2.7 script `bbobeval.py`, provided in `Tools`, you need to adapt the path to your `PythonBinary` in `BbobRunnerTests.cs`.
+Since the BBOB adapter makes use of the BBOB python 2.7 script `bbobeval.py`, provided in `Tools`, you need to make sure that you have python 2.7 together with the [NumPy package](https://numpy.org) installed on your system - in a way so that it can be loaded from your [PATH](https://en.wikipedia.org/wiki/PATH_(variable)) environment variable. <br/>
+The BBOB unit test project will automatically use the python 2.7 version that it retrieves from the PATH environment variable. <br/>
+Note that starting the actual tuning process still requires an explicit path to python, so that you can also run it in environments where you cannot modify the PATH variable.
 
 ### [Lingeling Adapter](lingeling.md)
 

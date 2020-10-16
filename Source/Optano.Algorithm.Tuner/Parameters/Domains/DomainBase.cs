@@ -1,30 +1,30 @@
 ﻿#region Copyright (c) OPTANO GmbH
 
 // ////////////////////////////////////////////////////////////////////////////////
-// 
+//
 //        OPTANO GmbH Source Code
 //        Copyright (c) 2010-2020 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
-// 
+//
 //    The entire contents of this file is protected by German and
 //    International Copyright Laws. Unauthorized reproduction,
 //    reverse-engineering, and distribution of all or any portion of
 //    the code contained in this file is strictly prohibited and may
 //    result in severe civil and criminal penalties and will be
 //    prosecuted to the maximum extent possible under the law.
-// 
+//
 //    RESTRICTIONS
-// 
+//
 //    THIS SOURCE CODE AND ALL RESULTING INTERMEDIATE FILES
 //    ARE CONFIDENTIAL AND PROPRIETARY TRADE SECRETS OF
 //    OPTANO GMBH.
-// 
+//
 //    THE SOURCE CODE CONTAINED WITHIN THIS FILE AND ALL RELATED
 //    FILES OR ANY PORTION OF ITS CONTENTS SHALL AT NO TIME BE
 //    COPIED, TRANSFERRED, SOLD, DISTRIBUTED, OR OTHERWISE MADE
 //    AVAILABLE TO OTHER INDIVIDUALS WITHOUT WRITTEN CONSENT
 //    AND PERMISSION FROM OPTANO GMBH.
-// 
+//
 // ////////////////////////////////////////////////////////////////////////////////
 
 #endregion
@@ -41,7 +41,25 @@ namespace Optano.Algorithm.Tuner.Parameters.Domains
     /// <typeparam name="T">The parameter's type.</typeparam>
     public abstract class DomainBase<T> : IDomain
     {
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DomainBase{T}" /> class.
+        /// </summary>
+        /// <param name="defaultValue">The optional default value.</param>
+        protected DomainBase(Allele<T>? defaultValue)
+        {
+            if (defaultValue.HasValue)
+            {
+                this.DefaultValue = defaultValue.Value;
+            }
+        }
+
         #region Public properties
+
+        /// <summary>
+        /// Gets the optional default value.
+        /// </summary>
+        protected Allele<T>? DefaultValue { get; }
 
         /// <summary>
         /// Gets the Domain Size.
@@ -51,13 +69,7 @@ namespace Optano.Algorithm.Tuner.Parameters.Domains
         /// <summary>
         /// Gets a value indicating whether this domain is an instance of <see cref="CategoricalDomain{T}"/>.
         /// </summary>
-        public virtual bool IsCategoricalDomain
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public virtual bool IsCategoricalDomain => false;
 
         #endregion
 
@@ -107,6 +119,17 @@ namespace Optano.Algorithm.Tuner.Parameters.Domains
             return this.Contains(typedValue);
         }
 
+        /// <inheritdoc />
+        public IAllele GetDefaultValue()
+        {
+            if (this.DefaultValue.HasValue)
+            {
+                return this.DefaultValue;
+            }
+
+            return this.GenerateRandomGeneValue();
+        }
+
         /// <summary>
         /// Generates a gene value from the domain uniformly at random.
         /// </summary>
@@ -117,7 +140,7 @@ namespace Optano.Algorithm.Tuner.Parameters.Domains
         }
 
         /// <summary>
-        /// Converts the given <paramref name="member"/> of this <see cref="IDomain"/> into a dobule value.
+        /// Converts the given <paramref name="member"/> of this <see cref="IDomain"/> into a double value.
         /// </summary>
         /// <param name="member">A member of the current domain.</param>
         /// <returns>A double that represents the <paramref name="member"/>.</returns>

@@ -39,6 +39,7 @@ namespace Optano.Algorithm.Tuner.Configuration
 
     using Akka.Configuration;
 
+    using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.Logging;
     using Optano.Algorithm.Tuner.MachineLearning;
 
@@ -290,6 +291,11 @@ namespace Optano.Algorithm.Tuner.Configuration
         public double FeatureSubsetRatioForDistanceComputation { get; private set; }
 
         /// <summary>
+        /// Gets a value indicating whether to include a <see cref="Genome"/> that uses the target algorithm's default values (if specified).
+        /// </summary>
+        public bool AddDefaultGenome { get; private set; }
+
+        /// <summary>
         /// Gets further configurations which are relevant for specific parts of OPTANO Algorithm Tuner.
         /// </summary>
         public Dictionary<string, ConfigurationBase> DetailedConfigurations { get; } =
@@ -392,7 +398,8 @@ namespace Optano.Algorithm.Tuner.Configuration
                    < ConfigurationBase.CompatibilityTolerance
                    && Math.Abs(this.FeatureSubsetRatioForDistanceComputation - otherConfig.FeatureSubsetRatioForDistanceComputation)
                    < ConfigurationBase.CompatibilityTolerance
-                   && this.DistanceMetric == otherConfig.DistanceMetric;
+                   && this.DistanceMetric == otherConfig.DistanceMetric
+                   && this.AddDefaultGenome == otherConfig.AddDefaultGenome;
         }
 
         /// <summary>
@@ -455,6 +462,7 @@ namespace Optano.Algorithm.Tuner.Configuration
             descriptionBuilder.AppendLine(Indent + $"maxParallelEvaluations : {this.MaximumNumberParallelEvaluations}");
             descriptionBuilder.AppendLine(Indent + $"instanceNumbers.Minimum : {this.StartNumInstances}");
             descriptionBuilder.AppendLine(Indent + $"instanceNumbers.Maximum : {this.EndNumInstances}");
+            descriptionBuilder.AppendLine(Indent + $"addDefaultGenome : {this.AddDefaultGenome}");
             descriptionBuilder.AppendLine("}");
 
             descriptionBuilder.AppendLine("Population-based algorithm : {");
@@ -639,6 +647,11 @@ namespace Optano.Algorithm.Tuner.Configuration
             /// </summary>
             private static readonly double DefaultMaxRanksCompensatedByDistance =
                 0.2 * DefaultMaximumMiniTournamentSize;
+
+            /// <summary>
+            /// The default value for <see cref="_addDefaultGenome"/>.
+            /// </summary>
+            private static readonly bool DefaultAddDefaultGenome = true;
 
             #endregion
 
@@ -853,6 +866,11 @@ namespace Optano.Algorithm.Tuner.Configuration
             /// The value to set for <see cref="AlgorithmTunerConfiguration.MaximumNumberParallelThreads"/>.
             /// </summary>
             private int? _maximumNumberParallelThreads;
+
+            /// <summary>
+            /// The value to set for <see cref="AlgorithmTunerConfiguration.AddDefaultGenome"/>.
+            /// </summary>
+            private bool? _addDefaultGenome;
 
             #endregion
 
@@ -1643,6 +1661,17 @@ namespace Optano.Algorithm.Tuner.Configuration
                 return this;
             }
 
+            /// <summary>
+            /// Sets whether a default value genome is added to the population.
+            /// </summary>
+            /// <param name="addDefaultGenome">Whether or not to add a default value genome in the population.</param>
+            /// <returns>The <see cref="AlgorithmTunerConfigurationBuilder" /> in its new state.</returns>
+            public AlgorithmTunerConfigurationBuilder SetAddDefaultGenome(bool addDefaultGenome)
+            {
+                this._addDefaultGenome = addDefaultGenome;
+                return this;
+            }
+
             #endregion
 
             #region Methods
@@ -1749,6 +1778,11 @@ namespace Optano.Algorithm.Tuner.Configuration
                     this._maximumNumberParallelThreads
                     ?? fallback?.MaximumNumberParallelThreads
                     ?? configuration.MaximumNumberParallelEvaluations;
+
+                configuration.AddDefaultGenome =
+                    this._addDefaultGenome
+                    ?? fallback?.AddDefaultGenome
+                    ?? AlgorithmTunerConfigurationBuilder.DefaultAddDefaultGenome;
 
                 this.CreateDetailedConfigurations(fallback, configuration);
 

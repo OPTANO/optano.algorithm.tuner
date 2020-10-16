@@ -33,6 +33,7 @@ namespace Optano.Algorithm.Tuner.ContinuousOptimization.CovarianceMatrixAdaptati
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using System.Runtime.CompilerServices;
 
@@ -95,6 +96,10 @@ namespace Optano.Algorithm.Tuner.ContinuousOptimization.CovarianceMatrixAdaptati
         /// <summary>
         /// The current covariance matrix, often denoted C in literature.
         /// </summary>
+        [SuppressMessage(
+            "NDepend",
+            "ND1905:DontAssignAFieldFromManyMethods",
+            Justification = "NDepend warning pops up, because field is assigned in more than 4, namely 5 methods. Violation of limit is not critical and can be ignored.")]
         private Matrix<double> _covariances;
 
         /// <summary>

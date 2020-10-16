@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xs:schema elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:element name="node" type="Node" />
-  
+
   <xs:complexType name="and">
     <xs:complexContent mixed="false">
       <xs:extension base="Node">
@@ -11,9 +11,9 @@
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  
+
   <xs:complexType name="Node" abstract="true" />
-  
+
   <xs:complexType name="ParameterNode" abstract="true">
     <xs:complexContent mixed="false">
       <xs:extension base="Node">
@@ -24,9 +24,11 @@
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  
-  <xs:complexType name="Domain" abstract="true" />
-  
+
+  <xs:complexType name="Domain" abstract="true" >
+    <xs:attribute name="defaultIndexOrValue" type="xs:double"/>
+  </xs:complexType>
+
   <xs:complexType name="continuous">
     <xs:complexContent mixed="false">
       <xs:extension base="Domain">
@@ -36,7 +38,7 @@
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  
+
   <xs:complexType name="discrete">
     <xs:complexContent mixed="false">
       <xs:extension base="Domain">
@@ -73,7 +75,7 @@
 	<xs:simpleType name="booleans">
 		<xs:list itemType="xs:boolean" />
 	</xs:simpleType>
-	
+
   <xs:complexType name="or">
     <xs:complexContent mixed="false">
       <xs:extension base="ParameterNode">
@@ -83,7 +85,7 @@
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  
+
   <xs:complexType name="Choice">
 		<xs:sequence>
 			<xs:choice>
@@ -95,7 +97,7 @@
 		  <xs:element name="child" type="Node" />
 		</xs:sequence>
   </xs:complexType>
-  
+
   <xs:complexType name="value">
     <xs:complexContent mixed="false">
       <xs:extension base="ParameterNode">

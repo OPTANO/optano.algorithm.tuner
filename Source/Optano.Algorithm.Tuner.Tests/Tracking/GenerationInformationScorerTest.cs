@@ -162,7 +162,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
                 this._resultStorageActor,
                 this._runEvaluator);
 
-            var dummyInformation = new GenerationInformation(0, 0, typeof(int), new ImmutableGenome(new Genome()));
+            var dummyInformation = new GenerationInformation(0, TimeSpan.Zero, 0, typeof(int), new ImmutableGenome(new Genome()));
             Assert.Throws<ArgumentNullException>(
                 () => scorer.ScoreInformationHistory(
                 informationHistory: new List<GenerationInformation> { dummyInformation },
@@ -182,7 +182,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
                 this._resultStorageActor,
                 this._runEvaluator);
 
-            var dummyInformation = new GenerationInformation(0, 0, typeof(int), new ImmutableGenome(new Genome()));
+            var dummyInformation = new GenerationInformation(0, TimeSpan.Zero, 0, typeof(int), new ImmutableGenome(new Genome()));
             Assert.Throws<ArgumentOutOfRangeException>(
                 () => scorer.ScoreInformationHistory(
                 informationHistory: new List<GenerationInformation> { dummyInformation },
@@ -202,7 +202,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
                 this._resultStorageActor,
                 this._runEvaluator);
 
-            var dummyInformation = new GenerationInformation(0, 0, typeof(int), new ImmutableGenome(new Genome()));
+            var dummyInformation = new GenerationInformation(0, TimeSpan.Zero, 0, typeof(int), new ImmutableGenome(new Genome()));
             Assert.Throws<ArgumentNullException>(
                 () => scorer.ScoreInformationHistory(
                 informationHistory: new List<GenerationInformation> { dummyInformation },
@@ -219,7 +219,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
         {
             var incumbent1 = new Genome();
             incumbent1.SetGene(ExtractIntegerValue.ParameterName, new Allele<int>(-2));
-            var generationInformation = new GenerationInformation(0, 0, typeof(int), new ImmutableGenome(incumbent1));
+            var generationInformation = new GenerationInformation(0, TimeSpan.Zero, 0, typeof(int), new ImmutableGenome(incumbent1));
 
             var scorer = new GenerationInformationScorer<InstanceSeedFile, IntegerResult>(
                 this._genomeSorter,
@@ -247,7 +247,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
         {
             var incumbent1 = new Genome();
             incumbent1.SetGene(ExtractIntegerValue.ParameterName, new Allele<int>(-2));
-            var generationInformation = new GenerationInformation(0, 0, typeof(int), new ImmutableGenome(incumbent1));
+            var generationInformation = new GenerationInformation(0, TimeSpan.Zero, 0, typeof(int), new ImmutableGenome(incumbent1));
 
             var scorer = new GenerationInformationScorer<InstanceSeedFile, IntegerResult>(
                 this._genomeSorter,

@@ -180,7 +180,6 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.CovarianceMatrixAdap
         {
             #region Constants
 
-            // TODO #23945: Find good value.
             /// <summary>
             /// The default value for <see cref="InitialStepSize"/>.
             /// </summary>

@@ -59,14 +59,14 @@
     <None Update="app.hocon">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="parameterTree.xsd">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
 	<None Include="..\..\Tools\TestApplication.dll" Link="Tools\TestApplication.dll">
 		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	</None>
 	<None Include="..\..\Tools\TestApplication.runtimeconfig.json" Link="Tools\TestApplication.runtimeconfig.json">
 		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</None>
+	<None Update="parameterTree.xsd">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	</None>
     <None Update="ParameterTreeReader\TestData\broken.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -81,6 +81,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="ParameterTreeReader\TestData\orNodeWithoutCategoricalDomain.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="ParameterTreeReader\TestData\treeWithDefaults.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="ParameterTreeReader\TestData\wrongChoice.xml">

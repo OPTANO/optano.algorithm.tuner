@@ -66,7 +66,6 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies
         /// </summary>
         public const int DefaultMinimumDomainSize = 150;
 
-        // TODO #23945: Find good value.
         /// <summary>
         /// The default value for <see cref="StrategyConfigurationBase{TConfiguration}.ReplacementRate"/>.
         /// </summary>

@@ -220,7 +220,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
             for (int i = 0; i < 13; i++)
             {
                 this._informationHistory.Add(
-                    new GenerationInformation(i, i * 100, typeof(string), new ImmutableGenome(new Genome())));
+                    new GenerationInformation(i, TimeSpan.FromSeconds(i), i * 100, typeof(string), new ImmutableGenome(new Genome())));
             }
 
             var status = this.CreateStatus(13, this._population, this._configuration, 43, this._informationHistory);
@@ -309,9 +309,9 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
             var strategyIndex = 17;
             /* (3) information history */
             var generation0 =
-                new GenerationInformation(0, 100, typeof(int), new ImmutableGenome(competitiveGenome));
+                new GenerationInformation(0, TimeSpan.FromSeconds(30), 100, typeof(int), new ImmutableGenome(competitiveGenome));
             var generation1 =
-                new GenerationInformation(1, 234, typeof(string), new ImmutableGenome(competitiveGenome));
+                new GenerationInformation(1, TimeSpan.FromSeconds(60), 234, typeof(string), new ImmutableGenome(competitiveGenome));
             generation0.IncumbentTrainingScore = 12;
             generation0.IncumbentTestScore = 345.8;
             this._informationHistory.Add(generation0);

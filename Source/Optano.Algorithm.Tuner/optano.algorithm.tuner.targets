@@ -1,6 +1,17 @@
-<?xml version="1.0" encoding="utf-8" standalone="no"?>
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Target Name = "CopyFiles" AfterTargets="build">
-    <Copy DestinationFolder="$(OutputPath)" SourceFiles="parameterTree.xsd" SkipUnchangedFiles = "false" />
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" InitialTargets="CopyParameterTreeXsd" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="CopyParameterTreeXsd" >
+       <Copy
+          SourceFiles="$(MSBuildThisFileDirectory)..\content\parameterTree.xsd"
+         DestinationFiles="$(MSBuildProjectDirectory)\..\parameterTree.xsd"         
+		 Condition="!Exists('$(MSBuildProjectDirectory)\..\parameterTree.xsd')" />
   </Target>
+  <ItemGroup>
+    <None Include="..\parameterTree.xsd">
+      <Link>parameterTree.xsd</Link>
+      <Visible>true</Visible>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </None>
+  </ItemGroup>
 </Project>

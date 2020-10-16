@@ -37,7 +37,7 @@ Remarks:
 - When executing a tuning in [several sessions](statusdump.md), you may only use `--maxParallelEvaluations`, because `--miniTournamentSize` is always adopted from the previous session.
 
 ### Address
-*OAT* will try to automatically detect your computing nodes' fully qualified domain names and use them for exchanging messages. If you experience connection problems on your system, you should try to set the host names explicitely.
+*OAT* will try to automatically detect your computing nodes' fully qualified domain names and use them for exchanging messages. If you experience connection problems on your system, you should try to set the host names explicitly.
 
 In addition, it is possible to specify the port on which the master listens for worker connections.
 
@@ -63,10 +63,13 @@ Note: For most applications, if you execute <i>OAT</i> in a distributed fashion,
 
  <dt>--instanceNumbers={NUMBER:NUMBER} (-i) [5:100]</dt>
  <dd>The number of instances to use at the first generation and the number of instances to use at the end. Instance numbers increase linearly from the start until <i>goalGen</i> and then stay at maximum size until the end of the tuning.</dd>
+
+ <dt>--addDefaultGenome={BOOLEAN} [true]</dt>
+ <dd>Value indicating whether to include a genome that uses the target algorithm's default parameter values, if they are specified. If a parameter does not have a specified default value, a randomized value from its domain is used instead.</dd>
 </dl>
 
 #### <a name="racing"></a>Speedups in Runtime Tuning
-**Racing**: In runtime tuning, *OAT* is able to skip evaluating a configuration further once it becomes clear that it won't get to be a winner of the mini tournament it is part of. This strategy has the potential to greatly reduce the tuner's run time because the worst configurations are evaluated less often. However, if you are not tuning for run time or if another criterium is more important for you, you should not enable this functionality.
+**Racing**: In runtime tuning, *OAT* is able to skip evaluating a configuration further once it becomes clear that it won't get to be a winner of the mini tournament it is part of. This strategy has the potential to greatly reduce the tuner's run time because the worst configurations are evaluated less often. However, if you are not tuning for run time or if another criterion is more important for you, you should not enable this functionality.
 
 **CPU Timeout**: Racing is useful, but only checks the run times between algorithm runs. That means that a really long run will never be cancelled, and the bad configuration will only be ignored afterwards. To avoid this problem, a CPU timeout can be set per run. Runs will be cancelled after this time and the run time will be counted as the run time until cancellation. If you want to handle cancelled runs differently from others, you can still use racing - all configurations that cause CPU timeouts will be ignored when deciding whether a configuration should be evaluated further.
 
@@ -101,8 +104,8 @@ Note: For most applications, if you execute <i>OAT</i> in a distributed fashion,
 ### <a name="master-output-parameters"></a>Logging
 <dl>
  <dt>--verbose={0, 1, 2, 3} (-v) [1]</dt>
- <dd>The verbosity level. 0 only prints warnings, 1 regurlarly prints some status information, 2 prints more detailed information, e.g. calls to the target mechanism, and 3 is for debugging.<br/>
-Note that workers have the same parameter for their own ouput.</dd>
+ <dd>The verbosity level. 0 only prints warnings, 1 regularly prints some status information, 2 prints more detailed information, e.g. calls to the target mechanism, and 3 is for debugging.<br/>
+Note that workers have the same parameter for their own output.</dd>
  <dt>--statusFileDir={ABSOLUTE_PATH} [<i>current directory</i>/status]</dt>
  <dd>Directory to which intermediate results should be written to. If --continue is set, this is also the path from which the intermediate results will be read.</dd>
  <dt>--zipOldStatus={BOOL} [false]</dt>
@@ -342,7 +345,7 @@ As *OAT* instances that are started as workers connect with a master and get mos
 </dl>
 
 ### Own Address
-*OAT* will try to automatically detect your computing nodes' fully qualified domain names and use them for exchanging messages. If you experience connection problems on your system, you should try to set the host names explicitely.
+*OAT* will try to automatically detect your computing nodes' fully qualified domain names and use them for exchanging messages. If you experience connection problems on your system, you should try to set the host names explicitly.
 <dl>
  <dt>--ownHostName={HOSTNAME}[Fully Qualified Domain Name]</dt>
  <dd>The address that the worker uses for incoming messages. On some systems the FQDN cannot be resolved on the fly. In that case, please provide the FQDN or an IP address.</dd>

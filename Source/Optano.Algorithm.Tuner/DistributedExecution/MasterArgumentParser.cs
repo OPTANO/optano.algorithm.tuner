@@ -1,30 +1,30 @@
 ﻿#region Copyright (c) OPTANO GmbH
 
 // ////////////////////////////////////////////////////////////////////////////////
-// 
+//
 //        OPTANO GmbH Source Code
 //        Copyright (c) 2010-2020 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
-// 
+//
 //    The entire contents of this file is protected by German and
 //    International Copyright Laws. Unauthorized reproduction,
 //    reverse-engineering, and distribution of all or any portion of
 //    the code contained in this file is strictly prohibited and may
 //    result in severe civil and criminal penalties and will be
 //    prosecuted to the maximum extent possible under the law.
-// 
+//
 //    RESTRICTIONS
-// 
+//
 //    THIS SOURCE CODE AND ALL RESULTING INTERMEDIATE FILES
 //    ARE CONFIDENTIAL AND PROPRIETARY TRADE SECRETS OF
 //    OPTANO GMBH.
-// 
+//
 //    THE SOURCE CODE CONTAINED WITHIN THIS FILE AND ALL RELATED
 //    FILES OR ANY PORTION OF ITS CONTENTS SHALL AT NO TIME BE
 //    COPIED, TRANSFERRED, SOLD, DISTRIBUTED, OR OTHERWISE MADE
 //    AVAILABLE TO OTHER INDIVIDUALS WITHOUT WRITTEN CONSENT
 //    AND PERMISSION FROM OPTANO GMBH.
-// 
+//
 // ////////////////////////////////////////////////////////////////////////////////
 
 #endregion
@@ -436,7 +436,7 @@ namespace Optano.Algorithm.Tuner.DistributedExecution
         {
             options.Add(
                 "v|verbose=",
-                "The verbosity level. 0 only prints warnings, 1 regurlarly prints some status information, 2 prints more detailed information, e.g. calls to the target mechanism, and 3 is for debugging.\nDefault is 1.\nMust be one of 0, 1, 2, 3.\n",
+                "The verbosity level. 0 only prints warnings, 1 regularly prints some status information, 2 prints more detailed information, e.g. calls to the target mechanism, and 3 is for debugging.\nDefault is 1.\nMust be one of 0, 1, 2, 3.\n",
                 (VerbosityLevel level) => this.InternalConfigurationBuilder.SetVerbosity(level));
             options.Add(
                 "statusFileDir=",
@@ -456,7 +456,7 @@ namespace Optano.Algorithm.Tuner.DistributedExecution
                 f => this.InternalConfigurationBuilder.SetLogFilePath(f));
             options.Add(
                 "trackConvergenceBehavior=",
-                "If this option is enabled, the convergence behavior is evalutated and logged.\nDefault is false.\nMust be a boolean value",
+                "If this option is enabled, the convergence behavior is evaluated and logged.\nDefault is false.\nMust be a boolean value",
                 (bool b) => this.InternalConfigurationBuilder.SetTrackConvergenceBehavior(b));
             options.Add(
                 "scoreGenerationHistory",
@@ -668,6 +668,10 @@ namespace Optano.Algorithm.Tuner.DistributedExecution
                 "t|cpuTimeout=",
                 $"The CPU timeout per target algorithm run in {{SECONDS}}.\nDefault is {TimeSpan.FromMilliseconds(int.MaxValue).TotalSeconds:0} seconds.\nThis must be a double.",
                 (double t) => this.InternalConfigurationBuilder.SetCpuTimeout(TimeSpan.FromSeconds(t)));
+            options.Add(
+                "addDefaultGenome=",
+                "If set to true, a genome that uses the target algorithm's default values (if specified), is added to the competitive population when the tuning is started.",
+                (bool b) => this.InternalConfigurationBuilder.SetAddDefaultGenome(b));
         }
 
         /// <summary>

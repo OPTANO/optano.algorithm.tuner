@@ -21,7 +21,8 @@ _OPTANO Algorithm Tuner_ writes several files during the execution:
 - `generationHistory.csv`
     - Summarizes interesting information about each generation
     - Contains average incumbent scores if `scores.csv` file exists
-    - Computed and written at the end of the tuning
+	- Written without IncumbentTrainingScore and IncumbentTestScore after each generation
+    - Computed and finally written at the end of the tuning
 - `standardDeviation.csv`
     - Contains the development of the _standard deviation_ for each numerical feature, measured over the _competitive_ population.
     - It is written after each generation.

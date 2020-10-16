@@ -47,7 +47,7 @@ namespace Optano.Algorithm.Tuner.Tracking
         /// Explanation of <see cref="ToString"/>.
         /// </summary>
         public const string LegendOfGenerationInformation =
-            "Generation;Total # Evaluations;Average Train Incumbent;Average Test Incumbent;Strategy;Incumbent";
+            "Generation;Elapsed(d:hh:mm:ss);Total # Evaluations;Average Train Incumbent;Average Test Incumbent;Strategy;Incumbent";
 
         #endregion
 
@@ -57,6 +57,7 @@ namespace Optano.Algorithm.Tuner.Tracking
         /// Initializes a new instance of the <see cref="GenerationInformation"/> class.
         /// </summary>
         /// <param name="generation">The generation index.</param>
+        /// <param name="totalElapsedTime"> The total elapsed time.</param>
         /// <param name="totalNumberOfEvaluations">
         /// The total number of evaluations at the end of the generation.
         /// </param>
@@ -70,6 +71,7 @@ namespace Optano.Algorithm.Tuner.Tracking
         /// </exception>
         public GenerationInformation(
             int generation,
+            TimeSpan totalElapsedTime,
             int totalNumberOfEvaluations,
             Type strategy,
             ImmutableGenome incumbent)
@@ -88,7 +90,15 @@ namespace Optano.Algorithm.Tuner.Tracking
                     $"Number of evaluations must not be negative, but was {totalNumberOfEvaluations}.");
             }
 
+            if (totalElapsedTime.TotalMilliseconds < 0)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(totalElapsedTime),
+                    $"The total elapsed time must not be negative, but was {totalElapsedTime.TotalMilliseconds} ms.");
+            }
+
             this.Generation = generation;
+            this.TotalElapsedTime = totalElapsedTime;
             this.TotalNumberOfEvaluations = totalNumberOfEvaluations;
             this.Strategy = strategy ?? throw new ArgumentNullException(nameof(strategy));
             this.Incumbent = incumbent ?? throw new ArgumentNullException(nameof(incumbent));
@@ -102,6 +112,11 @@ namespace Optano.Algorithm.Tuner.Tracking
         /// Gets the generation index.
         /// </summary>
         public int Generation { get; }
+
+        /// <summary>
+        /// Gets the total elapsed time.
+        /// </summary>
+        public TimeSpan TotalElapsedTime { get;  }
 
         /// <summary>
         /// Gets the total number of evaluations at the end of the generation.
@@ -143,7 +158,7 @@ namespace Optano.Algorithm.Tuner.Tracking
         public override string ToString()
         {
             return FormattableString.Invariant(
-                $"{this.Generation};{this.TotalNumberOfEvaluations};{this.IncumbentTrainingScore};{this.IncumbentTestScore};{this.Strategy.Name};{this.Incumbent}");
+                $"{this.Generation};{this.TotalElapsedTime:G};{this.TotalNumberOfEvaluations};{this.IncumbentTrainingScore};{this.IncumbentTestScore};{this.Strategy.Name};{this.Incumbent}");
         }
 
         #endregion

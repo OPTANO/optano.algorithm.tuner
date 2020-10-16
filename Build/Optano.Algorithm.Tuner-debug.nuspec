@@ -16,7 +16,7 @@
     <description>This package provides an algorithm which is a able to tune (improve the performance of) an algorithm.</description>
     <summary>In order to tune an algorithm, the user needs to provide the parameter tree for her algorithm. The parameter tree specifies which parameters the algorithm exposes and how they interact with each other. 
 
-	Documentation: https://docs.optano.com/algorithm.tuner/current
+	Documentation: https://docs.optano.com/algorithm.tuner/VERSION_PLACEHOLDER-pre
 	
 	Source Code: https://github.com/OPTANO/optano.algorithm.tuner
 	

@@ -39,6 +39,7 @@ namespace Optano.Algorithm.Tuner.ParameterTreeReader.Elements
     using System.Linq;
     using System.Reflection;
 
+    using Optano.Algorithm.Tuner.Genomes.Values;
     using Optano.Algorithm.Tuner.Parameters.Domains;
 
     /// <summary>
@@ -139,8 +140,18 @@ namespace Optano.Algorithm.Tuner.ParameterTreeReader.Elements
                 typedCategories.Add((T)enumerator.Current);
             }
 
-            // Create categorical domain.
-            return new CategoricalDomain<T>(typedCategories);
+            if (this.defaultIndexOrValueSpecified)
+            {
+                var defaultIndex = (int)this.defaultIndexOrValue;
+                var defaultValue = typedCategories[defaultIndex];
+
+                return new CategoricalDomain<T>(typedCategories, new Allele<T>(defaultValue));
+            }
+            else
+            {
+                // Create categorical domain.
+                return new CategoricalDomain<T>(typedCategories);
+            }
         }
 
         #endregion

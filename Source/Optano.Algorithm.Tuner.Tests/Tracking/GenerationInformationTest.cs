@@ -101,6 +101,23 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
             Assert.Throws<ArgumentOutOfRangeException>(
                 () => new GenerationInformation(
                     generation: -1,
+                    totalElapsedTime: TimeSpan.Zero,
+                    totalNumberOfEvaluations: GenerationInformationTest.TotalNumberOfEvaluations,
+                    strategy: this._strategy,
+                    incumbent: this._incumbent));
+        }
+
+        /// <summary>
+        /// Checks that <see cref="GenerationInformation"/>'s constructor throws a
+        /// <see cref="ArgumentOutOfRangeException"/> if called with a negative total elapsed time.
+        /// </summary>
+        [Fact]
+        public void ConstructorThrowsForNegativeTotalElapsedTime()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => new GenerationInformation(
+                    generation: -1,
+                    totalElapsedTime: TimeSpan.Zero - TimeSpan.MaxValue,
                     totalNumberOfEvaluations: GenerationInformationTest.TotalNumberOfEvaluations,
                     strategy: this._strategy,
                     incumbent: this._incumbent));
@@ -116,6 +133,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
             Assert.Throws<ArgumentOutOfRangeException>(
                 () => new GenerationInformation(
                     GenerationInformationTest.Generation,
+                    totalElapsedTime: TimeSpan.Zero,
                     totalNumberOfEvaluations: -1,
                     strategy: this._strategy,
                     incumbent: this._incumbent));
@@ -131,6 +149,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
             Assert.Throws<ArgumentNullException>(
                 () => new GenerationInformation(
                     GenerationInformationTest.Generation,
+                    totalElapsedTime: TimeSpan.Zero,
                     GenerationInformationTest.TotalNumberOfEvaluations,
                     strategy: null,
                     incumbent: this._incumbent));
@@ -146,6 +165,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
             Assert.Throws<ArgumentNullException>(
                 () => new GenerationInformation(
                     GenerationInformationTest.Generation,
+                    totalElapsedTime: TimeSpan.Zero,
                     GenerationInformationTest.TotalNumberOfEvaluations,
                     this._strategy,
                     incumbent: null));
@@ -159,13 +179,14 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
         {
             var information = new GenerationInformation(
                 GenerationInformationTest.Generation,
+                totalElapsedTime: TimeSpan.FromSeconds(30),
                 GenerationInformationTest.TotalNumberOfEvaluations,
                 this._strategy,
                 this._incumbent);
             information.IncumbentTrainingScore = -3.4;
             information.IncumbentTestScore = 1234.8;
             Assert.Equal(
-                "12;3468;-3.4;1234.8;DifferentialEvolutionStrategy`2;[a: -23](Age: 2)[Engineered: yes]",
+                "12;0:00:00:30.0000000;3468;-3.4;1234.8;DifferentialEvolutionStrategy`2;[a: -23](Age: 2)[Engineered: yes]",
                 information.ToString());
         }
 
@@ -177,11 +198,12 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
         {
             var information = new GenerationInformation(
                 GenerationInformationTest.Generation,
+                totalElapsedTime: TimeSpan.FromSeconds(30),
                 GenerationInformationTest.TotalNumberOfEvaluations,
                 this._strategy,
                 this._incumbent);
             Assert.Equal(
-                "12;3468;;;DifferentialEvolutionStrategy`2;[a: -23](Age: 2)[Engineered: yes]",
+                "12;0:00:00:30.0000000;3468;;;DifferentialEvolutionStrategy`2;[a: -23](Age: 2)[Engineered: yes]",
                 information.ToString());
         }
 

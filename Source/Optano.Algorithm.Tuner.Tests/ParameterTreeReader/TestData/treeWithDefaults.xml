@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- Root is an AND node. -->
+<node xsi:type="and" xsi:noNamespaceSchemaLocation="../../../Optano.Algorithm.Tuner/parameterTree.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <node xsi:type="value" id="contLog">
+    <domain xsi:type="continuous" log="true" start="10" end="100" defaultIndexOrValue="42"/>
+  </node>
+  <node xsi:type="value" id="contLinear">
+    <domain xsi:type="continuous" start="100" end="200" defaultIndexOrValue="123.45"/>
+  </node>
+  <node xsi:type="value" id="discreteLog">
+    <domain xsi:type="discrete" log="true" start="10" end="100" defaultIndexOrValue="10"/>
+  </node>
+  <node xsi:type="value" id="discreteLinear">
+    <domain xsi:type="discrete" start="10" end="100" defaultIndexOrValue="100"/>
+  </node>
+  <node xsi:type="or" id="or">
+    <domain xsi:type="categorical" doubles="0.1 0.3 0.5" defaultIndexOrValue="1" />
+    <!-- OR node's children is an AND node activated on 0.1 and a discrete value node activated on 0.5. -->
+    <choice>
+      <double>0.1</double>
+      <child xsi:type="and" />
+    </choice>
+    <choice>
+      <double>0.5</double>
+      <child xsi:type="value" id="orChild2">
+        <domain xsi:type="discrete" start="-2" end="3"/>
+      </child>
+    </choice>
+  </node>
+</node>

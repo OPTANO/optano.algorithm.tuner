@@ -309,6 +309,11 @@
             Gets the number of randomly selected features to use to compute distances between genomes during genetic engineering.
             </summary>
         </member>
+        <member name="P:Optano.Algorithm.Tuner.Configuration.AlgorithmTunerConfiguration.AddDefaultGenome">
+            <summary>
+            Gets a value indicating whether to include a <see cref="T:Optano.Algorithm.Tuner.Genomes.Genome"/> that uses the target algorithm's default values (if specified).
+            </summary>
+        </member>
         <member name="P:Optano.Algorithm.Tuner.Configuration.AlgorithmTunerConfiguration.DetailedConfigurations">
             <summary>
             Gets further configurations which are relevant for specific parts of OPTANO Algorithm Tuner.
@@ -422,6 +427,11 @@
         <member name="F:Optano.Algorithm.Tuner.Configuration.AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder.DefaultMaxRanksCompensatedByDistance">
             <summary>
             The default value for <see cref="F:Optano.Algorithm.Tuner.Configuration.AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder._maxRanksCompensatedByDistance"/>.
+            </summary>
+        </member>
+        <member name="F:Optano.Algorithm.Tuner.Configuration.AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder.DefaultAddDefaultGenome">
+            <summary>
+            The default value for <see cref="F:Optano.Algorithm.Tuner.Configuration.AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder._addDefaultGenome"/>.
             </summary>
         </member>
         <member name="F:Optano.Algorithm.Tuner.Configuration.AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder._detailedConfigurationBuilders">
@@ -631,6 +641,11 @@
         <member name="F:Optano.Algorithm.Tuner.Configuration.AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder._maximumNumberParallelThreads">
             <summary>
             The value to set for <see cref="P:Optano.Algorithm.Tuner.Configuration.AlgorithmTunerConfiguration.MaximumNumberParallelThreads"/>.
+            </summary>
+        </member>
+        <member name="F:Optano.Algorithm.Tuner.Configuration.AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder._addDefaultGenome">
+            <summary>
+            The value to set for <see cref="P:Optano.Algorithm.Tuner.Configuration.AlgorithmTunerConfiguration.AddDefaultGenome"/>.
             </summary>
         </member>
         <member name="P:Optano.Algorithm.Tuner.Configuration.AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder.Verbosity">
@@ -1034,6 +1049,13 @@
             </summary>
             <param name="score">Whether to include average scores on the complete instance sets.</param>
             <returns>The <see cref="T:Optano.Algorithm.Tuner.Configuration.AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder"/> in its new state.</returns>
+        </member>
+        <member name="M:Optano.Algorithm.Tuner.Configuration.AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder.SetAddDefaultGenome(System.Boolean)">
+            <summary>
+            Sets whether a default value genome is added to the population.
+            </summary>
+            <param name="addDefaultGenome">Whether or not to add a default value genome in the population.</param>
+            <returns>The <see cref="T:Optano.Algorithm.Tuner.Configuration.AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder" /> in its new state.</returns>
         </member>
         <member name="M:Optano.Algorithm.Tuner.Configuration.AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder.BuildWithFallback(Optano.Algorithm.Tuner.Configuration.AlgorithmTunerConfiguration)">
             <summary>
@@ -5251,6 +5273,22 @@
             <param name="age">The genome's age.</param>
             <returns>The created genome.</returns>
         </member>
+        <member name="M:Optano.Algorithm.Tuner.Genomes.GenomeBuilder.CreateDefaultGenome(System.Int32)">
+            <summary>
+            Creates a genome that uses the target algorithm's specified default values (or a random domain value, if no default value is specified).
+            </summary>
+            <param name="age">The age.</param>
+            <returns>The default genome.</returns>
+        </member>
+        <member name="M:Optano.Algorithm.Tuner.Genomes.GenomeBuilder.CreateGenome(System.Int32,System.Boolean)">
+            <summary>
+            Creates a genome with random or default gene values. A repair operation is applied after the creation
+            to ensure the genome is valid.
+            </summary>
+            <param name="age">The genome's age.</param>
+            <param name="useDefaultValues">Indicates whether to use the domain-default values [false], or random domain values [true]. </param>
+            <returns>The created genome.</returns>
+        </member>
         <member name="M:Optano.Algorithm.Tuner.Genomes.GenomeBuilder.Mutate(Optano.Algorithm.Tuner.Genomes.Genome)">
             <summary>
             Mutates a given genome. A repair operation is applied after the mutation
@@ -7912,11 +7950,12 @@
             </summary>
             <typeparam name="T">The values' type.</typeparam>
         </member>
-        <member name="M:Optano.Algorithm.Tuner.Parameters.Domains.CategoricalDomain`1.#ctor(System.Collections.Generic.List{`0})">
+        <member name="M:Optano.Algorithm.Tuner.Parameters.Domains.CategoricalDomain`1.#ctor(System.Collections.Generic.List{`0},System.Nullable{Optano.Algorithm.Tuner.Genomes.Values.Allele{`0}})">
             <summary>
             Initializes a new instance of the <see cref="T:Optano.Algorithm.Tuner.Parameters.Domains.CategoricalDomain`1" /> class.
             </summary>
             <param name="possibleValues">All values the domain consists of.</param>
+            <param name="defaultValue">The optional default value.</param>
         </member>
         <member name="P:Optano.Algorithm.Tuner.Parameters.Domains.CategoricalDomain`1.PossibleValues">
             <summary>
@@ -8008,12 +8047,13 @@
             A domain for <see cref="T:System.Double" /> values.
             </summary>
         </member>
-        <member name="M:Optano.Algorithm.Tuner.Parameters.Domains.ContinuousDomain.#ctor(System.Double,System.Double)">
+        <member name="M:Optano.Algorithm.Tuner.Parameters.Domains.ContinuousDomain.#ctor(System.Double,System.Double,System.Nullable{Optano.Algorithm.Tuner.Genomes.Values.Allele{System.Double}})">
             <summary>
             Initializes a new instance of the <see cref="T:Optano.Algorithm.Tuner.Parameters.Domains.ContinuousDomain" /> class.
             </summary>
             <param name="minimum">The smallest value. Default is <see cref="F:System.Double.MinValue" />.</param>
             <param name="maximum">The largest value. Default is <see cref="F:System.Double.MaxValue" />.</param>
+            <param name="defaultValue">The optional default value, if specified by user.</param>
         </member>
         <member name="P:Optano.Algorithm.Tuner.Parameters.Domains.ContinuousDomain.DomainSize">
             <summary>
@@ -8069,12 +8109,13 @@
             The domain in log space.
             </summary>
         </member>
-        <member name="M:Optano.Algorithm.Tuner.Parameters.Domains.DiscreteLogDomain.#ctor(System.Int32,System.Int32)">
+        <member name="M:Optano.Algorithm.Tuner.Parameters.Domains.DiscreteLogDomain.#ctor(System.Int32,System.Int32,System.Nullable{Optano.Algorithm.Tuner.Genomes.Values.Allele{System.Int32}})">
             <summary>
             Initializes a new instance of the <see cref="T:Optano.Algorithm.Tuner.Parameters.Domains.DiscreteLogDomain" /> class.
             </summary>
             <param name="minimum">The minimum value.</param>
             <param name="maximum">The maximum value.</param>
+            <param name="defaultValue">The optional default value.</param>
             <exception cref="T:System.ArgumentOutOfRangeException">Thrown if minimum value is not positive.</exception>
         </member>
         <member name="P:Optano.Algorithm.Tuner.Parameters.Domains.DiscreteLogDomain.DomainSize">
@@ -8130,6 +8171,17 @@
             </summary>
             <typeparam name="T">The parameter's type.</typeparam>
         </member>
+        <member name="M:Optano.Algorithm.Tuner.Parameters.Domains.DomainBase`1.#ctor(System.Nullable{Optano.Algorithm.Tuner.Genomes.Values.Allele{`0}})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Optano.Algorithm.Tuner.Parameters.Domains.DomainBase`1" /> class.
+            </summary>
+            <param name="defaultValue">The optional default value.</param>
+        </member>
+        <member name="P:Optano.Algorithm.Tuner.Parameters.Domains.DomainBase`1.DefaultValue">
+            <summary>
+            Gets the optional default value.
+            </summary>
+        </member>
         <member name="P:Optano.Algorithm.Tuner.Parameters.Domains.DomainBase`1.DomainSize">
             <summary>
             Gets the Domain Size.
@@ -8163,6 +8215,9 @@
             <param name="allele">Gene value to check.</param>
             <returns>Whether or not the given gene value is part of the domain.</returns>
         </member>
+        <member name="M:Optano.Algorithm.Tuner.Parameters.Domains.DomainBase`1.GetDefaultValue">
+            <inheritdoc />
+        </member>
         <member name="M:Optano.Algorithm.Tuner.Parameters.Domains.DomainBase`1.GenerateRandomGeneValue">
             <summary>
             Generates a gene value from the domain uniformly at random.
@@ -8171,7 +8226,7 @@
         </member>
         <member name="M:Optano.Algorithm.Tuner.Parameters.Domains.DomainBase`1.ConvertToDouble(Optano.Algorithm.Tuner.Genomes.Values.IAllele)">
             <summary>
-            Converts the given <paramref name="member"/> of this <see cref="T:Optano.Algorithm.Tuner.Parameters.Domains.IDomain"/> into a dobule value.
+            Converts the given <paramref name="member"/> of this <see cref="T:Optano.Algorithm.Tuner.Parameters.Domains.IDomain"/> into a double value.
             </summary>
             <param name="member">A member of the current domain.</param>
             <returns>A double that represents the <paramref name="member"/>.</returns>
@@ -8247,6 +8302,13 @@
             Gets a value indicating whether this domain is an instance of <see cref="T:Optano.Algorithm.Tuner.Parameters.Domains.CategoricalDomain`1"/>.
             </summary>
         </member>
+        <member name="M:Optano.Algorithm.Tuner.Parameters.Domains.IDomain.GetDefaultValue">
+            <summary>
+            Gets the default value, if one was specified by the user.
+            Otherwise, a <see cref="M:Optano.Algorithm.Tuner.Parameters.Domains.IDomain.GenerateRandomGeneValue"/> is returned.
+            </summary>
+            <returns>The default value.</returns>
+        </member>
         <member name="M:Optano.Algorithm.Tuner.Parameters.Domains.IDomain.GenerateRandomGeneValue">
             <summary>
             Generates a gene value taken from the domain uniformly at random.
@@ -8312,7 +8374,7 @@
             A domain for integer values.
             </summary>
         </member>
-        <member name="M:Optano.Algorithm.Tuner.Parameters.Domains.IntegerDomain.#ctor(System.Int32,System.Int32)">
+        <member name="M:Optano.Algorithm.Tuner.Parameters.Domains.IntegerDomain.#ctor(System.Int32,System.Int32,System.Nullable{Optano.Algorithm.Tuner.Genomes.Values.Allele{System.Int32}})">
             <summary>
             Initializes a new instance of the <see cref="T:Optano.Algorithm.Tuner.Parameters.Domains.IntegerDomain"/> class.
             </summary>
@@ -8322,6 +8384,7 @@
             <param name="maximum">
             The maximum value. Default is <see cref="F:System.Int32.MaxValue"/>.
             </param>
+            <param name="defaultValue">The optional default value.</param>
         </member>
         <member name="P:Optano.Algorithm.Tuner.Parameters.Domains.IntegerDomain.DomainSize">
             <summary>
@@ -8384,12 +8447,13 @@
             The domain in log space.
             </summary>
         </member>
-        <member name="M:Optano.Algorithm.Tuner.Parameters.Domains.LogDomain.#ctor(System.Double,System.Double)">
+        <member name="M:Optano.Algorithm.Tuner.Parameters.Domains.LogDomain.#ctor(System.Double,System.Double,System.Nullable{Optano.Algorithm.Tuner.Genomes.Values.Allele{System.Double}})">
             <summary>
             Initializes a new instance of the <see cref="T:Optano.Algorithm.Tuner.Parameters.Domains.LogDomain" /> class.
             </summary>
             <param name="minimum">The minimum value.</param>
             <param name="maximum">The maximum value.</param>
+            <param name="defaultValue">The optional default value.</param>
             <exception cref="T:System.ArgumentOutOfRangeException">Thrown if minimum value is not positive.</exception>
         </member>
         <member name="P:Optano.Algorithm.Tuner.Parameters.Domains.LogDomain.DomainSize">
@@ -8451,7 +8515,14 @@
             </summary>
             <param name="minimum">The minimum value.</param>
             <param name="maximum">The maximum value. Must be at least as large as minimum.</param>
-            <exception cref="T:System.ArgumentException">Thrown if the specified maximum value is smaller than the minimum one.</exception>
+        </member>
+        <member name="M:Optano.Algorithm.Tuner.Parameters.Domains.NumericalDomain`1.#ctor(`0,`0,System.Nullable{Optano.Algorithm.Tuner.Genomes.Values.Allele{`0}})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Optano.Algorithm.Tuner.Parameters.Domains.NumericalDomain`1" /> class.
+            </summary>
+            <param name="minimum">The minimum value.</param>
+            <param name="maximum">The maximum value. Must be at least as large as minimum.</param>
+            <param name="defaultValue">The optional default value.</param>
         </member>
         <member name="P:Optano.Algorithm.Tuner.Parameters.Domains.NumericalDomain`1.Minimum">
             <summary>
@@ -9685,6 +9756,12 @@
             <returns>The converted <see cref="T:Optano.Algorithm.Tuner.Parameters.Domains.IDomain"/>.</returns>
             <exception cref="T:System.Xml.XmlException">Thrown if the object was read from XML in such a way that it
             does not represent a valid <see cref="T:Optano.Algorithm.Tuner.Parameters.Domains.IDomain"/> object.</exception>
+        </member>
+        <member name="P:Optano.Algorithm.Tuner.ParameterTreeReader.Elements.Domain.defaultIndexOrValue">
+            <remarks/>
+        </member>
+        <member name="P:Optano.Algorithm.Tuner.ParameterTreeReader.Elements.Domain.defaultIndexOrValueSpecified">
+            <remarks/>
         </member>
         <member name="T:Optano.Algorithm.Tuner.ParameterTreeReader.Elements.and">
              <summary>
@@ -12396,6 +12473,26 @@
             Gets the seed.
             </summary>
         </member>
+        <member name="M:Optano.Algorithm.Tuner.TargetAlgorithm.Instances.InstanceSeedFile.CreateInstanceSeedFilesFromDirectory(System.String,System.String[],System.Int32,System.Int32)">
+            <summary>
+            Creates a list of <see cref="T:Optano.Algorithm.Tuner.TargetAlgorithm.Instances.InstanceSeedFile"/>s on using all valid instance files in the given instance directory.
+            </summary>
+            <param name="pathToInstanceDirectory">The path to the instance directory.</param>
+            <param name="validInstanceExtensions">The list of valid instance file extensions.</param>
+            <param name="numberOfSeedsToUse">The number of seeds to use.</param>
+            <param name="rngSeed">The random number generator seed.</param>
+            <returns>
+            The created list of <see cref="T:Optano.Algorithm.Tuner.TargetAlgorithm.Instances.InstanceSeedFile"/>s.
+            </returns>
+        </member>
+        <member name="M:Optano.Algorithm.Tuner.TargetAlgorithm.Instances.InstanceSeedFile.SeedsToUse(System.Int32,System.Int32)">
+            <summary>
+            Generates the seeds to use for the <see cref="T:Optano.Algorithm.Tuner.TargetAlgorithm.Instances.InstanceSeedFile"/> combinations.
+            </summary>
+            <param name="numberOfSeedsToUse">The number of seeds to use.</param>
+            <param name="rngSeed">The random number generator seed.</param>
+            <returns>The seeds.</returns>
+        </member>
         <member name="M:Optano.Algorithm.Tuner.TargetAlgorithm.Instances.InstanceSeedFile.Equals(System.Object)">
             <summary>
             Checks if the two objects are equal.
@@ -12423,6 +12520,13 @@
             <returns>
             The string representation.
             </returns>
+        </member>
+        <member name="M:Optano.Algorithm.Tuner.TargetAlgorithm.Instances.InstanceSeedFile.DumpInstanceSeedFileCombinations(System.IO.FileSystemInfo,System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Dumps the given <see cref="T:Optano.Algorithm.Tuner.TargetAlgorithm.Instances.InstanceSeedFile"/> combinations to a file.
+            </summary>
+            <param name="instanceDirectory">The instance directory.</param>
+            <param name="instanceSeedFileCombinations">The <see cref="T:Optano.Algorithm.Tuner.TargetAlgorithm.Instances.InstanceSeedFile"/> combinations.</param>
         </member>
         <member name="T:Optano.Algorithm.Tuner.TargetAlgorithm.ITargetAlgorithm`2">
             <summary>
@@ -12801,11 +12905,12 @@
             Explanation of <see cref="M:Optano.Algorithm.Tuner.Tracking.GenerationInformation.ToString"/>.
             </summary>
         </member>
-        <member name="M:Optano.Algorithm.Tuner.Tracking.GenerationInformation.#ctor(System.Int32,System.Int32,System.Type,Optano.Algorithm.Tuner.Genomes.ImmutableGenome)">
+        <member name="M:Optano.Algorithm.Tuner.Tracking.GenerationInformation.#ctor(System.Int32,System.TimeSpan,System.Int32,System.Type,Optano.Algorithm.Tuner.Genomes.ImmutableGenome)">
             <summary>
             Initializes a new instance of the <see cref="T:Optano.Algorithm.Tuner.Tracking.GenerationInformation"/> class.
             </summary>
             <param name="generation">The generation index.</param>
+            <param name="totalElapsedTime"> The total elapsed time.</param>
             <param name="totalNumberOfEvaluations">
             The total number of evaluations at the end of the generation.
             </param>
@@ -12821,6 +12926,11 @@
         <member name="P:Optano.Algorithm.Tuner.Tracking.GenerationInformation.Generation">
             <summary>
             Gets the generation index.
+            </summary>
+        </member>
+        <member name="P:Optano.Algorithm.Tuner.Tracking.GenerationInformation.TotalElapsedTime">
+            <summary>
+            Gets the total elapsed time.
             </summary>
         </member>
         <member name="P:Optano.Algorithm.Tuner.Tracking.GenerationInformation.TotalNumberOfEvaluations">
@@ -13463,13 +13573,14 @@
             </summary>
             <returns>The created <see cref="T:Optano.Algorithm.Tuner.Genomes.Population"/>.</returns>
         </member>
-        <member name="M:Optano.Algorithm.Tuner.Tuning.AlgorithmTuner`6.CreateRandomGenomes(System.Int32)">
+        <member name="M:Optano.Algorithm.Tuner.Tuning.AlgorithmTuner`6.CreateRandomGenomes(System.Int32,System.Boolean)">
             <summary>
             Creates random genomes with a random age such that age is distributed evenly.
             </summary>
             <param name="numberIndividuals">
             The number of genomes to add.
             </param>
+            <param name="includeDefaultGenome">Indicates whether to include a default value genome.</param>
             <returns>The created <see cref="T:Optano.Algorithm.Tuner.Genomes.Genome"/> objects.</returns>
         </member>
         <member name="M:Optano.Algorithm.Tuner.Tuning.AlgorithmTuner`6.UpdateIncumbentGenomeWrapper(Optano.Algorithm.Tuner.GenomeEvaluation.IncumbentGenomeWrapper{`2})">

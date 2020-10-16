@@ -32,6 +32,13 @@
 namespace Optano.Algorithm.Tuner.TargetAlgorithm.Instances
 {
     using System;
+    using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+
+    using Optano.Algorithm.Tuner.Logging;
 
     /// <summary>
     /// An <see cref="InstanceSeedFile"/> treats a combination of actual file (stored in <see cref="InstanceFile.Path"/>) and a <see cref="Seed"/> as a unique Instance.
@@ -67,6 +74,70 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm.Instances
         #endregion
 
         #region Public Methods and Operators
+
+        /// <summary>
+        /// Creates a list of <see cref="InstanceSeedFile"/>s on using all valid instance files in the given instance directory.
+        /// </summary>
+        /// <param name="pathToInstanceDirectory">The path to the instance directory.</param>
+        /// <param name="validInstanceExtensions">The list of valid instance file extensions.</param>
+        /// <param name="numberOfSeedsToUse">The number of seeds to use.</param>
+        /// <param name="rngSeed">The random number generator seed.</param>
+        /// <returns>
+        /// The created list of <see cref="InstanceSeedFile"/>s.
+        /// </returns>
+        public static List<InstanceSeedFile> CreateInstanceSeedFilesFromDirectory(
+            string pathToInstanceDirectory,
+            string[] validInstanceExtensions,
+            int numberOfSeedsToUse,
+            int rngSeed)
+        {
+            try
+            {
+                var instanceDirectory = new DirectoryInfo(pathToInstanceDirectory);
+                var instanceSeedCombinations = new List<string>();
+                var instanceSeedFiles = new List<InstanceSeedFile>();
+                foreach (var instanceFilePath in instanceDirectory.EnumerateFiles()
+                    .Where(file => validInstanceExtensions.Any(extension => file.Name.EndsWith(extension))))
+                {
+                    var fileAndSeedCsv = instanceFilePath.FullName;
+                    foreach (var seed in InstanceSeedFile.SeedsToUse(numberOfSeedsToUse, rngSeed))
+                    {
+                        instanceSeedFiles.Add(new InstanceSeedFile(instanceFilePath.FullName, seed));
+                        fileAndSeedCsv += $";{seed}";
+                    }
+
+                    instanceSeedCombinations.Add(fileAndSeedCsv);
+                }
+
+                InstanceSeedFile.DumpInstanceSeedFileCombinations(instanceDirectory, instanceSeedCombinations);
+                return instanceSeedFiles;
+            }
+            catch (Exception e)
+            {
+                Console.Out.WriteLine(e.Message);
+                Console.Out.WriteLine($"Cannot open instance directory {pathToInstanceDirectory}!");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Generates the seeds to use for the <see cref="InstanceSeedFile"/> combinations.
+        /// </summary>
+        /// <param name="numberOfSeedsToUse">The number of seeds to use.</param>
+        /// <param name="rngSeed">The random number generator seed.</param>
+        /// <returns>The seeds.</returns>
+        [SuppressMessage(
+            "NDepend",
+            "ND3101:DontUseSystemRandomForSecurityPurposes",
+            Justification = "No security related purpose.")]
+        public static IEnumerable<int> SeedsToUse(int numberOfSeedsToUse, int rngSeed)
+        {
+            var random = new Random(rngSeed);
+            for (var i = 0; i < numberOfSeedsToUse; i++)
+            {
+                yield return random.Next();
+            }
+        }
 
         /// <summary>
         /// Checks if the two objects are equal.
@@ -115,6 +186,33 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm.Instances
         public override string ToString()
         {
             return $"{base.ToString()}_{this.Seed}";
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Dumps the given <see cref="InstanceSeedFile"/> combinations to a file.
+        /// </summary>
+        /// <param name="instanceDirectory">The instance directory.</param>
+        /// <param name="instanceSeedFileCombinations">The <see cref="InstanceSeedFile"/> combinations.</param>
+        private static void DumpInstanceSeedFileCombinations(
+            FileSystemInfo instanceDirectory,
+            IEnumerable<string> instanceSeedFileCombinations)
+        {
+            var fileName = System.IO.Path.Combine(
+                instanceDirectory.FullName,
+                $"instanceSeedFileCombinations_{DateTime.Now:MM-dd-hh-mm-ss}.csv");
+            try
+            {
+                File.WriteAllLines(fileName, instanceSeedFileCombinations, Encoding.UTF8);
+            }
+            catch (Exception e)
+            {
+                LoggingHelper.WriteLine(VerbosityLevel.Warn, $"Could not write instance seed file combinations to destination {fileName}!");
+                LoggingHelper.WriteLine(VerbosityLevel.Warn, e.Message);
+            }
         }
 
         #endregion

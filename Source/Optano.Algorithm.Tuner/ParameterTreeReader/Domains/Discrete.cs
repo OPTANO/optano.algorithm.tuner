@@ -33,6 +33,7 @@
 // Namespace is required due to partial class.
 namespace Optano.Algorithm.Tuner.ParameterTreeReader.Elements
 {
+    using Optano.Algorithm.Tuner.Genomes.Values;
     using Optano.Algorithm.Tuner.Parameters.Domains;
 
     /// <summary>
@@ -71,12 +72,14 @@ namespace Optano.Algorithm.Tuner.ParameterTreeReader.Elements
         /// <returns>The converted <see cref="IntegerDomain"/> or <see cref="LogDomain"/>.</returns>
         internal override IDomain ConvertToParameterTreeDomain()
         {
+            var defaultAllele = this.defaultIndexOrValueSpecified ? new Allele<int>((int)this.defaultIndexOrValue) : (Allele<int>?)null;
+
             if (this.log)
             {
-                return new DiscreteLogDomain(this.start, this.end);
+                return new DiscreteLogDomain(this.start, this.end, defaultAllele);
             }
 
-            return new IntegerDomain(this.start, this.end);
+            return new IntegerDomain(this.start, this.end, defaultAllele);
         }
 
         #endregion

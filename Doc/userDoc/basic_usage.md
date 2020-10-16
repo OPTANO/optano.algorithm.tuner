@@ -1,7 +1,7 @@
 # Basic Usage of *OPTANO Algorithm Tuner*
 
 > [!NOTE] 
-> [Download the Generic OPTANO Algorithm Tuner Application](../OPTANO.Tuner.Application.zip)!
+> [Download the Generic OPTANO Algorithm Tuner Application!](../download.md)
 
 
 When using *OPTANO Algorithm Tuner* (*OAT*) in its basic version, it enables you to tune algorithms that
@@ -39,6 +39,12 @@ For each parameter, you need to provide
 - if the parameter is *continuous* or *discrete*, you can also define whether it is logarithmically or uniformly distributed
 - if the parameter is *continuous* or *discrete*, you need to define its range
 - if the parameter is *categorical*, you have to define the values it can take
+- _OPTIONAL:_ Default Value
+	- When the parameter's `defaultIndexOrValue` property is specified, this value will be used to create a _default_ genome, that will be part of the initial competitive population. <br/>I.e. if you wish to include the default configuration of the target algorithm in the tuning, you can do this by assigning the default value via the `defaultIndexOrValue` property to all parameters.
+	- When the parameter is a `categorical` parameter, you need to set the 0-based index of the desired default value in the list of categorical values of the parameter's domain.
+	- For discrete and continuous parameters, simply set the default value as `int` or `double` number. <br/>Make sure that this value lies within the min/max of the respective domain.
+	- See the `parameterTree.xml` within the [Gurobi Adapter](gurobi.md) for an example usage.
+	- Note: This feature also works _in-code_, when you're not specifying your parameter tree via xml. <br/>Simply pass the default value when calling a `Domain`'s constructor.
 
 The parameter's name is specified via the `id` attribute, its type via the `domain` element. To have a numerical parameter be distributed logarithmically, `log` has to be set to `true`. Ranges are defined via `start` and `end`. Categorical values are set using one of the lists `doubles`, `strings`, `ints` or `booleans`.
 

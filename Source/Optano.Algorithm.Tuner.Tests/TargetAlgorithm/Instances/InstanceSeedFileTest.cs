@@ -32,16 +32,67 @@
 namespace Optano.Algorithm.Tuner.Tests.TargetAlgorithm.Instances
 {
     using System;
+    using System.IO;
+    using System.Linq;
 
     using Optano.Algorithm.Tuner.TargetAlgorithm.Instances;
+
+    using Shouldly;
 
     using Xunit;
 
     /// <summary>
     /// Contains tests for the <see cref="InstanceSeedFile"/> class.
     /// </summary>
-    public class InstanceSeedFileTest
+    public class InstanceSeedFileTest : IDisposable
     {
+        #region Static Fields
+
+        /// <summary>
+        /// The file names that should be translated into <see cref="InstanceSeedFile"/>s on <see cref="InstanceSeedFile.CreateInstanceSeedFilesFromDirectory"/>.
+        /// </summary>
+        private static readonly string[] ValidFileNames = { "useful1.valid", "useful2.valid", "useful3.valid.zip", "useful4.valid.zip" };
+
+        /// <summary>
+        /// The file names that should not be translated into <see cref="InstanceSeedFile"/>s on <see cref="InstanceSeedFile.CreateInstanceSeedFilesFromDirectory"/>.
+        /// </summary>
+        private static readonly string[] NonValidFileNames = { "useless.txt", "useless.txt.zip" };
+
+        /// <summary>
+        /// The list of valid instance extensions.
+        /// </summary>
+        private static readonly string[] ValidInstanceExtensions = { ".valid", ".valid.zip" };
+
+        #endregion
+
+        #region Fields
+
+        /// <summary>
+        /// The path to the test instance folder. Has to be initialized.
+        /// </summary>
+        private readonly string _pathToTestInstanceFolder;
+
+        #endregion
+
+        #region Constructors and Destructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InstanceSeedFileTest"/> class.
+        /// Behaves like the [TestInitialize] of MSTest framework.
+        /// </summary>
+        public InstanceSeedFileTest()
+        {
+            this._pathToTestInstanceFolder = PathUtils.GetAbsolutePathFromExecutableFolderRelative("testInstanceFolder");
+            Directory.CreateDirectory(this._pathToTestInstanceFolder);
+            foreach (var fileName in InstanceSeedFileTest.ValidFileNames.Union(InstanceSeedFileTest.NonValidFileNames))
+            {
+                var handle = File.Create(Path.Combine(this._pathToTestInstanceFolder, fileName));
+                handle.Close();
+            }
+        }
+
+        #endregion
+
         #region Public Methods and Operators
 
         /// <summary>
@@ -202,6 +253,118 @@ namespace Optano.Algorithm.Tuner.Tests.TargetAlgorithm.Instances
             Assert.NotEqual(
                 firstInstanceHash,
                 secondInstanceHash);
+        }
+
+        /// <summary>
+        /// Verifies that calling <see cref="InstanceSeedFile.CreateInstanceSeedFilesFromDirectory"/> with a non existant directory throws
+        /// a <see cref="DirectoryNotFoundException"/>.
+        /// </summary>
+        [Fact]
+        public void CreateInstancesThrowsExceptionIfItCannotOpenFolder()
+        {
+            Exception exception =
+                Assert.Throws<DirectoryNotFoundException>(
+                    () =>
+                        {
+                            InstanceSeedFile.CreateInstanceSeedFilesFromDirectory(
+                                "foobarFolder",
+                                InstanceSeedFileTest.ValidInstanceExtensions,
+                                1,
+                                42);
+                        });
+        }
+
+        /// <summary>
+        /// Verifies that calling <see cref="InstanceSeedFile.CreateInstanceSeedFilesFromDirectory"/> with a non existant directory prints
+        /// out a message to the console telling the user the directory doesn't exist.
+        /// </summary>
+        [Fact]
+        public void CreateInstancesPrintsMessageIfItCannotOpenFolder()
+        {
+            TestUtils.CheckOutput(
+                action: () =>
+                    {
+                        // Call CreateInstanceSeedFilesFromDirectory with a non existant directory path.
+                        try
+                        {
+                            InstanceSeedFile.CreateInstanceSeedFilesFromDirectory(
+                                "foobarFolder",
+                                InstanceSeedFileTest.ValidInstanceExtensions,
+                                1,
+                                42);
+                        }
+                        catch (DirectoryNotFoundException)
+                        {
+                            // This is expected.
+                        }
+                    },
+                check: consoleOutput =>
+                    {
+                        // Check that information about it is written to console.
+                        var reader = new StringReader(consoleOutput.ToString());
+                        reader.ReadLine().ShouldContain("foobarFolder");
+                        reader.ReadLine().ShouldBe("Cannot open instance directory foobarFolder!");
+                    });
+        }
+
+        /// <summary>
+        /// Checks that <see cref="InstanceSeedFile.CreateInstanceSeedFilesFromDirectory"/> creates an instance out of each valid file and
+        /// the instance's file name matches the complete path to that file.
+        /// </summary>
+        [Fact]
+        public void CreateInstancesCorrectlyExtractsPathsToValidFiles()
+        {
+            // Call method.
+            var instances = InstanceSeedFile.CreateInstanceSeedFilesFromDirectory(
+                this._pathToTestInstanceFolder,
+                InstanceSeedFileTest.ValidInstanceExtensions,
+                1,
+                42);
+
+            // Check that file names of instances match the complete paths of all valid files.
+            var expectedPaths = InstanceSeedFileTest.ValidFileNames
+                .Select(name => this._pathToTestInstanceFolder + Path.DirectorySeparatorChar + name).ToList();
+            var instancePaths = instances.Select(instance => instance.Path).ToList();
+            expectedPaths.ShouldBe(
+                instancePaths,
+                true,
+                $"{TestUtils.PrintList(instancePaths)} should have been equal to {TestUtils.PrintList(expectedPaths)}.");
+        }
+
+        /// <summary>
+        /// Checks that <see cref="InstanceSeedFile.CreateInstanceSeedFilesFromDirectory"/> ignores all non valid files.
+        /// </summary>
+        [Fact]
+        public void CreateInstancesIgnoresNonValidFiles()
+        {
+            // Call method.
+            var instances = InstanceSeedFile.CreateInstanceSeedFilesFromDirectory(
+                this._pathToTestInstanceFolder,
+                InstanceSeedFileTest.ValidInstanceExtensions,
+                1,
+                42);
+
+            // Check that no non valid file has been translated into an instance.
+            var instancePaths = instances.Select(instance => instance.Path);
+            instancePaths.Any(path => InstanceSeedFileTest.NonValidFileNames.Any(path.Contains))
+                .ShouldBeFalse("Not all non valid files have been ignored.");
+        }
+
+        /// <summary>
+        /// Checks that <see cref="InstanceSeedFile.SeedsToUse"/> returns the correct number of seeds.
+        /// </summary>
+        [Fact]
+        public void SeedsToUseReturnsCorrectNumberOfSeeds()
+        {
+            const int NumberOfSeeds = 6;
+            var seedsToUse = InstanceSeedFile.SeedsToUse(NumberOfSeeds, 42);
+            seedsToUse.Count().ShouldBe(NumberOfSeeds);
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            Directory.Delete(this._pathToTestInstanceFolder, recursive: true);
         }
 
         #endregion

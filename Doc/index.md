@@ -8,12 +8,12 @@ _OPTANO Algorithm Tuner_ (*OAT*) is a .Net-API that helps tuning (finding near-o
 # Easy Start
 
 > [!NOTE] 
-> [Download the Generic OPTANO Algorithm Tuner Application](OPTANO.Tuner.Application.zip) and [follow these instructions](userDoc/basic_usage.md). 
+> [Download the Generic OPTANO Algorithm Tuner Application](download.md) and [follow these instructions](userDoc/basic_usage.md)!
 
 # Source code
 
 * The souce code of *OAT* can be found at https://github.com/OPTANO/optano.algorithm.tuner.
-* The source code of the [Generic OAT Application](OPTANO.Tuner.Application.zip) and the [exemplary target algorithm adapters](userDoc/examples.md) can be found at https://github.com/OPTANO/optano.algorithm.tuner.examples.
+* The source code of the [Generic OAT Application](download.md) and the [exemplary target algorithm adapters](userDoc/examples.md) can be found at https://github.com/OPTANO/optano.algorithm.tuner.examples.
 
 
 # Help and Information
@@ -72,7 +72,7 @@ This project is sponsored
 ![Bad Image Exception](images/sponsor.png)
 
 ## Licenses
-This version of *OAT* is [distributed freely for non-commercial use](https://optano.com/en/algorithm-tuner-mit-license/).
+This version of *OAT* is [distributed under the MIT license](https://optano.com/en/algorithm-tuner-mit-license/).
 
 This project links to the following nuget packages:
 

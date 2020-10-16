@@ -26,6 +26,9 @@ try
     # Connect
     $session.Open($sessionOptions)
 
+    # Delete Target
+    $session.RemoveFiles($targetpath)
+    
     # Upload
     $session.PutFiles($sourcepath, $targetpath).Check()
 }

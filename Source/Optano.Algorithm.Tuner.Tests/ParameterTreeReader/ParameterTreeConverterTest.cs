@@ -310,6 +310,8 @@ namespace Optano.Algorithm.Tuner.Tests.ParameterTreeReader
             var orNode = tree.Root.Children.First() as OrNode<double>;
             Assert.True(orNode != null, "First root child is not a double OR node as expected.");
             Assert.Equal("or", orNode.Identifier);
+            // defaultValue of OR node should be the 2nd value of the categorical list (= 0.3).
+            Assert.Equal(0.3, orNode.Domain.GetDefaultValue().GetValue());
 
             // Check values / children for OR node (first root child).
             IParameterTreeNode secondAndNode;
@@ -360,6 +362,55 @@ namespace Optano.Algorithm.Tuner.Tests.ParameterTreeReader
             Assert.True(
                 logNode.Domain.ContainsGeneValue(new Allele<double>(100)),
                 "Log value node's domain does not contain 100.");
+        }
+
+        /// <summary>
+        /// Checks that all default values are parsed from the XML tree.
+        /// </summary>
+        [Fact]
+        public void DomainsReturnXmlDefaultValues()
+        {
+            Randomizer.Configure(42);
+            var tree = ParameterTreeConverter.ConvertToParameterTree(ParameterTreeConverterTest.PathPrefix + "treeWithDefaults.xml");
+            var nodes = tree.Root.Children.ToList();
+
+            Assert.Equal(5, nodes.Count);
+
+            var contLog = (ParameterNodeBase<double>)nodes[0];
+            Assert.NotNull(contLog);
+            Assert.Equal("contLog", contLog.Identifier);
+            Assert.Equal(42d, contLog.Domain.GetDefaultValue().GetValue());
+
+            var contLinear = (ParameterNodeBase<double>)nodes[1];
+            Assert.NotNull(contLinear);
+            Assert.Equal("contLinear", contLinear.Identifier);
+            Assert.Equal(123.45, contLinear.Domain.GetDefaultValue().GetValue());
+
+            var discreteLog = (ParameterNodeBase<int>)nodes[2];
+            Assert.NotNull(discreteLog);
+            Assert.Equal("discreteLog", discreteLog.Identifier);
+            Assert.Equal(10, discreteLog.Domain.GetDefaultValue().GetValue());
+
+            var discreteLinear = (ParameterNodeBase<int>)nodes[3];
+            Assert.NotNull(discreteLinear);
+            Assert.Equal("discreteLinear", discreteLinear.Identifier);
+            Assert.Equal(100, discreteLinear.Domain.GetDefaultValue().GetValue());
+
+            var orNode = (OrNode<double>)nodes[4];
+            Assert.NotNull(orNode);
+            Assert.Equal("or", orNode.Identifier);
+            Assert.Equal(2, orNode.Children.Count());
+            Assert.Equal(0.3, orNode.Domain.GetDefaultValue().GetValue());
+
+            // make sure that domains without default value return a random value within the domain when calling GetDefaultValue.
+            var orValueChild = orNode.Children.Skip(1).Single() as ValueNode<int>;
+            Assert.NotNull(orValueChild);
+            Assert.Equal("orChild2", orValueChild.Identifier);
+            var defaultAllele = orValueChild.Domain.GetDefaultValue();
+            Assert.NotNull(defaultAllele);
+            var defaultValue = defaultAllele.GetValue();
+            Assert.NotNull(defaultValue);
+            Assert.True(orValueChild.Domain.ContainsGeneValue(defaultAllele));
         }
 
         #endregion

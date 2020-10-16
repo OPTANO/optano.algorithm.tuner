@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <!-- Root is an AND node. -->
-<node xsi:type="and" xsi:noNamespaceSchemaLocation="../../../../Optano.Algorithm.Tuner/parameterTree.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<node xsi:type="and" xsi:noNamespaceSchemaLocation="../../../Optano.Algorithm.Tuner/parameterTree.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<!-- AND node's children are a double OR node and a double value node. -->
 	<node xsi:type="or" id="or">
-		<domain xsi:type="categorical" doubles="0.1 0.3 0.5" />
+		<domain xsi:type="categorical" doubles="0.1 0.3 0.5" defaultIndexOrValue="1" />
 		<!-- OR node's children is an AND node activated on 0.1 and a discrete value node activated on 0.5. -->
 		<choice>
 			<double>0.1</double>

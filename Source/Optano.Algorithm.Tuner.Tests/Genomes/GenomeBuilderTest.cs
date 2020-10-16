@@ -1,30 +1,30 @@
 ﻿#region Copyright (c) OPTANO GmbH
 
 // ////////////////////////////////////////////////////////////////////////////////
-// 
+//
 //        OPTANO GmbH Source Code
 //        Copyright (c) 2010-2020 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
-// 
+//
 //    The entire contents of this file is protected by German and
 //    International Copyright Laws. Unauthorized reproduction,
 //    reverse-engineering, and distribution of all or any portion of
 //    the code contained in this file is strictly prohibited and may
 //    result in severe civil and criminal penalties and will be
 //    prosecuted to the maximum extent possible under the law.
-// 
+//
 //    RESTRICTIONS
-// 
+//
 //    THIS SOURCE CODE AND ALL RESULTING INTERMEDIATE FILES
 //    ARE CONFIDENTIAL AND PROPRIETARY TRADE SECRETS OF
 //    OPTANO GMBH.
-// 
+//
 //    THE SOURCE CODE CONTAINED WITHIN THIS FILE AND ALL RELATED
 //    FILES OR ANY PORTION OF ITS CONTENTS SHALL AT NO TIME BE
 //    COPIED, TRANSFERRED, SOLD, DISTRIBUTED, OR OTHERWISE MADE
 //    AVAILABLE TO OTHER INDIVIDUALS WITHOUT WRITTEN CONSENT
 //    AND PERMISSION FROM OPTANO GMBH.
-// 
+//
 // ////////////////////////////////////////////////////////////////////////////////
 
 #endregion
@@ -310,7 +310,7 @@ namespace Optano.Algorithm.Tuner.Tests.Genomes
             int forbiddenValue = 3;
             Func<Genome, bool> doesNotHave3ForInt1To5 = candidate =>
                 !object.Equals(candidate.GetGeneValue(GenomeBuilderTest.SmallValueParameter).GetValue(), forbiddenValue);
-            
+
             // Create a genome builder implementing that check. It also should never mutate randomly
             // so we can be sure the repair was not due to the mutation itself.
             var genomeBuilder = GenomeBuilderTest.CreateCustomGenomeBuilder(
@@ -343,7 +343,7 @@ namespace Optano.Algorithm.Tuner.Tests.Genomes
             var genomeBuilder = GenomeBuilderTest.CreateCustomGenomeBuilder(
                 mutationRate: 0,
                 isValidFunction: doesNotHave3ForInt1To5);
-            
+
             var genome = GenomeBuilderTest.BuildFittingGenome();
             genome.SetGene(GenomeBuilderTest.SmallValueParameter, new Allele<int>(forbiddenValue));
 
@@ -600,6 +600,34 @@ namespace Optano.Algorithm.Tuner.Tests.Genomes
                 $"Crossover was found not to respect the switch probability by the Chi-Squared test with significance level of {matchesSwitchProbabilityTest.Size}.");
         }
 
+        /// <summary>
+        /// Checks that the <see cref="GenomeBuilder.CreateDefaultGenome"/> uses the specified domain default values.
+        /// </summary>
+        [Fact]
+        public void DefaultGenomeUsesDefaultValues()
+        {
+            var tree = GenomeBuilderTest.BuildParameterTree(true);
+            var builder = new GenomeBuilder(tree, new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder().Build(maximumNumberParallelEvaluations: 1));
+
+            var defaultGenome = builder.CreateDefaultGenome(1337);
+
+            Assert.NotNull(defaultGenome);
+            Assert.Equal(1337, defaultGenome.Age);
+
+            // GenomeBuilderTest.ContinuousParameter should not be active, since "a" node is the default.
+            var filteredGenes = defaultGenome.GetFilteredGenes(tree);
+            Assert.Equal(3, filteredGenes.Count);
+
+            Assert.Equal("a", filteredGenes[GenomeBuilderTest.DecisionParameter].GetValue());
+            Assert.Equal(1, filteredGenes[GenomeBuilderTest.SmallValueParameter].GetValue());
+            Assert.Equal(42, filteredGenes[GenomeBuilderTest.DiscreteParameter].GetValue());
+
+            // GenomeBuilderTest.ContinuousParameter should also have a default value, even though it is not active.
+            var contAllele = defaultGenome.GetGeneValue(GenomeBuilderTest.ContinuousParameter);
+            Assert.NotNull(contAllele);
+            Assert.Equal(0.2, contAllele.GetValue());
+        }
+
         #endregion
 
         #region Methods
@@ -608,11 +636,12 @@ namespace Optano.Algorithm.Tuner.Tests.Genomes
         /// Creates a simple <see cref="GenomeBuilder"/> that uses the parameter tree from
         /// <see cref="GenomeBuilderTest.BuildParameterTree"/>.
         /// </summary>
+        /// <param name="includeDefaultValues">Indicates whether to add default values to the domains.</param>
         /// <returns>The genome builder.</returns>
-        private static GenomeBuilder CreateGenomeBuilder()
+        private static GenomeBuilder CreateGenomeBuilder(bool includeDefaultValues = false)
         {
             return new GenomeBuilder(
-                GenomeBuilderTest.BuildParameterTree(),
+                GenomeBuilderTest.BuildParameterTree(includeDefaultValues),
                 new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder().Build(maximumNumberParallelEvaluations: 1));
         }
 
@@ -648,24 +677,31 @@ namespace Optano.Algorithm.Tuner.Tests.Genomes
         /// <summary>
         /// Builds the following parameter tree:
         /// - AND node as root
-        /// - 1st child of AND node: OR node with string either a or b
-        /// - 2nd child of AND node: value node with integer between 1 and 5
-        /// - OR node, a branch: value node with integer
-        /// - OR node, b branch: value node with double between 0.1 and 0.8.
+        /// - 1st child of AND node: OR node with string either a or b (default: "a")
+        /// - 2nd child of AND node: value node with integer between 1 and 5 (default: 1)
+        /// - OR node, a branch: value node with integer (default: 42).
+        /// - OR node, b branch: value node with double between 0.1 and 0.8 (default: 0.2).
         /// </summary>
+        /// <param name="includeDefaultValues">Indicates whether to add default values to the domains.</param>
         /// <returns>The build parameter tree.</returns>
-        private static ParameterTree BuildParameterTree()
+        private static ParameterTree BuildParameterTree(bool includeDefaultValues = false)
         {
             // Create all parameter tree nodes.
             var rootNode = new AndNode();
             OrNode<string> decideAOrBNode = new OrNode<string>(
                 DecisionParameter,
-                new CategoricalDomain<string>(new List<string> { "a", "b" }));
-            IParameterNode smallIntegerParamNode = new ValueNode<int>(GenomeBuilderTest.SmallValueParameter, new IntegerDomain(1, 5));
-            IParameterNode integerParamNode = new ValueNode<int>(GenomeBuilderTest.DiscreteParameter, new IntegerDomain());
+                new CategoricalDomain<string>(new List<string> { "a", "b" }, includeDefaultValues ? new Allele<string>("a") : (Allele<string>?)null));
+
+            IParameterNode integerParamNode = new ValueNode<int>(
+                GenomeBuilderTest.DiscreteParameter,
+                new IntegerDomain(defaultValue: includeDefaultValues ? new Allele<int>(42) : (Allele<int>?)null));
             IParameterNode continuousParamNode = new ValueNode<double>(
                 GenomeBuilderTest.ContinuousParameter,
-                new ContinuousDomain(0.1, 0.8));
+                new ContinuousDomain(0.1, 0.8, includeDefaultValues ? new Allele<double>(0.2) : (Allele<double>?)null));
+
+            IParameterNode smallIntegerParamNode = new ValueNode<int>(
+                GenomeBuilderTest.SmallValueParameter,
+                new IntegerDomain(1, 5, includeDefaultValues ? new Allele<int>(1) : (Allele<int>?)null));
 
             // Connect them.
             decideAOrBNode.AddChild("a", integerParamNode);

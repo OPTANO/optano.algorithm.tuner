@@ -411,6 +411,9 @@ namespace Optano.Algorithm.Tuner.Tuning
                 this.UpdateGenerationHistory(currentStrategy);
                 this.TrackConvergenceBehavior();
 
+                // Export generation history without IncumbentTrainingScore and IncumbentTestScore.
+                RunStatisticTracker.ExportGenerationHistory(this._informationHistory);
+
                 if (this._currGeneration != this._configuration.Generations - 1)
                 {
                     // Functions depending on the complete population may behave unexpectedly in the final generation
@@ -615,6 +618,7 @@ namespace Optano.Algorithm.Tuner.Tuning
 
             var generationInformation = new GenerationInformation(
                 generation: this._currGeneration,
+                totalElapsedTime: this._logWriter.TotalElapsedTime,
                 totalNumberOfEvaluations: evaluationCountRequest.Result.TotalEvaluationCount,
                 strategy: currentStrategy.GetType(),
                 incumbent: new ImmutableGenome(this._incumbentGenomeWrapper.IncumbentGenome));
@@ -736,13 +740,15 @@ namespace Optano.Algorithm.Tuner.Tuning
                                                      ? (this._configuration.PopulationSize / 2) + 1
                                                      : this._configuration.PopulationSize / 2;
 
-            // Then add random genomes.
-            foreach (var nonCompetitive in this.CreateRandomGenomes(sizeOfNonCompetitivePopulation))
+            // Then add non-competitive random genomes.
+            foreach (var nonCompetitive in this.CreateRandomGenomes(sizeOfNonCompetitivePopulation, false))
             {
                 population.AddGenome(nonCompetitive, false);
             }
 
-            foreach (var competitive in this.CreateRandomGenomes(this._configuration.PopulationSize - sizeOfNonCompetitivePopulation))
+            // competitive genomes.
+            var sizeOfCompetitivePopulation = this._configuration.PopulationSize - sizeOfNonCompetitivePopulation;
+            foreach (var competitive in this.CreateRandomGenomes(sizeOfCompetitivePopulation, this._configuration.AddDefaultGenome))
             {
                 population.AddGenome(competitive, true);
             }
@@ -756,14 +762,25 @@ namespace Optano.Algorithm.Tuner.Tuning
         /// <param name="numberIndividuals">
         /// The number of genomes to add.
         /// </param>
+        /// <param name="includeDefaultGenome">Indicates whether to include a default value genome.</param>
         /// <returns>The created <see cref="Genome"/> objects.</returns>
-        private IEnumerable<Genome> CreateRandomGenomes(int numberIndividuals)
+        private IEnumerable<Genome> CreateRandomGenomes(int numberIndividuals, bool includeDefaultGenome)
         {
+            if (numberIndividuals <= 0)
+            {
+                yield break;
+            }
+
+            if (includeDefaultGenome)
+            {
+                yield return this._genomeBuilder.CreateDefaultGenome(1);
+            }
+
             // Begin with a random, legal age at least 1.
             var nextAge = 1 + Randomizer.Instance.Next(this._configuration.MaxGenomeAge);
 
             // Then add the specified number of random individuals.
-            for (var i = 0; i < numberIndividuals; i++)
+            for (var i = includeDefaultGenome ? 1 : 0; i < numberIndividuals; i++)
             {
                 var genome = this._genomeBuilder.CreateRandomGenome(nextAge);
                 yield return genome;
@@ -793,7 +810,8 @@ namespace Optano.Algorithm.Tuner.Tuning
             }
             else
             {
-                // we want to log the most recent results
+                // we want to log the most recent results and the genome, such that we get the current age of the incumbent genome
+                this._incumbentGenomeWrapper.IncumbentGenome = generationBest.IncumbentGenome;
                 this._incumbentGenomeWrapper.IncumbentInstanceResults = generationBest.IncumbentInstanceResults;
                 LoggingHelper.WriteLine(
                     VerbosityLevel.Debug,

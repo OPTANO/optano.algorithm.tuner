@@ -40,5 +40,7 @@
 
 ## [BBOB Tuning](bbob.md)
 
+# [Downloads](../download.md)
+
 # [Typical Issues](typical_issues.md)
 

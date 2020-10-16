@@ -35,6 +35,7 @@ namespace Optano.Algorithm.Tuner.ParameterTreeReader.Elements
 {
     using System;
 
+    using Optano.Algorithm.Tuner.Genomes.Values;
     using Optano.Algorithm.Tuner.Parameters.Domains;
 
     /// <summary>
@@ -73,12 +74,14 @@ namespace Optano.Algorithm.Tuner.ParameterTreeReader.Elements
         /// <returns>The converted <see cref="ContinuousDomain"/> or <see cref="LogDomain"/>.</returns>
         internal override IDomain ConvertToParameterTreeDomain()
         {
+            var defaultAllele = this.defaultIndexOrValueSpecified ? new Allele<double>(this.defaultIndexOrValue) : (Allele<double>?)null;
+
             if (this.log)
             {
-                return new LogDomain(this.start, this.end);
+                return new LogDomain(this.start, this.end, defaultAllele);
             }
 
-            return new ContinuousDomain(this.start, this.end);
+            return new ContinuousDomain(this.start, this.end, defaultAllele);
         }
 
         #endregion
