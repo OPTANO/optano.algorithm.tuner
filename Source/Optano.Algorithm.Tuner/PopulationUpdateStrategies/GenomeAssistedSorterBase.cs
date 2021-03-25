@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -39,41 +39,34 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies
     using Akka.Actor;
 
     using Optano.Algorithm.Tuner.ContinuousOptimization;
+    using Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation;
+    using Optano.Algorithm.Tuner.GenomeEvaluation.Messages;
     using Optano.Algorithm.Tuner.GenomeEvaluation.Sorting;
     using Optano.Algorithm.Tuner.GenomeEvaluation.Sorting.Messages;
     using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.TargetAlgorithm.Instances;
+    using Optano.Algorithm.Tuner.TargetAlgorithm.Results;
 
     /// <summary>
     /// Abstract base class for all <see cref="ISearchPointSorter{TSearchPoint}"/> which are based on
-    /// <see cref="GenomeSorter{TInstance,TResult}"/>s.
+    /// <see cref="GenerationEvaluationActor{TTargetAlgorithm,TInstance,TResult}"/>s.
     /// </summary>
     /// <typeparam name="TSearchPoint">
     /// The kind of <typeparamref name="TSearchPoint"/> which gets sorted.
     /// </typeparam>
-    /// <typeparam name="TInstance">
-    /// The type of instance the <see cref="GenomeSorter{TInstance, TResult}"/> expects.
-    /// </typeparam>
-    public abstract class GenomeAssistedSorterBase<TSearchPoint, TInstance> : SearchPointSorterBase<TSearchPoint>
+    /// <typeparam name="TInstance">The instance type.</typeparam>
+    /// <typeparam name="TResult">The result type of a single target algorithm evaluation.</typeparam>
+    public abstract class GenomeAssistedSorterBase<TSearchPoint, TInstance, TResult> : SearchPointSorterBase<TSearchPoint>
         where TSearchPoint : SearchPoint
         where TInstance : InstanceBase
+        where TResult : ResultBase<TResult>, new()
     {
-        #region Static Fields
-
-        /// <summary>
-        /// A <see cref="IEqualityComparer{T}"/> to compare <see cref="ImmutableGenome"/>s by their genes only.
-        /// </summary>
-        protected static readonly IEqualityComparer<ImmutableGenome> GeneValueComparer
-            = new ImmutableGenome.GeneValueComparer();
-
-        #endregion
-
         #region Fields
 
         /// <summary>
-        /// Gets an <see cref="IActorRef" /> to a <see cref="GenomeSorter{TInstance,TResult}" />.
+        /// Gets an <see cref="IActorRef" /> to a <see cref="GenerationEvaluationActor{TTargetAlgorithm,TInstance,TResult}"/>.
         /// </summary>
-        private readonly IActorRef _genomeSorter;
+        private readonly IActorRef _generationEvaluationActor;
 
         /// <summary>
         /// The <typeparamref name="TInstance"/>s to base the sorting on.
@@ -85,14 +78,14 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies
         #region Constructors and Destructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="GenomeAssistedSorterBase{TSearchPoint, TInstance}"/> class.
+        /// Initializes a new instance of the <see cref="GenomeAssistedSorterBase{TSearchPoint, TInstance, TResult}"/> class.
         /// </summary>
-        /// <param name="genomeSorter">
-        /// An <see cref="IActorRef" /> to a <see cref="GenomeSorter{TInstance, TResult}" />.
+        /// <param name="generationEvaluationActor">
+        /// An <see cref="IActorRef" /> to a <see cref="GenerationEvaluationActor{TTargetAlgorithm,TInstance,TResult}"/>.
         /// </param>
-        protected GenomeAssistedSorterBase(IActorRef genomeSorter)
+        protected GenomeAssistedSorterBase(IActorRef generationEvaluationActor)
         {
-            this._genomeSorter = genomeSorter ?? throw new ArgumentNullException(nameof(genomeSorter));
+            this._generationEvaluationActor = generationEvaluationActor ?? throw new ArgumentNullException(nameof(generationEvaluationActor));
         }
 
         #endregion
@@ -130,11 +123,11 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies
             var ranks = new Dictionary<ImmutableGenome, int>(genomes.Count);
             for (int rank = 0; rank < sortResult.Ranking.Count; rank++)
             {
-                // There might be several points describing the same genome, so make sure to choose one which has 
+                // There might be several points describing the same genome, so make sure to choose one which has
                 // no rank assigned as of yet.
                 var fittingGenome = genomes.First(
                     genome =>
-                        GeneValueComparer.Equals(sortResult.Ranking[rank], genome) && !ranks.ContainsKey(genome));
+                        ImmutableGenome.GenomeComparer.Equals(sortResult.Ranking[rank], genome) && !ranks.ContainsKey(genome));
                 ranks.Add(fittingGenome, rank);
             }
 
@@ -142,17 +135,22 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies
         }
 
         /// <summary>
-        /// Sorts genomes using the <see cref="_genomeSorter"/>.
+        /// Sorts genomes using the <see cref="_generationEvaluationActor"/>.
         /// </summary>
         /// <param name="genomesToSort">The <see cref="ImmutableGenome"/>s to sort.</param>
         /// <returns>The sorting result.</returns>
         protected SortResult SortGenomes(ImmutableList<ImmutableGenome> genomesToSort)
         {
-            var sortRequest = this._genomeSorter.Ask<SortResult>(
-                new SortCommand<TInstance>(genomesToSort, this._instances.ToImmutableList()));
-            sortRequest.Wait();
+            var generationEvaluationTask = this._generationEvaluationActor.Ask<SortResult>(
+                new GenerationEvaluation<TInstance, TResult>(
+                    genomesToSort,
+                    this._instances,
+                    (runEvaluator, participantsOfGeneration, instancesOfGeneration) =>
+                        new SortingGenerationEvaluationStrategy<TInstance, TResult>(runEvaluator, participantsOfGeneration, instancesOfGeneration)));
 
-            return sortRequest.Result;
+            generationEvaluationTask.Wait();
+
+            return generationEvaluationTask.Result;
         }
 
         #endregion

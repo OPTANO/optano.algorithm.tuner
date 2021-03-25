@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -48,10 +48,7 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.CovarianceMatrixAdap
     /// Type of <see cref="SearchPoint"/> handled by the
     /// <see cref="CovarianceMatrixAdaptationStrategyBase{TSearchPoint,TInstance,TResult}"/> instance.
     /// </typeparam>
-    /// <typeparam name="TInstance">
-    /// Type of <see cref="InstanceBase"/> handled by the
-    /// <see cref="CovarianceMatrixAdaptationStrategyBase{TSearchPoint,TInstance,TResult}"/> instance.
-    /// </typeparam>
+    /// <typeparam name="TInstance">The instance type.</typeparam>
     public class CovarianceMatrixAdaptationStrategyStatus<TSearchPoint, TInstance>
         : ContinuousOptimizationStrategyStatusBase<TSearchPoint, TInstance>
         where TSearchPoint : SearchPoint, IDeserializationRestorer<TSearchPoint>

@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -43,6 +43,7 @@ namespace Optano.Algorithm.Tuner.Tracking
     using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.Logging;
     using Optano.Algorithm.Tuner.Parameters;
+    using Optano.Algorithm.Tuner.TargetAlgorithm.Instances;
     using Optano.Algorithm.Tuner.TargetAlgorithm.Results;
     using Optano.Algorithm.Tuner.TargetAlgorithm.RunEvaluators;
 
@@ -118,18 +119,18 @@ namespace Optano.Algorithm.Tuner.Tracking
         /// The incumbent genome wrapper.
         /// </param>
         /// <param name="runEvaluator">
-        /// A <see cref="IMetricRunEvaluator{TResult}"/> to evaluate the incumbent's results.
+        /// A <see cref="IMetricRunEvaluator{TInstance, TResult}"/> to evaluate the incumbent's results.
         /// </param>
-        /// <typeparam name="TResult">
-        /// Type of single instance evaluation result.
-        /// </typeparam>
+        /// <typeparam name="TInstance">The instance type.</typeparam>
+        /// <typeparam name="TResult">The result type of a single target algorithm evaluation.</typeparam>
         /// <returns>
-        /// The <see cref="double"/> average <see cref="IMetricRunEvaluator{TResult}.GetMetricRepresentation"/> of the
+        /// The <see cref="double"/> average <see cref="IMetricRunEvaluator{TInstance, TResult}.GetMetricRepresentation"/> of the
         /// current incumbent.
         /// </returns>
-        public static double TrackConvergenceBehavior<TResult>(
+        public static double TrackConvergenceBehavior<TInstance, TResult>(
             IncumbentGenomeWrapper<TResult> incumbentGenomeWrapper,
-            IMetricRunEvaluator<TResult> runEvaluator)
+            IMetricRunEvaluator<TInstance, TResult> runEvaluator)
+            where TInstance : InstanceBase
             where TResult : ResultBase<TResult>, new()
         {
             if (runEvaluator == null)

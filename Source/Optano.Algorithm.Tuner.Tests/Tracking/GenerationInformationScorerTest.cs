@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -37,9 +37,8 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
     using Akka.Actor;
 
     using Optano.Algorithm.Tuner.AkkaConfiguration;
-    using Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments.Actors;
+    using Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation;
     using Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage;
-    using Optano.Algorithm.Tuner.GenomeEvaluation.Sorting;
     using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.Genomes.Values;
     using Optano.Algorithm.Tuner.Parameters;
@@ -67,15 +66,15 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
             new ValueNode<int>(ExtractIntegerValue.ParameterName, new IntegerDomain(-1000, 1000)));
 
         /// <summary>
-        /// The <see cref="Optano.Algorithm.Tuner.TargetAlgorithm.RunEvaluators.IMetricRunEvaluator{TResult}"/>
+        /// The <see cref="Optano.Algorithm.Tuner.TargetAlgorithm.RunEvaluators.IMetricRunEvaluator{TInstance, TResult}"/>
         /// to score the target algorithm run results.
         /// </summary>
-        private readonly SortByValue _runEvaluator = new SortByValue();
+        private readonly SortByValue<InstanceSeedFile> _runEvaluator = new SortByValue<InstanceSeedFile>();
 
         /// <summary>
-        /// An <see cref="IActorRef" /> to a <see cref="GenomeSorter{TInstance,TResult}" />.
+        /// An <see cref="IActorRef" /> to a <see cref="GenerationEvaluationActor{TTargetAlgorithm,TInstance,TResult}" />.
         /// </summary>
-        private IActorRef _genomeSorter;
+        private IActorRef _generationEvaluationActor;
 
         /// <summary>
         /// An <see cref="IActorRef" /> to a <see cref="ResultStorageActor{TInstance,TResult}" />
@@ -90,16 +89,16 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
         /// <summary>
         /// Checks that <see cref="GenerationInformationScorer{TInstance,TResult}"/>'s constructor throws a
         /// <see cref="ArgumentNullException"/> if called without a reference to a
-        /// <see cref="GenomeSorter{TInstance, TResult}"/>.
+        /// <see cref="GenerationEvaluationActor{TTargetAlgorithm,TInstance, TResult}"/>.
         /// </summary>
         [Fact]
-        public void ConstructorThrowsForMissingGenomeSorter()
+        public void ConstructorThrowsForMissingGenerationEvaluationActor()
         {
             Assert.Throws<ArgumentNullException>(
                 () => new GenerationInformationScorer<InstanceSeedFile, IntegerResult>(
-                    genomeSorter: null,
-                    resultStorageActor: this._resultStorageActor,
-                    runEvaluator: this._runEvaluator));
+                    null,
+                    this._resultStorageActor,
+                    this._runEvaluator));
         }
 
         /// <summary>
@@ -112,24 +111,24 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
         {
             Assert.Throws<ArgumentNullException>(
                 () => new GenerationInformationScorer<InstanceSeedFile, IntegerResult>(
-                    this._genomeSorter,
-                    resultStorageActor: null,
-                    runEvaluator: this._runEvaluator));
+                    this._generationEvaluationActor,
+                    null,
+                    this._runEvaluator));
         }
 
         /// <summary>
         /// Checks that <see cref="GenerationInformationScorer{TInstance,TResult}"/>'s constructor throws a
         /// <see cref="ArgumentNullException"/> if called without a reference to a
-        /// <see cref="Optano.Algorithm.Tuner.TargetAlgorithm.RunEvaluators.IMetricRunEvaluator{TResult}"/>.
+        /// <see cref="Optano.Algorithm.Tuner.TargetAlgorithm.RunEvaluators.IMetricRunEvaluator{TInstance, TResult}"/>.
         /// </summary>
         [Fact]
         public void ConstructorThrowsForMissingRunEvaluator()
         {
             Assert.Throws<ArgumentNullException>(
                 () => new GenerationInformationScorer<InstanceSeedFile, IntegerResult>(
-                    this._genomeSorter,
+                    this._generationEvaluationActor,
                     this._resultStorageActor,
-                    runEvaluator: null));
+                    null));
         }
 
         /// <summary>
@@ -140,14 +139,14 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
         public void ScoreInformationHistoryThrowsForMissingHistory()
         {
             var scorer = new GenerationInformationScorer<InstanceSeedFile, IntegerResult>(
-                this._genomeSorter,
+                this._generationEvaluationActor,
                 this._resultStorageActor,
                 this._runEvaluator);
             Assert.Throws<ArgumentNullException>(
                 () => scorer.ScoreInformationHistory(
-                informationHistory: null,
-                trainingInstances: GenerationInformationScorerTest.CreateInstances(0, 1), 
-                testInstances: GenerationInformationScorerTest.CreateInstances(0, 1)));
+                    informationHistory: null,
+                    trainingInstances: GenerationInformationScorerTest.CreateInstances(0, 1),
+                    testInstances: GenerationInformationScorerTest.CreateInstances(0, 1)));
         }
 
         /// <summary>
@@ -158,16 +157,16 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
         public void ScoreInformationHistoryThrowsForMissingTrainingInstancesSet()
         {
             var scorer = new GenerationInformationScorer<InstanceSeedFile, IntegerResult>(
-                this._genomeSorter,
+                this._generationEvaluationActor,
                 this._resultStorageActor,
                 this._runEvaluator);
 
             var dummyInformation = new GenerationInformation(0, TimeSpan.Zero, 0, typeof(int), new ImmutableGenome(new Genome()));
             Assert.Throws<ArgumentNullException>(
                 () => scorer.ScoreInformationHistory(
-                informationHistory: new List<GenerationInformation> { dummyInformation },
-                trainingInstances: null,
-                testInstances: GenerationInformationScorerTest.CreateInstances(0, 1)));
+                    informationHistory: new List<GenerationInformation> { dummyInformation },
+                    trainingInstances: null,
+                    testInstances: GenerationInformationScorerTest.CreateInstances(0, 1)));
         }
 
         /// <summary>
@@ -178,16 +177,16 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
         public void ScoreInformationHistoryThrowsForEmptySetOfTrainingInstances()
         {
             var scorer = new GenerationInformationScorer<InstanceSeedFile, IntegerResult>(
-                this._genomeSorter,
+                this._generationEvaluationActor,
                 this._resultStorageActor,
                 this._runEvaluator);
 
             var dummyInformation = new GenerationInformation(0, TimeSpan.Zero, 0, typeof(int), new ImmutableGenome(new Genome()));
             Assert.Throws<ArgumentOutOfRangeException>(
                 () => scorer.ScoreInformationHistory(
-                informationHistory: new List<GenerationInformation> { dummyInformation },
-                trainingInstances: new List<InstanceSeedFile>(),
-                testInstances: GenerationInformationScorerTest.CreateInstances(0, 1)));
+                    informationHistory: new List<GenerationInformation> { dummyInformation },
+                    trainingInstances: new List<InstanceSeedFile>(),
+                    testInstances: GenerationInformationScorerTest.CreateInstances(0, 1)));
         }
 
         /// <summary>
@@ -198,16 +197,16 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
         public void ScoreInformationHistoryThrowsForMissingTestInstancesSet()
         {
             var scorer = new GenerationInformationScorer<InstanceSeedFile, IntegerResult>(
-                this._genomeSorter,
+                this._generationEvaluationActor,
                 this._resultStorageActor,
                 this._runEvaluator);
 
             var dummyInformation = new GenerationInformation(0, TimeSpan.Zero, 0, typeof(int), new ImmutableGenome(new Genome()));
             Assert.Throws<ArgumentNullException>(
                 () => scorer.ScoreInformationHistory(
-                informationHistory: new List<GenerationInformation> { dummyInformation },
-                trainingInstances: GenerationInformationScorerTest.CreateInstances(0, 1),
-                testInstances: null));
+                    informationHistory: new List<GenerationInformation> { dummyInformation },
+                    trainingInstances: GenerationInformationScorerTest.CreateInstances(0, 1),
+                    testInstances: null));
         }
 
         /// <summary>
@@ -222,7 +221,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
             var generationInformation = new GenerationInformation(0, TimeSpan.Zero, 0, typeof(int), new ImmutableGenome(incumbent1));
 
             var scorer = new GenerationInformationScorer<InstanceSeedFile, IntegerResult>(
-                this._genomeSorter,
+                this._generationEvaluationActor,
                 this._resultStorageActor,
                 this._runEvaluator);
             scorer.ScoreInformationHistory(
@@ -250,7 +249,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
             var generationInformation = new GenerationInformation(0, TimeSpan.Zero, 0, typeof(int), new ImmutableGenome(incumbent1));
 
             var scorer = new GenerationInformationScorer<InstanceSeedFile, IntegerResult>(
-                this._genomeSorter,
+                this._generationEvaluationActor,
                 this._resultStorageActor,
                 this._runEvaluator);
             scorer.ScoreInformationHistory(
@@ -282,20 +281,15 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
             this._resultStorageActor = this.ActorSystem.ActorOf(
                 Props.Create(() => new ResultStorageActor<InstanceSeedFile, IntegerResult>()),
                 AkkaNames.ResultStorageActor);
-            this._genomeSorter = this.ActorSystem.ActorOf(
-                Props.Create(() => new GenomeSorter<InstanceSeedFile, IntegerResult>(this._runEvaluator)),
-                AkkaNames.GenomeSorter);
-
-            // The tournament selector is needed to create evaluation actors, which are used by the sorter.
-            var tournamentSelector = this.ActorSystem.ActorOf(
+            this._generationEvaluationActor = this.ActorSystem.ActorOf(
                 Props.Create(
-                    () => new TournamentSelector<MultiplyIntegerWithSeed, InstanceSeedFile, IntegerResult>(
+                    () => new GenerationEvaluationActor<MultiplyIntegerWithSeed, InstanceSeedFile, IntegerResult>(
                         new MultiplyIntegerWithSeedCreator(),
                         this._runEvaluator,
                         configuration,
                         this._resultStorageActor,
                         this._parameterTree)),
-                AkkaNames.TournamentSelector);
+                AkkaNames.GenerationEvaluationActor);
         }
 
         /// <summary>

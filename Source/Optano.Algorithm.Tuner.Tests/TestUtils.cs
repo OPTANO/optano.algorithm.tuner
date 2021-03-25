@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -39,8 +39,6 @@ namespace Optano.Algorithm.Tuner.Tests
     using NLog;
     using NLog.Config;
     using NLog.Targets;
-
-    using Optano.Algorithm.Tuner;
 
     using Xunit;
 

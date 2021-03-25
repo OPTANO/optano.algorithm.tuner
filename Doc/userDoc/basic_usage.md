@@ -43,7 +43,7 @@ For each parameter, you need to provide
 	- When the parameter's `defaultIndexOrValue` property is specified, this value will be used to create a _default_ genome, that will be part of the initial competitive population. <br/>I.e. if you wish to include the default configuration of the target algorithm in the tuning, you can do this by assigning the default value via the `defaultIndexOrValue` property to all parameters.
 	- When the parameter is a `categorical` parameter, you need to set the 0-based index of the desired default value in the list of categorical values of the parameter's domain.
 	- For discrete and continuous parameters, simply set the default value as `int` or `double` number. <br/>Make sure that this value lies within the min/max of the respective domain.
-	- See the `parameterTree.xml` within the [Gurobi Adapter](gurobi.md) for an example usage.
+	- See the `parameterTree.xml` within the [Gurobi Adapter](../developerDoc/gurobi.md) for an example usage.
 	- Note: This feature also works _in-code_, when you're not specifying your parameter tree via xml. <br/>Simply pass the default value when calling a `Domain`'s constructor.
 
 The parameter's name is specified via the `id` attribute, its type via the `domain` element. To have a numerical parameter be distributed logarithmically, `log` has to be set to `true`. Ranges are defined via `start` and `end`. Categorical values are set using one of the lists `doubles`, `strings`, `ints` or `booleans`.
@@ -78,21 +78,21 @@ The parameter's name is specified via the `id` attribute, its type via the `doma
 	</node>
 </node>
 ```
-A more complicated parameter tree definition using the other properties and types defined above can be found in the [example source code for Gurobi tuning](gurobi.md).
+A more complicated parameter tree definition using the other properties and types defined above can be found in the [example source code for Gurobi tuning](../developerDoc/gurobi.md).
 
 ## Provide what to tune for
-By default, *OAT* will tune for small run time. If, in addtion, you provide the  `--parK` argument, e.g. `--parK=10`, the tuning will use timeout penalized average run time (PAR-K) and penalize timed-out runs by multiplying there actual run time by K. To make *OAT* exploit run time tuning in order to improve its own run time, set `--enableRacing=true`.
+By default, *OAT* will tune for small run time. If, in addtion, you provide the  `--parK` argument, e.g. `--parK=10`, the tuning will use timeout penalized average run time (PAR-K) and penalize timed-out runs by multiplying there actual run time by K. To make *OAT* exploit run time tuning in order to improve its own run time by [enabling racing](parameters.md#racing), set `--enableRacing=true`.
 
 You can also configure *OAT* to tune the last number that your algorithm writes to console before exiting. This value can then either be minimized or maximized.
 
 To enable value tuning, you need to provide `--byValue` as an argument. You can change minimization to maximization by setting `--ascending=false`.
 
-Note that *OAT* assumes that all runs finish when `--byValue` is specified. Therefore, you should not set the `--cpuTimeout` parameter in this case.
+Note that *OAT* assumes that all runs finish when `--byValue` is specified. Therefore, you should not set the `--cpuTimeout` parameter in this case. Moreover it is not recommended to enable racing while tuning for value, because it is not possible to implement a usefull racing strategy without knowing the global minimum or maximum.
 
 ## Putting it all together
 To run *OAT* and tune your algorithm, you'll now simply have to call
 	 
-	dotnet Optano.Algorithm.Tuner.Application.dll --master -- maxParallelEvaluations=<maxParellelEvaluations> --basicCommand=<commandToExecuteYourAlgorithmWith> --parameterTree=<pathToXML> --trainingInstanceFolder=<instanceFolder> <optionalAdditionalParameters>
+	dotnet Optano.Algorithm.Tuner.Application.dll --master --maxParallelEvaluations=<maxParellelEvaluations> --basicCommand=<commandToExecuteYourAlgorithmWith> --parameterTree=<pathToXML> --trainingInstanceFolder=<instanceFolder> <optionalAdditionalParameters>
 
 If you want to tune by value, add `--byValue`. If you want to exploit run time tuning, add `--enableRacing=true`.
 
@@ -100,7 +100,7 @@ Finally, if you would like to see how the parameterization quality changed throu
 
 	--scoreGenerationHistory
 	
-to acquire [respective logging files](logging.md).
+to acquire [respective logging files](../developerDoc/logging.md).
 
 In some cases, you might be interested in performance on a test set of instances. Then, create a second folder with test instances and add
 
@@ -110,4 +110,4 @@ In some cases, you might be interested in performance on a test set of instances
 
 All parameters that can be specified either for master or for worker instances of *OAT* can be found at [Parameters](parameters.md). 
 
-_Note:_ Already the basic implementation of the *OAT* enables you to use the [Model-Based Crossover Operator](model_based_crossover.md). The default setup the modified version of a random forest, that is described in the respective [paper](https://www.ijcai.org/Proceedings/15/Papers/109.pdf). More information on the [control parameters](parameters.md) and how to [specify them](parameter_selection.md#model-based-crossover) is given in the further documentation.
+_Note:_ Already the basic implementation of the *OAT* enables you to use the [Model-Based Crossover Operator](../developerDoc/model_based_crossover.md). The default setup the modified version of a random forest, that is described in the respective [paper](https://www.ijcai.org/Proceedings/15/Papers/109.pdf). More information on the [control parameters](parameters.md) and how to [specify them](parameter_selection.md#model-based-crossover) is given in the further documentation.

@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -72,7 +72,7 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.GeneticAlgorithm
             Population population,
             int iterationCounter,
             int incumbentKeptCounter,
-            Dictionary<Genome, List<GenomeTournamentResult>> allKnownRanks)
+            Dictionary<Genome, List<GenomeTournamentRank>> allKnownRanks)
         {
             if (incumbentKeptCounter < 0)
             {
@@ -101,7 +101,7 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.GeneticAlgorithm
         /// <summary>
         /// Gets all known ranks.
         /// </summary>
-        public Dictionary<Genome, List<GenomeTournamentResult>> AllKnownRanks { get; }
+        public Dictionary<Genome, List<GenomeTournamentRank>> AllKnownRanks { get; }
 
         /// <summary>
         /// Gets the current population.

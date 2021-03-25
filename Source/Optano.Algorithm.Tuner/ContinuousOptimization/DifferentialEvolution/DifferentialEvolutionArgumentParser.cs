@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -87,19 +87,23 @@ namespace Optano.Algorithm.Tuner.ContinuousOptimization.DifferentialEvolution
 
             optionSet.Add(
                 "bestPercentage=",
-                $"The percentage of population members which may be used as best member in the current-to-pbest mutation strategy.\nDefault is {DifferentialEvolutionConfiguration.DifferentialEvolutionConfigurationBuilder.DefaultBestPercentage}.\nThis must be a double in the range of (0, 1].",
+                () =>
+                    $"The percentage of population members which may be used as best member in the current-to-pbest mutation strategy.\nDefault is {DifferentialEvolutionConfiguration.DifferentialEvolutionConfigurationBuilder.DefaultBestPercentage}.\nThis must be a double in the range of (0, 1].",
                 (double percentage) => this.InternalConfigurationBuilder.SetBestPercentage(percentage));
             optionSet.Add(
                 "meanMutationFactor=",
-                $"The initial value of the mean mutation factor.\nDefault is {DifferentialEvolutionConfiguration.DifferentialEvolutionConfigurationBuilder.DefaultInitialMeanMutationFactor}.\nThis must be a double in the range of [0, 1].",
+                () =>
+                    $"The initial value of the mean mutation factor.\nDefault is {DifferentialEvolutionConfiguration.DifferentialEvolutionConfigurationBuilder.DefaultInitialMeanMutationFactor}.\nThis must be a double in the range of [0, 1].",
                 (double factor) => this.InternalConfigurationBuilder.SetInitialMeanMutationFactor(factor));
             optionSet.Add(
                 "meanCrossoverRate=",
-                $"The initial value of the mean crossover rate.\nDefault is {DifferentialEvolutionConfiguration.DifferentialEvolutionConfigurationBuilder.DefaultInitialMeanCrossoverRate}.\nThis must be a double in the range of [0, 1].",
+                () =>
+                    $"The initial value of the mean crossover rate.\nDefault is {DifferentialEvolutionConfiguration.DifferentialEvolutionConfigurationBuilder.DefaultInitialMeanCrossoverRate}.\nThis must be a double in the range of [0, 1].",
                 (double rate) => this.InternalConfigurationBuilder.SetInitialMeanCrossoverRate(rate));
             optionSet.Add(
                 "learningRate=",
-                $"The learning rate for the means.\nDefault is {DifferentialEvolutionConfiguration.DifferentialEvolutionConfigurationBuilder.DefaultLearningRate}.\nThis must be a double in the range of [0, 1].",
+                () =>
+                    $"The learning rate for the means.\nDefault is {DifferentialEvolutionConfiguration.DifferentialEvolutionConfigurationBuilder.DefaultLearningRate}.\nThis must be a double in the range of [0, 1].",
                 (double rate) => this.InternalConfigurationBuilder.SetLearningRate(rate));
 
             return optionSet;

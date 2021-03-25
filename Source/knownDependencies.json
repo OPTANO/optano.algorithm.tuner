@@ -38,7 +38,7 @@
     },
     {
       "PackageId": "Akka",
-      "VersionString": "1.4.3",
+      "VersionString": "1.4.14",
       "LicenceUrl": "https://github.com/akkadotnet/akka.net/blob/master/LICENSE",
       "ProjectUrl": "https://github.com/akkadotnet/akka.net",
       "CopyrightOrOwner": "Copyright © 2013-2020 Akka.NET Team",
@@ -50,7 +50,7 @@
     },
     {
       "PackageId": "Akka.Cluster",
-      "VersionString": "1.4.3",
+      "VersionString": "1.4.14",
       "LicenceUrl": "https://github.com/akkadotnet/akka.net/blob/master/LICENSE",
       "ProjectUrl": "https://github.com/akkadotnet/akka.net",
       "CopyrightOrOwner": "Copyright © 2013-2020 Akka.NET Team",
@@ -62,7 +62,7 @@
     },
     {
       "PackageId": "Akka.Logger.NLog",
-      "VersionString": "1.3.5",
+      "VersionString": "1.4.10",
       "LicenceUrl": "https://github.com/AkkaNetContrib/Akka.Logger.Nlog/blob/master/LICENSE",
       "ProjectUrl": "https://github.com/AkkaNetContrib/Akka.Logger.Nlog",
       "CopyrightOrOwner": "Copyright © 2013-2020 Akka.NET Contrib Team",
@@ -74,7 +74,7 @@
     },
     {
       "PackageId": "Akka.Remote",
-      "VersionString": "1.4.3",
+      "VersionString": "1.4.14",
       "LicenceUrl": "https://github.com/akkadotnet/akka.net/blob/master/LICENSE",
       "ProjectUrl": "https://github.com/akkadotnet/akka.net",
       "CopyrightOrOwner": "Copyright © 2013-2020 Akka.NET Team",
@@ -86,7 +86,7 @@
     },
     {
       "PackageId": "Akka.Serialization.Hyperion",
-      "VersionString": "1.4.3",
+      "VersionString": "1.4.14",
       "LicenceUrl": "https://github.com/akkadotnet/akka.net/blob/master/LICENSE",
       "ProjectUrl": "https://github.com/akkadotnet/akka.net",
       "CopyrightOrOwner": "Copyright © 2013-2020 Akka.NET Team",
@@ -98,7 +98,7 @@
     },
     {
       "PackageId": "Akka.TestKit",
-      "VersionString": "1.4.3",
+      "VersionString": "1.4.14",
       "LicenceUrl": "https://github.com/akkadotnet/akka.net/blob/master/LICENSE",
       "ProjectUrl": "https://github.com/akkadotnet/akka.net",
       "CopyrightOrOwner": "Copyright © 2013-2020 Akka.NET Team",
@@ -110,7 +110,7 @@
     },
     {
       "PackageId": "Akka.TestKit.Xunit2",
-      "VersionString": "1.4.3",
+      "VersionString": "1.4.14",
       "LicenceUrl": "https://github.com/akkadotnet/akka.net/blob/master/LICENSE",
       "ProjectUrl": "https://github.com/akkadotnet/akka.net",
       "CopyrightOrOwner": "Copyright © 2013-2020 Akka.NET Team",
@@ -118,6 +118,18 @@
         "Optano.Algorithm.Tuner.Tests.csproj"
       ],
       "SourceCodeUrl": "https://github.com/akkadotnet/akka.net",
+      "Comment": null
+    },
+    {
+      "PackageId": "Castle.Core",
+      "VersionString": "4.4.0",
+      "LicenceUrl": "http://www.apache.org/licenses/LICENSE-2.0.html",
+      "ProjectUrl": "http://www.castleproject.org/",
+      "CopyrightOrOwner": "Copyright (c) 2004-2019 Castle Project - http://www.castleproject.org/",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": "https://github.com/castleproject/Core",
       "Comment": null
     },
     {
@@ -194,7 +206,7 @@
     },
     {
       "PackageId": "Google.Protobuf",
-      "VersionString": "3.11.4",
+      "VersionString": "3.14.0",
       "LicenceUrl": "https://github.com/protocolbuffers/protobuf/blob/master/LICENSE",
       "ProjectUrl": "https://github.com/protocolbuffers/protobuf",
       "CopyrightOrOwner": "Copyright 2015, Google Inc.",
@@ -206,7 +218,7 @@
     },
     {
       "PackageId": "Hyperion",
-      "VersionString": "0.9.15",
+      "VersionString": "0.9.16",
       "LicenceUrl": "https://github.com/akkadotnet/Hyperion/blob/master/LICENSE",
       "ProjectUrl": "https://github.com/akkadotnet/Hyperion",
       "CopyrightOrOwner": "Copyright © 2016-2017 Akka.NET Team",
@@ -373,15 +385,27 @@
       "Comment": null
     },
     {
-      "PackageId": "NDesk.Options",
-      "VersionString": "0.2.1",
-      "LicenceUrl": "http://www.opensource.org/licenses/mit-license.php",
-      "ProjectUrl": "",
-      "CopyrightOrOwner": "NDesk",
+      "PackageId": "Moq",
+      "VersionString": "4.16.1",
+      "LicenceUrl": "https://raw.githubusercontent.com/moq/moq4/master/License.txt",
+      "ProjectUrl": "https://github.com/moq/moq4",
+      "CopyrightOrOwner": "",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": "https://github.com/moq/moq4",
+      "Comment": null
+    },
+    {
+      "PackageId": "NDesk.Options.Patched",
+      "VersionString": "0.3.2",
+      "LicenceUrl": "https://licenses.nuget.org/MIT",
+      "ProjectUrl": "https://github.com/nano-byte/NDesk.Options",
+      "CopyrightOrOwner": "Copyright (C) 2008 Novell",
       "UsedInProjects": [
         "Optano.Algorithm.Tuner.csproj"
       ],
-      "SourceCodeUrl": null,
+      "SourceCodeUrl": "https://github.com/nano-byte/NDesk.Options",
       "Comment": null
     },
     {
@@ -410,14 +434,14 @@
     },
     {
       "PackageId": "NLog",
-      "VersionString": "4.5.11",
+      "VersionString": "4.7.5",
       "LicenceUrl": "https://github.com/NLog/NLog/blob/master/LICENSE.txt",
-      "ProjectUrl": "http://nlog-project.org/",
-      "CopyrightOrOwner": "Copyright (c) 2004-2018 NLog Project - http://nlog-project.org/",
+      "ProjectUrl": "https://nlog-project.org/",
+      "CopyrightOrOwner": "Copyright (c) 2004-2020 NLog Project - https://nlog-project.org/",
       "UsedInProjects": [
         "Optano.Algorithm.Tuner.csproj"
       ],
-      "SourceCodeUrl": "git://github.com/NLog/NLog",
+      "SourceCodeUrl": "https://github.com/NLog/NLog.git",
       "Comment": null
     },
     {
@@ -430,6 +454,18 @@
         "Optano.Algorithm.Tuner.Tests.csproj"
       ],
       "SourceCodeUrl": "https://github.com/NuGet/NuGet.Client",
+      "Comment": null
+    },
+    {
+      "PackageId": "OptimizedPriorityQueue",
+      "VersionString": "5.0.0",
+      "LicenceUrl": "https://github.com/BlueRaja/High-Speed-Priority-Queue-for-C-Sharp/blob/master/LICENSE.txt",
+      "ProjectUrl": "https://github.com/BlueRaja/High-Speed-Priority-Queue-for-C-Sharp",
+      "CopyrightOrOwner": "Copyright 2020",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
       "Comment": null
     },
     {
@@ -674,10 +710,10 @@
     },
     {
       "PackageId": "System.Buffers",
-      "VersionString": "4.4.0",
+      "VersionString": "4.5.1",
       "LicenceUrl": "https://github.com/dotnet/corefx/blob/master/LICENSE.TXT",
       "ProjectUrl": "https://dot.net/",
-      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
       "UsedInProjects": [
         "Optano.Algorithm.Tuner.csproj"
       ],
@@ -710,12 +746,36 @@
     },
     {
       "PackageId": "System.Collections.Immutable",
-      "VersionString": "1.7.0",
+      "VersionString": "1.7.1",
       "LicenceUrl": "https://licenses.nuget.org/MIT",
       "ProjectUrl": "https://github.com/dotnet/corefx",
       "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
       "UsedInProjects": [
         "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Collections.NonGeneric",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Collections.Specialized",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
       ],
       "SourceCodeUrl": null,
       "Comment": null
@@ -728,6 +788,30 @@
       "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
       "UsedInProjects": [
         "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.ComponentModel.Primitives",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.ComponentModel.TypeConverter",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
       ],
       "SourceCodeUrl": null,
       "Comment": null
@@ -812,6 +896,18 @@
       "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
       "UsedInProjects": [
         "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Diagnostics.TraceSource",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
       ],
       "SourceCodeUrl": null,
       "Comment": null
@@ -974,7 +1070,7 @@
     },
     {
       "PackageId": "System.Memory",
-      "VersionString": "4.5.3",
+      "VersionString": "4.5.4",
       "LicenceUrl": "https://github.com/dotnet/corefx/blob/master/LICENSE.TXT",
       "ProjectUrl": "https://dot.net/",
       "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
@@ -1202,7 +1298,7 @@
     },
     {
       "PackageId": "System.Runtime.CompilerServices.Unsafe",
-      "VersionString": "4.5.2",
+      "VersionString": "4.5.3",
       "LicenceUrl": "https://github.com/dotnet/corefx/blob/master/LICENSE.TXT",
       "ProjectUrl": "https://dot.net/",
       "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
@@ -1585,6 +1681,18 @@
       "Comment": null
     },
     {
+      "PackageId": "System.Xml.XmlDocument",
+      "VersionString": "4.3.0",
+      "LicenceUrl": "http://go.microsoft.com/fwlink/?LinkId=329770",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation.  All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
       "PackageId": "Validation",
       "VersionString": "2.4.18",
       "LicenceUrl": "https://raw.githubusercontent.com/AArnott/Validation/69e6a2c4f3/LICENSE.txt",
@@ -1734,7 +1842,31 @@
     },
     {
       "PackageId": "System.Memory",
+      "VersionString": "4.5.3",
+      "LicenceUrl": "https://github.com/dotnet/corefx/blob/master/LICENSE.TXT",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Runtime.CompilerServices.Unsafe",
       "VersionString": "4.5.2",
+      "LicenceUrl": "https://github.com/dotnet/corefx/blob/master/LICENSE.TXT",
+      "ProjectUrl": "https://dot.net/",
+      "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj"
+      ],
+      "SourceCodeUrl": null,
+      "Comment": null
+    },
+    {
+      "PackageId": "System.Threading.Tasks.Extensions",
+      "VersionString": "4.5.4",
       "LicenceUrl": "https://github.com/dotnet/corefx/blob/master/LICENSE.TXT",
       "ProjectUrl": "https://dot.net/",
       "CopyrightOrOwner": "© Microsoft Corporation. All rights reserved.",
@@ -1748,12 +1880,13 @@
   "LicUrls": [
     "http://accord-framework.net/license.txt",
     "http://go.microsoft.com/fwlink/?LinkId=329770",
+    "http://www.apache.org/licenses/LICENSE-2.0.html",
     "http://www.microsoft.com/web/webpi/eula/net_library_eula_enu.htm",
-    "http://www.opensource.org/licenses/mit-license.php",
     "https://github.com/akkadotnet/akka.net/blob/master/LICENSE",
     "https://github.com/akkadotnet/Hyperion/blob/master/LICENSE",
     "https://github.com/AkkaNetContrib/Akka.Logger.Nlog/blob/master/LICENSE",
     "https://github.com/Azure/DotNetty/blob/master/LICENSE.txt",
+    "https://github.com/BlueRaja/High-Speed-Priority-Queue-for-C-Sharp/blob/master/LICENSE.txt",
     "https://github.com/dotnet/corefx/blob/master/LICENSE.TXT",
     "https://github.com/NLog/NLog/blob/master/LICENSE.txt",
     "https://github.com/protocolbuffers/protobuf/blob/master/LICENSE",
@@ -1763,6 +1896,7 @@
     "https://numerics.mathdotnet.com/License.html",
     "https://raw.githubusercontent.com/AArnott/Validation/69e6a2c4f3/LICENSE.txt",
     "https://raw.githubusercontent.com/AArnott/Xunit.SkippableFact/c7f20eaa78/LICENSE.txt",
+    "https://raw.githubusercontent.com/moq/moq4/master/License.txt",
     "https://raw.githubusercontent.com/xunit/xunit.analyzers/master/LICENSE",
     "https://raw.githubusercontent.com/xunit/xunit/master/license.txt"
   ]

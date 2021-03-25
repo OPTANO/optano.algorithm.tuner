@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -90,7 +90,7 @@ namespace Optano.Algorithm.Tuner.MachineLearning.RandomForest
                 .AppendLine();
 
             Debug.Assert(
-                data.Genomes.GroupBy(g => g, g => g, new Genome.GeneValueComparator()).Count() == data.Count,
+                data.Genomes.GroupBy(g => g, g => g, Genome.GenomeComparer).Count() == data.Count,
                 "Found 2 separate genomes in list data.Genomes that are equal. This should not occur.");
 
             // indices/order:
@@ -102,7 +102,7 @@ namespace Optano.Algorithm.Tuner.MachineLearning.RandomForest
             for (var rowIndex = 0; rowIndex < data.Count; rowIndex++)
             {
                 // repeat the genome data for every observed tournament result
-                // assumption: data.Genomes is a distinct list of genomes (with respect to Genome.GeneValueComparator)
+                // assumption: data.Genomes is a distinct list of genomes (with respect to Genome.GeneValueComparer)
                 var currentGenome = genomes[rowIndex];
                 var genomeMatrixString = convertedGenomes.GetRowAsCsv(rowIndex, ";");
                 var genomeResults = data.TournamentResults[currentGenome];
@@ -113,7 +113,7 @@ namespace Optano.Algorithm.Tuner.MachineLearning.RandomForest
                         CultureInfo.InvariantCulture,
                         formatTemplate,
                         rowIndex,
-                        currentResult.Generation,
+                        currentResult.GenerationId,
                         currentResult.TournamentId,
                         genomeMatrixString,
                         currentResult.TournamentRank);

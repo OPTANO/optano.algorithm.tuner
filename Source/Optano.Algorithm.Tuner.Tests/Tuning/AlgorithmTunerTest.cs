@@ -1,30 +1,30 @@
 ﻿#region Copyright (c) OPTANO GmbH
 
 // ////////////////////////////////////////////////////////////////////////////////
-//
+// 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
-//
+// 
 //    The entire contents of this file is protected by German and
 //    International Copyright Laws. Unauthorized reproduction,
 //    reverse-engineering, and distribution of all or any portion of
 //    the code contained in this file is strictly prohibited and may
 //    result in severe civil and criminal penalties and will be
 //    prosecuted to the maximum extent possible under the law.
-//
+// 
 //    RESTRICTIONS
-//
+// 
 //    THIS SOURCE CODE AND ALL RESULTING INTERMEDIATE FILES
 //    ARE CONFIDENTIAL AND PROPRIETARY TRADE SECRETS OF
 //    OPTANO GMBH.
-//
+// 
 //    THE SOURCE CODE CONTAINED WITHIN THIS FILE AND ALL RELATED
 //    FILES OR ANY PORTION OF ITS CONTENTS SHALL AT NO TIME BE
 //    COPIED, TRANSFERRED, SOLD, DISTRIBUTED, OR OTHERWISE MADE
 //    AVAILABLE TO OTHER INDIVIDUALS WITHOUT WRITTEN CONSENT
 //    AND PERMISSION FROM OPTANO GMBH.
-//
+// 
 // ////////////////////////////////////////////////////////////////////////////////
 
 #endregion
@@ -39,11 +39,11 @@ namespace Optano.Algorithm.Tuner.Tests.Tuning
     using System.Threading;
     using System.Threading.Tasks;
 
-    using Optano.Algorithm.Tuner;
     using Optano.Algorithm.Tuner.Configuration;
     using Optano.Algorithm.Tuner.ContinuousOptimization.DifferentialEvolution;
     using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.Genomes.Values;
+    using Optano.Algorithm.Tuner.Logging;
     using Optano.Algorithm.Tuner.MachineLearning;
     using Optano.Algorithm.Tuner.MachineLearning.Prediction;
     using Optano.Algorithm.Tuner.MachineLearning.RandomForest;
@@ -70,8 +70,6 @@ namespace Optano.Algorithm.Tuner.Tests.Tuning
     using Optano.Algorithm.Tuner.Tuning;
 
     using Xunit;
-
-    using SortByValue = Optano.Algorithm.Tuner.Tests.TargetAlgorithm.InterfaceImplementations.ValueConsideration.SortByValue;
 
     /// <summary>
     /// Contains tests for <see cref="AlgorithmTuner{TTargetAlgorithm,TInstance,TResult}"/>.
@@ -210,9 +208,9 @@ namespace Optano.Algorithm.Tuner.Tests.Tuning
             // ...then provide 39.
             Assert.Throws<ArgumentException>(
                 () => new AlgorithmTunerBuilder()
-                .SetConfiguration(configuration)
-                .SetTrainingInstances(AlgorithmTunerTest.BuildEmptyInstances(number: 39))
-                .ExecuteAlgorithmTunerConstructor());
+                    .SetConfiguration(configuration)
+                    .SetTrainingInstances(AlgorithmTunerTest.BuildEmptyInstances(number: 39))
+                    .ExecuteAlgorithmTunerConstructor());
         }
 
         /// <summary>
@@ -552,7 +550,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tuning
                 .Build(maximumNumberParallelEvaluations: 1);
             var runner = new AlgorithmTuner<ExtractIntegerValue, TestInstance, IntegerResult>(
                 new ExtractIntegerValueCreator(),
-                new SortByValue(),
+                new TargetAlgorithm.InterfaceImplementations.ValueConsideration.SortByValue<TestInstance>(),
                 AlgorithmTunerTest.BuildEmptyInstances(number: 2),
                 AlgorithmTunerTest.SimpleParameterTree,
                 configuration,
@@ -659,7 +657,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tuning
                     statusDumps[i].RunResults.Sum(result => result.Value.Count),
                     information.TotalNumberOfEvaluations);
                 Assert.True(
-                    new Genome.GeneValueComparator().Equals(
+                    Genome.GenomeComparer.Equals(
                         statusDumps[i].IncumbentGenomeWrapper.IncumbentGenome,
                         information.Incumbent.CreateMutableGenome()),
                     $"Expected different incumbent in {i}th generation.");
@@ -843,7 +841,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tuning
         /// Checks that
         /// <see cref="AlgorithmTuner{TTargetAlgorithm,TInstance,TResult,TModelLearner,TPredictorModel,TSamplingStrategy}.CompleteAndExportGenerationHistory"/>
         /// writes a "generationHistory.csv" file, and also a "scores.csv" file, but the latter only if the run evaluator is a
-        /// <see cref="IMetricRunEvaluator{TResult}"/>.
+        /// <see cref="IMetricRunEvaluator{TInstance,TResult}"/>.
         /// </summary>
         [Fact]
         public void CompleteAndExportGenerationHistoryDoesOnlyWriteScoresForMetricRunEvaluators()
@@ -871,7 +869,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tuning
 
             var metricTuner = new AlgorithmTuner<ExtractIntegerValue, TestInstance, IntegerResult>(
                 new ExtractIntegerValueCreator(),
-                new SortByValue(),
+                new TargetAlgorithm.InterfaceImplementations.ValueConsideration.SortByValue<TestInstance>(),
                 AlgorithmTunerTest.BuildEmptyInstances(number: 1),
                 AlgorithmTunerTest.SimpleParameterTree,
                 configuration);
@@ -904,7 +902,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tuning
 
             var plainTuner = new AlgorithmTuner<ExtractIntegerValue, TestInstance, IntegerResult>(
                 new ExtractIntegerValueCreator(),
-                new SortByValue(),
+                new TargetAlgorithm.InterfaceImplementations.ValueConsideration.SortByValue<TestInstance>(),
                 AlgorithmTunerTest.BuildEmptyInstances(number: 1),
                 AlgorithmTunerTest.SimpleParameterTree,
                 configurationBuilder.Build(maximumNumberParallelEvaluations: 1));
@@ -917,7 +915,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tuning
 
             var tunerWithScores = new AlgorithmTuner<ExtractIntegerValue, TestInstance, IntegerResult>(
                 new ExtractIntegerValueCreator(),
-                new SortByValue(),
+                new TargetAlgorithm.InterfaceImplementations.ValueConsideration.SortByValue<TestInstance>(),
                 AlgorithmTunerTest.BuildEmptyInstances(number: 1),
                 AlgorithmTunerTest.SimpleParameterTree,
                 configurationBuilder.SetScoreGenerationHistory(true).Build(maximumNumberParallelEvaluations: 1));
@@ -953,7 +951,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tuning
                 .Build(maximumNumberParallelEvaluations: 1);
             var tuner = new AlgorithmTuner<MultiplyIntegerWithSeed, InstanceSeedFile, IntegerResult>(
                 new MultiplyIntegerWithSeedCreator(),
-                new SortByValue(),
+                new TargetAlgorithm.InterfaceImplementations.ValueConsideration.SortByValue<InstanceSeedFile>(),
                 new List<InstanceSeedFile> { new InstanceSeedFile("train", 12) },
                 AlgorithmTunerTest.SimpleParameterTree,
                 configuration,
@@ -1151,6 +1149,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tuning
             int generations,
             bool allowConfigChangeForSubsequentRun = false)
         {
+            LoggingHelper.Configure("test.txt");
             var config = new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder()
                 .SetGenerations(generations)
                 .SetMaximumNumberGgaGenerations(5)
@@ -1216,9 +1215,9 @@ namespace Optano.Algorithm.Tuner.Tests.Tuning
                 = AlgorithmTunerTest.NoopFactory;
 
             /// <summary>
-            /// The <see cref="IRunEvaluator{TestResult}"/> to provide.
+            /// The <see cref="IRunEvaluator{TestInstance, TestResult}"/> to provide.
             /// </summary>
-            private IRunEvaluator<TestResult> _runEvaluator = new KeepSuggestedOrder<TestResult>();
+            private IRunEvaluator<TestInstance, TestResult> _runEvaluator = new KeepSuggestedOrder<TestInstance, TestResult>();
 
             /// <summary>
             /// The <see cref="TestInstance"/>s to provide for training.
@@ -1307,7 +1306,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tuning
             }
 
             /// <summary>
-            /// Sets the <see cref="IRunEvaluator{TestResult}"/> to provide to the
+            /// Sets the <see cref="IRunEvaluator{TestInstance, TestResult}"/> to provide to the
             /// <see cref="AlgorithmTuner{TTargetAlgorithm,TInstance,TResult,TLearnerModel,TPredictorModel,TSamplingStrategy}"/>
             /// constructor.
             /// Default is an evaluator which simply keeps the supplied order.
@@ -1316,7 +1315,8 @@ namespace Optano.Algorithm.Tuner.Tests.Tuning
             /// <see cref="AlgorithmTuner{TTargetAlgorithm,TInstance,TResult,TLearnerModel,TPredictorModel,TSamplingStrategy}"/>
             /// constructor.</param>
             /// <returns>The <see cref="AlgorithmTunerBuilder"/> in its new state.</returns>
-            public AlgorithmTunerBuilder<TLearnerModel, TPredictorModel, TSamplingStrategy> SetRunEvaluator(IRunEvaluator<TestResult> runEvaluator)
+            public AlgorithmTunerBuilder<TLearnerModel, TPredictorModel, TSamplingStrategy> SetRunEvaluator(
+                IRunEvaluator<TestInstance, TestResult> runEvaluator)
             {
                 this._runEvaluator = runEvaluator;
                 return this;

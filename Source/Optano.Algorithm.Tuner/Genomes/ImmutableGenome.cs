@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -43,6 +43,15 @@ namespace Optano.Algorithm.Tuner.Genomes
     /// </summary>
     public sealed class ImmutableGenome
     {
+        #region Static Fields
+
+        /// <summary>
+        /// The <see cref="GeneValueComparer"/> of <see cref="ImmutableGenome"/>s.
+        /// </summary>
+        public static readonly GeneValueComparer GenomeComparer = new GeneValueComparer();
+
+        #endregion
+
         #region Fields
 
         /// <summary>
@@ -68,6 +77,15 @@ namespace Optano.Algorithm.Tuner.Genomes
             // Copy the genome s.t. noone can modify it anymore.
             this._genome = new Genome(genome);
         }
+
+        #endregion
+
+        #region Public properties
+
+        /// <summary>
+        /// Gets the age of the genome.
+        /// </summary>
+        public int Age => this._genome.Age;
 
         #endregion
 
@@ -143,15 +161,6 @@ namespace Optano.Algorithm.Tuner.Genomes
             Justification = "The comparer needs to access private fields while being publicly visible.")]
         public class GeneValueComparer : IEqualityComparer<ImmutableGenome>
         {
-            #region Fields
-
-            /// <summary>
-            /// Underlying <see cref="IEqualityComparer{Genome}"/>.
-            /// </summary>
-            private readonly Genome.GeneValueComparator _innerComparer = new Genome.GeneValueComparator();
-
-            #endregion
-
             #region Public Methods and Operators
 
             /// <summary>
@@ -163,7 +172,7 @@ namespace Optano.Algorithm.Tuner.Genomes
             public bool Equals(ImmutableGenome x, ImmutableGenome y)
             {
                 // since there cannot exist an IG(null), we do not need to distinguish between x == null and x.genome == null (or y respectively).
-                return this._innerComparer.Equals(x?._genome, y?._genome);
+                return Genome.GenomeComparer.Equals(x?._genome, y?._genome);
             }
 
             /// <summary>
@@ -173,7 +182,7 @@ namespace Optano.Algorithm.Tuner.Genomes
             /// <returns>The hash code.</returns>
             public int GetHashCode(ImmutableGenome genome)
             {
-                return this._innerComparer.GetHashCode(genome._genome);
+                return Genome.GenomeComparer.GetHashCode(genome._genome);
             }
 
             #endregion

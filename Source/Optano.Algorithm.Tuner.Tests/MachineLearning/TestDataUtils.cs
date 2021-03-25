@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -35,7 +35,6 @@ namespace Optano.Algorithm.Tuner.Tests.MachineLearning
     using System.Collections.Generic;
     using System.Linq;
 
-    using Optano.Algorithm.Tuner;
     using Optano.Algorithm.Tuner.Configuration;
     using Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments.Results;
     using Optano.Algorithm.Tuner.Genomes;
@@ -88,7 +87,7 @@ namespace Optano.Algorithm.Tuner.Tests.MachineLearning
             AlgorithmTunerConfiguration config)
         {
             var result = new TrainingDataWrapper(
-                new Dictionary<Genome, List<GenomeTournamentResult>>(new Genome.GeneValueComparator()),
+                new Dictionary<Genome, List<GenomeTournamentRank>>(Genome.GenomeComparer),
                 generations - 1);
 
             // Start with correct number of random genomes.
@@ -105,12 +104,12 @@ namespace Optano.Algorithm.Tuner.Tests.MachineLearning
                     var currentGenome = randomGenomes[genomeIndex];
                     if (!result.TournamentResults.ContainsKey(currentGenome))
                     {
-                        result.TournamentResults[currentGenome] = new List<GenomeTournamentResult>();
+                        result.TournamentResults[currentGenome] = new List<GenomeTournamentRank>();
                     }
 
-                    var tournamentResult = new GenomeTournamentResult()
+                    var tournamentResult = new GenomeTournamentRank()
                                                {
-                                                   Generation = currentGen,
+                                                   GenerationId = currentGen,
                                                    TournamentId = currentGen,
                                                    TournamentRank = fitness[genomeIndex],
                                                };

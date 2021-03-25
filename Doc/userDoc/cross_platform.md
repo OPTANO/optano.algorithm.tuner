@@ -25,7 +25,7 @@ exec $1
 
 Here, the command ``exec`` makes sure, that the execution of the executed target algorithm is stopped, when the `bash script` is terminated, e.g. because ``process.kill()`` is called by the *OPTANO Algorithm Tuner*, or because the memory limit is exceeded.
 
-For more details on how to use such a bash script in an adapter of *Optano Algorithm Tuner*, please take a look on our [Lingeling example](lingeling.md).
+For more details on how to use such a bash script in an adapter of *Optano Algorithm Tuner*, please take a look on our [Lingeling example](../developerDoc/lingeling.md).
 
 ### Troubleshooting: 
 Do not forget to make your bash script executable by using the command ``chmod +x [PATH TO *.sh OF BASH-SCRIPT]`` before starting *OPTANO Algorithm Tuner*.

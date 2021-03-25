@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -225,7 +225,7 @@ namespace Optano.Algorithm.Tuner.Tests.Parameters.ParameterConverters
         /// </summary>
         private void ValidateGenomeConversion()
         {
-            var comparer = new Genome.GeneValueComparator();
+            var comparer = Genome.GenomeComparer;
 
             foreach (var genome in this.Genomes)
             {

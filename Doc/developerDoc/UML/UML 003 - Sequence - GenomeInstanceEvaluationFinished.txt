@@ -1,0 +1,53 @@
+// https://sequencediagram.org/
+title UML 003: Workflow for GenerationEvaluationActor.GenomeInstanceEvaluationFinished(g,r)
+
+participant GenerationEvaluationActor
+participant MiniTournamentManager
+participant GenomeStats
+participant IRunEvaluator
+[-#blue>GenerationEvaluationActor:<color:#blue>GenomeInstanceEvaluationFinished
+
+activate GenerationEvaluationActor
+GenerationEvaluationActor->MiniTournamentManager:UpdateResult(GIP,Result)
+
+activate MiniTournamentManager
+alt !Manages(GIP.Genome)
+MiniTournamentManager-->GenerationEvaluationActor:
+else MTM manages Genome
+MiniTournamentManager->GenomeStats:FinishInstance(GIP,Result)
+
+activate GenomeStats
+GenomeStats->GenomeStats:TryMoveInstance:\nRunning->Finished
+GenomeStats-->MiniTournamentManager:Success:bool
+deactivate GenomeStats
+
+group CheckRacing
+MiniTournamentManager->IRunEvaluator:GetGenomesThatCanBeCancelledByRacing(all GenomeStats)
+activate IRunEvaluator
+IRunEvaluator-->MiniTournamentManager:GenomesToCancel
+deactivate IRunEvaluator
+
+loop FORALL g:GenomesToCancel
+MiniTournamentManager->GenomeStats:Cancel [g]
+activate GenomeStats
+GenomeStats->GenomeStats:TryMoveInstance:\nRunning+Open->Finished
+GenomeStats-->MiniTournamentManager:StatusChanged:bool
+deactivate GenomeStats
+MiniTournamentManager->MiniTournamentManager:if StatusChanged:\nRemoveFromQueue(g)
+end
+
+end
+alt g.HasOpenInstances
+
+MiniTournamentManager->IRunEvaluator:ComputeGenomePriority(g,GenomeStats(g))
+activate IRunEvaluator
+IRunEvaluator->MiniTournamentManager:newPriority:double
+deactivate IRunEvaluator
+MiniTournamentManager->MiniTournamentManager:UpdatePriorityQueue(g, newPriority)
+else g is finished
+MiniTournamentManager->MiniTournamentManager:RemoveFromQueue(g)
+end
+MiniTournamentManager-->GenerationEvaluationActor:
+end
+deactivate MiniTournamentManager
+GenerationEvaluationActor--#blue>[:

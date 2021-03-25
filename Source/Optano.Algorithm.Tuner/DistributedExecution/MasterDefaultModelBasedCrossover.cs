@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -47,12 +47,8 @@ namespace Optano.Algorithm.Tuner.DistributedExecution
     /// <typeparam name="TTargetAlgorithm">
     /// The algorithm that should be tuned.
     /// </typeparam>
-    /// <typeparam name="TInstance">
-    /// The instance type to use.
-    /// </typeparam>
-    /// <typeparam name="TResult">
-    /// The result for an individual evaluation.
-    /// </typeparam>
+    /// <typeparam name="TInstance">The instance type.</typeparam>
+    /// <typeparam name="TResult">The result type of a single target algorithm evaluation.</typeparam>
     public sealed class Master<TTargetAlgorithm, TInstance, TResult> : Master<TTargetAlgorithm, TInstance, TResult,
         StandardRandomForestLearner<ReuseOldTreesStrategy>, GenomePredictionForestModel<GenomePredictionTree>, ReuseOldTreesStrategy>
         where TTargetAlgorithm : ITargetAlgorithm<TInstance, TResult> where TInstance : InstanceBase where TResult : ResultBase<TResult>, new()

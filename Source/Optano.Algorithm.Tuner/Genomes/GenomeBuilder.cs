@@ -1,30 +1,30 @@
 ﻿#region Copyright (c) OPTANO GmbH
 
 // ////////////////////////////////////////////////////////////////////////////////
-//
+// 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
-//
+// 
 //    The entire contents of this file is protected by German and
 //    International Copyright Laws. Unauthorized reproduction,
 //    reverse-engineering, and distribution of all or any portion of
 //    the code contained in this file is strictly prohibited and may
 //    result in severe civil and criminal penalties and will be
 //    prosecuted to the maximum extent possible under the law.
-//
+// 
 //    RESTRICTIONS
-//
+// 
 //    THIS SOURCE CODE AND ALL RESULTING INTERMEDIATE FILES
 //    ARE CONFIDENTIAL AND PROPRIETARY TRADE SECRETS OF
 //    OPTANO GMBH.
-//
+// 
 //    THE SOURCE CODE CONTAINED WITHIN THIS FILE AND ALL RELATED
 //    FILES OR ANY PORTION OF ITS CONTENTS SHALL AT NO TIME BE
 //    COPIED, TRANSFERRED, SOLD, DISTRIBUTED, OR OTHERWISE MADE
 //    AVAILABLE TO OTHER INDIVIDUALS WITHOUT WRITTEN CONSENT
 //    AND PERMISSION FROM OPTANO GMBH.
-//
+// 
 // ////////////////////////////////////////////////////////////////////////////////
 
 #endregion
@@ -168,28 +168,6 @@ namespace Optano.Algorithm.Tuner.Genomes
         }
 
         /// <summary>
-        /// Creates a genome with random or default gene values. A repair operation is applied after the creation
-        /// to ensure the genome is valid.
-        /// </summary>
-        /// <param name="age">The genome's age.</param>
-        /// <param name="useDefaultValues">Indicates whether to use the domain-default values [false], or random domain values [true]. </param>
-        /// <returns>The created genome.</returns>
-        protected Genome CreateGenome(int age, bool useDefaultValues = false)
-        {
-            // Create genome with correct age.
-            var genome = new Genome(age);
-
-            // Randomly set each gene value.
-            foreach (var parameterNode in this._parameterNodes)
-            {
-                genome.SetGene(parameterNode.Identifier, useDefaultValues ? parameterNode.Domain.GetDefaultValue() : parameterNode.Domain.GenerateRandomGeneValue());
-            }
-
-            this.MakeGenomeValid(genome);
-            return genome;
-        }
-
-        /// <summary>
         /// Mutates a given genome. A repair operation is applied after the mutation
         /// to ensure the genome is valid at the end of the method.
         /// </summary>
@@ -319,6 +297,30 @@ namespace Optano.Algorithm.Tuner.Genomes
         #endregion
 
         #region Methods
+
+        /// <summary>
+        /// Creates a genome with random or default gene values. A repair operation is applied after the creation
+        /// to ensure the genome is valid.
+        /// </summary>
+        /// <param name="age">The genome's age.</param>
+        /// <param name="useDefaultValues">Indicates whether to use the domain-default values [false], or random domain values [true]. </param>
+        /// <returns>The created genome.</returns>
+        protected Genome CreateGenome(int age, bool useDefaultValues = false)
+        {
+            // Create genome with correct age.
+            var genome = new Genome(age);
+
+            // Randomly set each gene value.
+            foreach (var parameterNode in this._parameterNodes)
+            {
+                genome.SetGene(
+                    parameterNode.Identifier,
+                    useDefaultValues ? parameterNode.Domain.GetDefaultValue() : parameterNode.Domain.GenerateRandomGeneValue());
+            }
+
+            this.MakeGenomeValid(genome);
+            return genome;
+        }
 
         /// <summary>
         /// Changes the given genome by mutating the gene corresponding to the given <see cref="IParameterNode" />.

@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -84,9 +84,9 @@ namespace Optano.Algorithm.Tuner.ContinuousOptimization.CovarianceMatrixAdaptati
         private CmaEsConfiguration _configuration;
 
         /// <summary>
-        /// The current generation, often denoted g in literature.
+        /// The current CMA-ES generation, often denoted g in literature.
         /// </summary>
-        private int _generation;
+        private int _currentCmaesGeneration;
 
         /// <summary>
         /// The current distribution mean, often denoted m in literature.
@@ -161,7 +161,7 @@ namespace Optano.Algorithm.Tuner.ContinuousOptimization.CovarianceMatrixAdaptati
         {
             this._configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             this._terminationCriteria = terminationCriteria?.ToList() ??
-                                       throw new ArgumentNullException(nameof(terminationCriteria));
+                                        throw new ArgumentNullException(nameof(terminationCriteria));
 
             if (!this._terminationCriteria.Any())
             {
@@ -170,7 +170,7 @@ namespace Optano.Algorithm.Tuner.ContinuousOptimization.CovarianceMatrixAdaptati
                     "There needs to be at least one termination criterion.");
             }
 
-            this._generation = 0;
+            this._currentCmaesGeneration = 0;
             this._covariances = Matrix<double>.Build.DenseIdentity(this._configuration.SearchSpaceDimension);
             this._covariancesDecomposition = this._covariances.Evd();
             this._evolutionPath = Vector<double>.Build.Dense(this._configuration.SearchSpaceDimension);
@@ -189,7 +189,7 @@ namespace Optano.Algorithm.Tuner.ContinuousOptimization.CovarianceMatrixAdaptati
         {
             this.CheckIsInitialized();
 
-            this._generation++;
+            this._currentCmaesGeneration++;
 
             var randomDirections = this.SampleRandomDirections();
             var stepDirections = this.BuildStepDirections(randomDirections).ToList();
@@ -259,7 +259,7 @@ namespace Optano.Algorithm.Tuner.ContinuousOptimization.CovarianceMatrixAdaptati
             }
 
             this._configuration = status.Data.Configuration;
-            this._generation = status.Data.Generation;
+            this._currentCmaesGeneration = status.Data.Generation;
             this._distributionMean = status.Data.DistributionMean;
             this._covariances = status.Data.Covariances;
             this._covariancesDecomposition = this._covariances?.Evd(Symmetricity.Symmetric);
@@ -396,7 +396,7 @@ namespace Optano.Algorithm.Tuner.ContinuousOptimization.CovarianceMatrixAdaptati
                 this._configuration.VarianceEffectiveSelectionMass);
             var stallingConstant = this.DecideStallingConstant();
             this._evolutionPath = ((1 - this._configuration.CumulationLearningRate) * this._evolutionPath) +
-                                 ((stallingConstant * normalizationConstant) * unscaledMeanStep);
+                                  ((stallingConstant * normalizationConstant) * unscaledMeanStep);
 
             var evolutionPathAsMatrix = this._evolutionPath.ToRowMatrix();
             var rankOneUpdate = this._configuration.RankOneUpdateLearningRate *
@@ -413,7 +413,7 @@ namespace Optano.Algorithm.Tuner.ContinuousOptimization.CovarianceMatrixAdaptati
         private int DecideStallingConstant()
         {
             double maximumPathLength =
-                Math.Sqrt(1 - Math.Pow(1 - this._configuration.StepSizeControlLearningRate, 2 * (this._generation + 1))) *
+                Math.Sqrt(1 - Math.Pow(1 - this._configuration.StepSizeControlLearningRate, 2 * (this._currentCmaesGeneration + 1))) *
                 (1.4 + (2d / (this._configuration.SearchSpaceDimension + 1))) *
                 this._configuration.ComputeExpectedConjugateEvolutionPathLength();
             return this._conjugateEvolutionPath.L2Norm() >= maximumPathLength ? 0 : 1;
@@ -496,7 +496,7 @@ namespace Optano.Algorithm.Tuner.ContinuousOptimization.CovarianceMatrixAdaptati
         {
             return new CmaEsElements(
                 this._configuration,
-                this._generation,
+                this._currentCmaesGeneration,
                 this._distributionMean,
                 this._stepSize,
                 this._covariances,

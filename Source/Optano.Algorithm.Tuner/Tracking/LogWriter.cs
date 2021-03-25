@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -46,9 +46,8 @@ namespace Optano.Algorithm.Tuner.Tracking
     /// <summary>
     /// Responsible for rewriting a log file after every generation.
     /// </summary>
-    /// <typeparam name="TInstance">Instance type the target algorithm can deal with.
-    /// Must extend <see cref="InstanceBase"/>.</typeparam>
-    /// <typeparam name="TResult">Type of the results. Must extend <see cref="ResultBase{TResultType}"/>.</typeparam>
+    /// <typeparam name="TInstance">The instance type.</typeparam>
+    /// <typeparam name="TResult">The result type of a single target algorithm evaluation.</typeparam>
     public class LogWriter<TInstance, TResult>
         where TInstance : InstanceBase where TResult : ResultBase<TResult>, new()
     {

@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -39,6 +39,8 @@ namespace Optano.Algorithm.Tuner.Tests.MachineLearning.TargetLeafSampling
     using Optano.Algorithm.Tuner.MachineLearning.TargetLeafSampling;
 
     using SharpLearning.DecisionTrees.Nodes;
+
+    using Shouldly;
 
     using Xunit;
 
@@ -231,8 +233,8 @@ namespace Optano.Algorithm.Tuner.Tests.MachineLearning.TargetLeafSampling
         public void UnbalancedTreeIsHandledCorrectly()
         {
             this.CreateUnbalancedTree();
-            var competitive = new double[] { 0, 0, 0 };
-            var nonCompetitive = new double[] { 1, 1, 1 };
+            var competitive = new double[] { 0, 0, 0, };
+            var nonCompetitive = new double[] { 1, 1, 1, };
             var parents = new ParentGenomesConverted(competitive, nonCompetitive);
 
             var reachableLeaves = TargetLeafComputation.ComputeReachableTargetLeavesForTree(this.Tree, parents, new Dictionary<int, HashSet<int>>())
@@ -242,7 +244,7 @@ namespace Optano.Algorithm.Tuner.Tests.MachineLearning.TargetLeafSampling
 
             for (var i = 0; i < reachableLeaves.Length; i++)
             {
-                Assert.True(i == reachableLeaves[i].CurrentNode.Value, $"Leaf should have label {i}");
+                reachableLeaves[i].CurrentNode.Value.ShouldBe(i, $"Leaf should have label {i}");
                 Assert.True(reachableLeaves[i].FixedIndicesInDoubleRepresentation.ContainsKey(0), "First feature should always be fixed");
                 Assert.False(reachableLeaves[i].FixedIndicesInDoubleRepresentation.ContainsKey(2), "Third feature should never be fixed");
 

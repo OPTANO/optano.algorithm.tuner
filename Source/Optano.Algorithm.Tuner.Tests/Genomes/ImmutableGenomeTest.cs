@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -69,7 +69,7 @@ namespace Optano.Algorithm.Tuner.Tests.Genomes
         /// A <see cref="ImmutableGenome.GeneValueComparer"/>.
         /// </summary>
         private static readonly IEqualityComparer<ImmutableGenome> geneValueComparer =
-            new ImmutableGenome.GeneValueComparer();
+            ImmutableGenome.GenomeComparer;
 
         #endregion
 
@@ -156,7 +156,7 @@ namespace Optano.Algorithm.Tuner.Tests.Genomes
 
             // Make sure it has the same values as the original genome.
             Assert.True(
-                new Genome.GeneValueComparator().Equals(mutableGenome, this._originalGenome),
+                Genome.GenomeComparer.Equals(mutableGenome, this._originalGenome),
                 "New mutable genome should have had the same gene values as the original mutable genome.");
         }
 

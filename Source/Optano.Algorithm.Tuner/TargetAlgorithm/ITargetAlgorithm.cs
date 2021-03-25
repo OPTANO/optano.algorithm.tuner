@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -45,8 +45,8 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm
     /// If you use some resources that should be disposed of as soon as the algorithm has completed working,
     /// implement <see cref="IDisposable" /> and OPTANO Algorithm Tuner will dispose it for you.
     /// </remarks>
-    /// <typeparam name="TInstance">Type of instances.</typeparam>
-    /// <typeparam name="TResult">Type of results.</typeparam>
+    /// <typeparam name="TInstance">The instance type.</typeparam>
+    /// <typeparam name="TResult">The result type of a single target algorithm evaluation.</typeparam>
     public interface ITargetAlgorithm<TInstance, TResult>
         where TInstance : InstanceBase where TResult : ResultBase<TResult>, new()
     {

@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -38,36 +38,37 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.CovarianceMatrixAdap
     using Akka.Actor;
 
     using Optano.Algorithm.Tuner.ContinuousOptimization;
-    using Optano.Algorithm.Tuner.GenomeEvaluation.Sorting;
+    using Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation;
     using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.TargetAlgorithm.Instances;
+    using Optano.Algorithm.Tuner.TargetAlgorithm.Results;
 
     /// <summary>
     /// A <see cref="ISearchPointSorter{TSearchPoint}"/> which evaluates <see cref="IRepairedGenomeRepresentation"/>s
-    /// via a <see cref="GenomeSorter{TInstance,TResult}"/>.
+    /// via a <see cref="GenerationEvaluationActor{TTargetAlgorithm,TInstance,TResult}"/>.
     /// </summary>
     /// <typeparam name="TSearchPoint">
     /// The specific type of <see cref="IRepairedGenomeRepresentation"/> which can be evaluated.
     /// </typeparam>
-    /// <typeparam name="TInstance">
-    /// The type of instance the <see cref="GenomeSorter{TInstance, TResult}"/> expects.
-    /// </typeparam>
-    public class RepairedGenomeSearchPointSorter<TSearchPoint, TInstance>
-        : GenomeAssistedSorterBase<TSearchPoint, TInstance>
+    /// <typeparam name="TInstance">The instance type.</typeparam>
+    /// <typeparam name="TResult">The result type of a single target algorithm evaluation.</typeparam>
+    public class RepairedGenomeSearchPointSorter<TSearchPoint, TInstance, TResult>
+        : GenomeAssistedSorterBase<TSearchPoint, TInstance, TResult>
         where TSearchPoint : SearchPoint, IRepairedGenomeRepresentation
         where TInstance : InstanceBase
+        where TResult : ResultBase<TResult>, new()
     {
         #region Constructors and Destructors
 
         /// <summary>
         /// Initializes a new instance of the
-        /// <see cref="RepairedGenomeSearchPointSorter{TSearchPoint,TInstance}"/> class.
+        /// <see cref="RepairedGenomeSearchPointSorter{TSearchPoint, TInstance, TResult}"/> class.
         /// </summary>
-        /// <param name="genomeSorter">
-        /// An <see cref="IActorRef" /> to a <see cref="GenomeSorter{TInstance, TResult}" />.
+        /// <param name="generationEvaluationActor">
+        /// An <see cref="IActorRef" /> to a <see cref="GenerationEvaluationActor{TTargetAlgorithm,TInstance,TResult}" />.
         /// </param>
-        public RepairedGenomeSearchPointSorter(IActorRef genomeSorter)
-            : base(genomeSorter)
+        public RepairedGenomeSearchPointSorter(IActorRef generationEvaluationActor)
+            : base(generationEvaluationActor)
         {
         }
 

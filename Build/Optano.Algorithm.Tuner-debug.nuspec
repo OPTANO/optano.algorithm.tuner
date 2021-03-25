@@ -25,11 +25,12 @@
     <language>en-US</language>
     <dependencies>
       <group targetFramework="netstandard21">
-        <dependency id="Akka.Cluster" version="1.4.3" />
-        <dependency id="Akka.Logger.NLog" version="1.3.5" />
-        <dependency id="Akka.Serialization.Hyperion" version="1.4.3" />
+        <dependency id="Akka.Cluster" version="1.4.14" />
+        <dependency id="Akka.Logger.NLog" version="1.4.10" />
+        <dependency id="Akka.Serialization.Hyperion" version="1.4.14" />
         <dependency id="MathNet.Numerics" version="4.9.0" />
-        <dependency id="NDesk.Options" version="0.2.1" />
+        <dependency id="NDesk.Options.Patched" version="0.3.2" />
+        <dependency id="OptimizedPriorityQueue" version="5.0.0" />
       </group>
     </dependencies>
   </metadata>

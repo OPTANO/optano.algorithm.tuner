@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -56,7 +56,7 @@ namespace Optano.Algorithm.Tuner.MachineLearning.TrainingData.SamplingStrategies
         }
 
         /// <summary>
-        /// Computes the average <see cref="GenomeTournamentResult.TournamentRank"/> over all <see cref="GenomeTournamentResult"/> for each <see cref="Genome"/> in <see cref="TrainingDataWrapper.Genomes"/>.
+        /// Computes the average <see cref="GenomeTournamentRank.TournamentRank"/> over all <see cref="GenomeTournamentRank"/> for each <see cref="Genome"/> in <see cref="TrainingDataWrapper.Genomes"/>.
         /// </summary>
         /// <param name="data">
         /// The training data.

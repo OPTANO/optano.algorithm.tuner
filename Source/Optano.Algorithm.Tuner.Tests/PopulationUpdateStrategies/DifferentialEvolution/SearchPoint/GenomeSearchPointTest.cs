@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -39,7 +39,6 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.DifferentialEv
 
     using MathNet.Numerics.LinearAlgebra;
 
-    using Optano.Algorithm.Tuner;
     using Optano.Algorithm.Tuner.Configuration;
     using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.Genomes.Values;
@@ -477,7 +476,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.DifferentialEv
             var createdGenome = point.Genome.CreateMutableGenome();
 
             Assert.True(
-                new Genome.GeneValueComparator().Equals(originalGenome, createdGenome),
+                Genome.GenomeComparer.Equals(originalGenome, createdGenome),
                 $"{createdGenome} should have the same values as the genome it is based on, {originalGenome}.");
         }
 

@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -41,9 +41,7 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments.Results
     /// <summary>
     /// The tournament winners with rank.
     /// </summary>
-    /// <typeparam name="TResult">
-    /// Type of result of a target algorithm run.
-    /// </typeparam>
+    /// <typeparam name="TResult">The result type of a single target algorithm evaluation.</typeparam>
     public class TournamentWinnersWithRank<TResult>
         where TResult : ResultBase<TResult>, new()
     {
@@ -61,24 +59,24 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments.Results
         /// <param name="generationBestResult">
         /// The result of the incumbent genome.
         /// </param>
-        /// <param name="genomeToRank">
+        /// <param name="genomeToTournamentRank">
         /// Genome with a rank for every tournament it participated in.
         /// </param>
         public TournamentWinnersWithRank(
             IEnumerable<ImmutableGenome> competitiveParents,
             ImmutableGenome generationBest,
             ImmutableList<TResult> generationBestResult,
-            ImmutableDictionary<ImmutableGenome, List<GenomeTournamentResult>> genomeToRank)
+            ImmutableDictionary<ImmutableGenome, List<GenomeTournamentRank>> genomeToTournamentRank)
         {
             this.CompetitiveParents = competitiveParents.Select(g => g.CreateMutableGenome()).ToImmutableList();
             this.GenerationBest = generationBest.CreateMutableGenome();
             this.GenerationBestResult = generationBestResult;
 
-            // since genomeToRank also used an allele-based equality comparer, the keys should be unique
-            this.GenomeToTournamentRank = genomeToRank.ToDictionary(
+            // Since genomeToTournamentRank also used an allele-based equality comparer, the keys should be unique!
+            this.GenomeToTournamentRank = genomeToTournamentRank.ToDictionary(
                 g => g.Key.CreateMutableGenome(),
                 g => g.Value,
-                new Genome.GeneValueComparator());
+                Genome.GenomeComparer);
         }
 
         #endregion
@@ -96,14 +94,14 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments.Results
         public Genome GenerationBest { get; }
 
         /// <summary>
-        /// Gets a dictionary containing the observed tournament results, grouped by <see cref="Genome"/>.
-        /// </summary>
-        public Dictionary<Genome, List<GenomeTournamentResult>> GenomeToTournamentRank { get; }
-
-        /// <summary>
         /// Gets the generation best result.
         /// </summary>
         public ImmutableList<TResult> GenerationBestResult { get; }
+
+        /// <summary>
+        /// Gets a dictionary containing the observed tournament results, grouped by <see cref="Genome"/>.
+        /// </summary>
+        public Dictionary<Genome, List<GenomeTournamentRank>> GenomeToTournamentRank { get; }
 
         #endregion
     }

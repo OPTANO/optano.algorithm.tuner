@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -43,8 +43,8 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.CovarianceMatrixAdap
     using Optano.Algorithm.Tuner.ContinuousOptimization;
     using Optano.Algorithm.Tuner.ContinuousOptimization.CovarianceMatrixAdaptation;
     using Optano.Algorithm.Tuner.GenomeEvaluation;
+    using Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation;
     using Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage;
-    using Optano.Algorithm.Tuner.GenomeEvaluation.Sorting;
     using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.Parameters;
     using Optano.Algorithm.Tuner.TargetAlgorithm.Instances;
@@ -54,12 +54,8 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.CovarianceMatrixAdap
     /// Uses <see cref="CmaEs{TSearchPoint}"/> instances to update <see cref="Population"/> objects:
     /// Continuizes all parameters and works on the complete competitive population.
     /// </summary>
-    /// <typeparam name="TInstance">
-    /// The instance type to use.
-    /// </typeparam>
-    /// <typeparam name="TResult">
-    /// The result for an individual evaluation.
-    /// </typeparam>
+    /// <typeparam name="TInstance">The instance type.</typeparam>
+    /// <typeparam name="TResult">The result type of a single target algorithm evaluation.</typeparam>
     public class GlobalCovarianceMatrixAdaptationStrategy<TInstance, TResult>
         : CovarianceMatrixAdaptationStrategyBase<ContinuizedGenomeSearchPoint, TInstance, TResult>
         where TInstance : InstanceBase
@@ -89,8 +85,8 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.CovarianceMatrixAdap
         /// <param name="parameterTree">Provides the tunable parameters.</param>
         /// <param name="genomeBuilder">Responsible for creation, modification and crossover of genomes.
         /// Needs to be compatible with the given parameter tree and configuration.</param>
-        /// <param name="genomeSorter">
-        /// An <see cref="IActorRef" /> to a <see cref="GenomeSorter{TInstance,TResult}" />.
+        /// <param name="generationEvaluationActor">
+        /// An <see cref="IActorRef" /> to a <see cref="GenerationEvaluationActor{TTargetAlgorithm,TInstance,TResult}"/>.
         /// </param>
         /// <param name="targetRunResultStorage">
         /// An <see cref="IActorRef" /> to a <see cref="ResultStorageActor{TInstance,TResult}" />
@@ -100,9 +96,9 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.CovarianceMatrixAdap
             AlgorithmTunerConfiguration configuration,
             ParameterTree parameterTree,
             GenomeBuilder genomeBuilder,
-            IActorRef genomeSorter,
+            IActorRef generationEvaluationActor,
             IActorRef targetRunResultStorage)
-            : base(configuration, parameterTree, genomeSorter, targetRunResultStorage)
+            : base(configuration, parameterTree, generationEvaluationActor, targetRunResultStorage)
         {
             if (genomeBuilder == null)
             {

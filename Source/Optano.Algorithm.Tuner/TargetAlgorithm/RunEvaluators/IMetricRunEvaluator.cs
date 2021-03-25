@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -31,24 +31,27 @@
 
 namespace Optano.Algorithm.Tuner.TargetAlgorithm.RunEvaluators
 {
+    using Optano.Algorithm.Tuner.TargetAlgorithm.Instances;
     using Optano.Algorithm.Tuner.TargetAlgorithm.Results;
 
     /// <summary>
-    /// A <see cref="IRunEvaluator{TResult}"/> which is able to assign a meaningful <see cref="double"/> value to each
+    /// A <see cref="IRunEvaluator{TInstance, TResult}"/> which is able to assign a meaningful <see cref="double"/> value to each
     /// <typeparamref name="TResult"/>, and bases its sorting on these values.
     /// <para>
     /// OPTANO Algorithm Tuner may exploit the knowledge about these inner workings, e.g. in evaluation statistics.
     /// </para>
     /// </summary>
-    /// <typeparam name="TResult">The type of the result.</typeparam>
-    public interface IMetricRunEvaluator<TResult> : IRunEvaluator<TResult>
+    /// <typeparam name="TInstance">The instance type.</typeparam>
+    /// <typeparam name="TResult">The result type of a single target algorithm evaluation.</typeparam>
+    public interface IMetricRunEvaluator<TInstance, TResult> : IRunEvaluator<TInstance, TResult>
+        where TInstance : InstanceBase
         where TResult : ResultBase<TResult>, new()
     {
         #region Public Methods and Operators
 
         /// <summary>
         /// Gets a metric representation of the provided result.
-        /// <para><see cref="IRunEvaluator{TResult}.Sort"/> needs to be based on this.</para>
+        /// <para><see cref="IRunEvaluator{TInstance, TResult}.Sort"/> needs to be based on this.</para>
         /// </summary>
         /// <param name="result">The result.</param>
         /// <returns>A metric representation.</returns>

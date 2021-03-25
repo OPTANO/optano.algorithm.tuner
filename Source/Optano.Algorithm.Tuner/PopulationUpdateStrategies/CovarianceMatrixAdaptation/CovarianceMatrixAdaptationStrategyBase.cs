@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -40,8 +40,8 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.CovarianceMatrixAdap
     using Optano.Algorithm.Tuner.ContinuousOptimization;
     using Optano.Algorithm.Tuner.ContinuousOptimization.CovarianceMatrixAdaptation;
     using Optano.Algorithm.Tuner.ContinuousOptimization.CovarianceMatrixAdaptation.TerminationCriteria;
+    using Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation;
     using Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage;
-    using Optano.Algorithm.Tuner.GenomeEvaluation.Sorting;
     using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.Parameters;
     using Optano.Algorithm.Tuner.Serialization;
@@ -55,12 +55,8 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.CovarianceMatrixAdap
     /// <typeparam name="TSearchPoint">
     /// The type of <see cref="SearchPoint"/>s handled by this strategy instance.
     /// </typeparam>
-    /// <typeparam name="TInstance">
-    /// The instance type to use.
-    /// </typeparam>
-    /// <typeparam name="TResult">
-    /// The result for an individual evaluation.
-    /// </typeparam>
+    /// <typeparam name="TInstance">The instance type.</typeparam>
+    /// <typeparam name="TResult">The result type of a single target algorithm evaluation.</typeparam>
     public abstract class CovarianceMatrixAdaptationStrategyBase<TSearchPoint, TInstance, TResult>
         : ContinuousOptimizationStrategyBase<TSearchPoint, TInstance, TResult>
         where TSearchPoint : SearchPoint, IRepairedGenomeRepresentation, IDeserializationRestorer<TSearchPoint>
@@ -85,8 +81,8 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.CovarianceMatrixAdap
         /// </summary>
         /// <param name="configuration">Options used for this instance.</param>
         /// <param name="parameterTree">Provides the tunable parameters.</param>
-        /// <param name="genomeSorter">
-        /// An <see cref="IActorRef" /> to a <see cref="GenomeSorter{TInstance,TResult}" />.
+        /// <param name="generationEvaluationActor">
+        /// An <see cref="IActorRef" /> to a <see cref="GenerationEvaluationActor{TTargetAlgorithm,TInstance,TResult}"/>.
         /// </param>
         /// <param name="targetRunResultStorage">
         /// An <see cref="IActorRef" /> to a <see cref="ResultStorageActor{TInstance,TResult}" />
@@ -95,9 +91,13 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.CovarianceMatrixAdap
         protected CovarianceMatrixAdaptationStrategyBase(
             AlgorithmTunerConfiguration configuration,
             ParameterTree parameterTree,
-            IActorRef genomeSorter,
+            IActorRef generationEvaluationActor,
             IActorRef targetRunResultStorage)
-            : base(configuration, parameterTree, targetRunResultStorage, new RepairedGenomeSearchPointSorter<TSearchPoint, TInstance>(genomeSorter))
+            : base(
+                configuration,
+                parameterTree,
+                targetRunResultStorage,
+                new RepairedGenomeSearchPointSorter<TSearchPoint, TInstance, TResult>(generationEvaluationActor))
         {
             this.StrategyConfiguration =
                 this.Configuration.ExtractDetailedConfiguration<CovarianceMatrixAdaptationStrategyConfiguration>(

@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -36,7 +36,6 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
     using System.Collections.Immutable;
     using System.Linq;
 
-    using Optano.Algorithm.Tuner;
     using Optano.Algorithm.Tuner.Configuration;
     using Optano.Algorithm.Tuner.GenomeEvaluation;
     using Optano.Algorithm.Tuner.Genomes;
@@ -57,7 +56,8 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
     /// <summary>
     /// Contains tests for <see cref="Status{TInstance,TResult,TLearnerModel,TPredictorModel,TSamplingStrategy}"/>.
     /// </summary>
-    public class StatusTest : StatusBaseTest<Status<TestInstance, TestResult, GenomePredictionRandomForest<ReuseOldTreesStrategy>, GenomePredictionForestModel<GenomePredictionTree>, ReuseOldTreesStrategy>>
+    public class StatusTest : StatusBaseTest<Status<TestInstance, TestResult, GenomePredictionRandomForest<ReuseOldTreesStrategy>,
+        GenomePredictionForestModel<GenomePredictionTree>, ReuseOldTreesStrategy>>
     {
         #region Fields
 
@@ -349,7 +349,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
                 deserializedStatus.Population.GetCompetitiveIndividuals().Count);
             var deserializedCompetitiveGenome = deserializedStatus.Population.GetCompetitiveIndividuals().First();
             Assert.True(
-                new Genome.GeneValueComparator().Equals(competitiveGenome, deserializedCompetitiveGenome),
+                Genome.GenomeComparer.Equals(competitiveGenome, deserializedCompetitiveGenome),
                 "Expected different competive genome.");
             Assert.Equal(
                 competitiveGenome.Age,
@@ -359,7 +359,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
                 deserializedStatus.Population.GetNonCompetitiveMates().Count);
             var deserializedNonCompetitiveGenome = deserializedStatus.Population.GetNonCompetitiveMates().First();
             Assert.True(
-                new Genome.GeneValueComparator().Equals(nonCompetitiveGenome, deserializedNonCompetitiveGenome),
+                Genome.GenomeComparer.Equals(nonCompetitiveGenome, deserializedNonCompetitiveGenome),
                 "Expected different non-competive genome.");
             Assert.Equal(
                 nonCompetitiveGenome.Age,

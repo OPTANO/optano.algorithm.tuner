@@ -2,17 +2,27 @@
 
 _OPTANO Algorithm Tuner_ is a Genetic Algorithm implementation. It finds near-optimal parameters (a configuration) for any given target algorithm. 
 
+## Version 1.0.0 (2021-03-25)
+
+Changes:
+
+- Improvement: Reworked parallelization of genome/instance evaluations.
+- Feature: Racing rules can be customized by end-user.
+	- By customization, Racing now can kill more evaluations, leading to a reduction of required compute time, while not altering any tournament-outcome (when compared to a tuning without racing).
+	- Overall, a speedup of factor `2` up to `5` over version 0.9.1 is achieved. (In combination with the new parallelization.)
+- Improvement: Further code clean ups + additional unit tests.
+
 ## Version 0.9.1 (2020-10-14)
 
 Changes:
 
 - Feature: Add option for specifying the default configuration of the target algorithm, in order to include it in the initial population when a new tuning is started.
-    - See [notes on usage here](userDoc/basic_usage.md#xml) or refer to [Gurobi's](userDoc/gurobi.md#parameter-tree) `parameterTree.xml` for an example on how to use the default value feature.
-- Improvement: The new [download page](download.md) now provides a _self-contained_ version of the [Tuner.Application](userDoc/basicUsage.md) for `win-x64`, `linux-x64` and `osx-x64`.
+    - See [notes on usage here](userDoc/basic_usage.md#xml) or refer to [Gurobi's](developerDoc/gurobi.md#parameter-tree) `parameterTree.xml` for an example on how to use the default value feature.
+- Improvement: The new [download page](download.md) now provides a _self-contained_ version of the [Tuner.Application](userDoc/basic_usage.md) for `win-x64`, `linux-x64` and `osx-x64`.
 - Improvement: Export the generation history after each generation.
     - Previously, the generation history was only exported after the tuning was finished (and the optional evaluation of the test set has been completed).
-- Improvement: (More) Clean ups and refactoring for the [example projects](userDoc/examples.md). E.g.:
-    - [Gurobi](userDoc/gurobi.md) now targets Gurobi 9.0 and supports parsing of compressed instance- and start solution files.
+- Improvement: (More) Clean ups and refactoring for the [example projects](developerDoc/examples.md). E.g.:
+    - [Gurobi](developerDoc/gurobi.md) now targets Gurobi 9.0 and supports parsing of compressed instance- and start solution files.
 - Fix: The _logged_ age of the incumbent genome now is updated properly in the case that the incumbent did not change.
     - This issue did not affect the behavior/performance of OAT and was simply related to logging.
 
@@ -22,7 +32,7 @@ Changes:
 
 - Feature: Introduce [.Net Standard 2.1](https://docs.microsoft.com/dotnet/standard/net-standard) compatibility
 - Feature: Add [out-of-the-box algorithm tuning](userDoc/basic_usage.md)  for common optimization functions
-- Improvement: Reorganize [exemplary adapters](userDoc/examples.md) for BBOB, Gurobi, Lingeling and SAPS
+- Improvement: Reorganize [exemplary adapters](developerDoc/examples.md) for BBOB, Gurobi, Lingeling and SAPS
 - Improvement: Remove unnecessary NuGet packages
 - Improvement: Update referenced NuGet packages
     - Akka.Cluster 1.3.14 -> 1.4.3
@@ -32,7 +42,7 @@ Changes:
 - Improvement: Revise default parameters to improve overall tuning behaviour
 - Feature: The `tunerLog.txt` logging file is now part of the zip archive created in case of `--zipOldStatus=true`
 - Improvement: Improved default parameters
-    - Default usage of standard random forest in [model-based crossover](userDoc/model_based_crossover.md)
+    - Default usage of standard random forest in [model-based crossover](developerDoc/model_based_crossover.md)
 - Improvement: Update of referenced NuGet packages
     - Akka 1.3.2 -> 1.3.14
     - Akka.Cluster 1.3.2 -> 1.3.14
@@ -72,7 +82,7 @@ Changes:
 	-  [JADE](userDoc/algorithms.md#jade) 
 	-  [Active CMA-ES](userDoc/algorithms.md#active-cma-es) 
 - Feature: New option `--scoreGenerationHistory` to evaluate a tuner run on complete training and test set if it optimizes a numerical evaluation value
-    - Average scores are [logged](userDoc/logging.md) in two new logging files, `generationHistory.csv` and `scores.csv`
+    - Average scores are [logged](developerDoc/logging.md) in two new logging files, `generationHistory.csv` and `scores.csv`
     - Calling `Master.Run` now requires the `AlgorithmTuner` factory method to take both a training and a test instance folder
     - Using the test set by calling `AlgorithmTuner.SetTestInstances` is optional
 - Improvement: More information is logged, esp. on debug level 
@@ -94,9 +104,9 @@ Changes:
     - Improved namespace logic comes with changes in namespaces for many classes.
 - Fix: By default, the status file now is written to the working directory instead of the directory that contains the tuner.exe.
 - Fix: Fixed several minor issues regarding the console output. (E.g. Frequencies of output, formats, etc.)
-- Improvement: Speedups in  [machine-learning based tuning](userDoc/model_based_crossover.md).
+- Improvement: Speedups in  [machine-learning based tuning](developerDoc/model_based_crossover.md).
 - Improvement: Reduced amount of traffic sent over TCP between Master and Workers.
-- Improvement: Clarified role of the `IRunEvaluator` interface both in the [user documentation](userDoc/advanced.md#evaluator) and API.
+- Improvement: Clarified role of the `IRunEvaluator` interface both in the [user documentation](developerDoc/advanced.md#evaluator) and API.
 - Fix: Evaluation settings were not properly updated on all external workers.
     - This led to unfair comparisons between configurations when *OPTANO Algorithm Tuner* was used in a [distributed fashion](userDoc/distributed.md).
 - Fix: Target sampling was not performed for some reachable leaves during model based crossover.
@@ -109,7 +119,7 @@ Changes:
     - Merged `IComparer<IInstanceFile>` and `IInstanceFile` into `InstanceBase`
 - Simplified  [status dumps](userDoc/statusdump.md) 
 - Updated user documentation
-	- especially with respect to [machine-learning based tuning](userDoc/model_based_crossover.md)
+	- especially with respect to [machine-learning based tuning](developerDoc/model_based_crossover.md)
 - `parameterTree.xsd` and `SharpLearningCustom`  are now automatically added to builds
 - Added native PAR-k evaluations.
 - Logging

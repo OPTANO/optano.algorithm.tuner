@@ -1,30 +1,30 @@
 ﻿#region Copyright (c) OPTANO GmbH
 
 // ////////////////////////////////////////////////////////////////////////////////
-//
+// 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
-//
+// 
 //    The entire contents of this file is protected by German and
 //    International Copyright Laws. Unauthorized reproduction,
 //    reverse-engineering, and distribution of all or any portion of
 //    the code contained in this file is strictly prohibited and may
 //    result in severe civil and criminal penalties and will be
 //    prosecuted to the maximum extent possible under the law.
-//
+// 
 //    RESTRICTIONS
-//
+// 
 //    THIS SOURCE CODE AND ALL RESULTING INTERMEDIATE FILES
 //    ARE CONFIDENTIAL AND PROPRIETARY TRADE SECRETS OF
 //    OPTANO GMBH.
-//
+// 
 //    THE SOURCE CODE CONTAINED WITHIN THIS FILE AND ALL RELATED
 //    FILES OR ANY PORTION OF ITS CONTENTS SHALL AT NO TIME BE
 //    COPIED, TRANSFERRED, SOLD, DISTRIBUTED, OR OTHERWISE MADE
 //    AVAILABLE TO OTHER INDIVIDUALS WITHOUT WRITTEN CONSENT
 //    AND PERMISSION FROM OPTANO GMBH.
-//
+// 
 // ////////////////////////////////////////////////////////////////////////////////
 
 #endregion
@@ -37,12 +37,13 @@ namespace Optano.Algorithm.Tuner.Tests.Configuration
 
     using Akka.Configuration;
 
-    using Optano.Algorithm.Tuner;
     using Optano.Algorithm.Tuner.Configuration;
     using Optano.Algorithm.Tuner.ContinuousOptimization.DifferentialEvolution;
     using Optano.Algorithm.Tuner.Logging;
     using Optano.Algorithm.Tuner.MachineLearning.RandomForest.Configuration;
     using Optano.Algorithm.Tuner.PopulationUpdateStrategies.DifferentialEvolution.Configuration;
+
+    using Shouldly;
 
     using Xunit;
 
@@ -63,6 +64,57 @@ namespace Optano.Algorithm.Tuner.Tests.Configuration
         /// <see cref="GenomePredictionRandomForestConfig.GenomePredictionRandomForestConfigBuilder"/> used for tests.
         /// </summary>
         private readonly GenomePredictionRandomForestConfig.GenomePredictionRandomForestConfigBuilder _randomForestConfigBuilder;
+
+        /// <summary>
+        /// Copy of the HOCON config text.
+        /// </summary>
+        private string _defaultTestingHoconConfig = @"akka
+{
+	stdout-loglevel = DEBUG
+	loglevel = DEBUG
+	actor
+	{
+		# Imitate real distributed situation by serializing messages.
+		serialize-messages = on
+		serializers.hyperion = ""Akka.Serialization.HyperionSerializer, Akka.Serialization.Hyperion""				
+		serialization-bindings
+		{
+			""System.Object"" = hyperion
+		}
+
+	debug {
+		receive = on 
+		autoreceive = on
+		lifecycle = on
+		event-stream = on
+		unhandled = on
+		router-misconfiguration = on
+	}
+					
+		provider = ""Akka.Cluster.ClusterActorRefProvider, Akka.Cluster""			
+		deployment
+		{
+			/GenerationEvaluationActor/EvaluationActorRouter
+			{
+				router = broadcast-pool # routing strategy
+                cluster
+				{
+					max-nr-of-instances-per-node = 2 # Set to 2 here, but to maximumNumberParallelEvaluations outside the test project.
+					enabled = on
+					allow-local-routees = on
+                }
+			}
+		}
+	}
+	remote.dot-netty.tcp {
+		hostname = 0.0.0.0
+		port = 8081
+	}
+remote {
+log-sent-messages = on
+log-received-messages = on
+	}
+}";
 
         #endregion
 
@@ -292,9 +344,16 @@ namespace Optano.Algorithm.Tuner.Tests.Configuration
             Assert.Equal(100, config.EndNumInstances);
             Assert.Equal(74, config.GoalGeneration);
             Assert.Equal(VerbosityLevel.Info, config.Verbosity);
-            Assert.Equal(
-                ConfigurationFactory.Load(),
-                config.AkkaConfiguration);
+
+            // ConfigurationFactory.Load() does no longer provide a proper equals implementation.
+            // check individual properties instead of assert config.AkkaConfiguration equals ConfigurationFactory.Load().
+            var expectedConfig = ConfigurationFactory.ParseString(this._defaultTestingHoconConfig);
+            config.AkkaConfiguration.ShouldNotBeNull();
+            config.AkkaConfiguration.Fallback.ShouldBeNull();
+            config.AkkaConfiguration.IsEmpty.ShouldBe(expectedConfig.IsEmpty);
+            config.AkkaConfiguration.Root.ShouldNotBeNull();
+            config.AkkaConfiguration.Root.IsEmpty.ShouldBe(expectedConfig.Root.IsEmpty);
+            config.AkkaConfiguration.ToString(false).ShouldBe(expectedConfig.ToString(false));
             Assert.Equal(
                 3,
                 config.MaximumNumberConsecutiveFailuresPerEvaluation);
@@ -571,6 +630,37 @@ namespace Optano.Algorithm.Tuner.Tests.Configuration
             Assert.Equal(
                 defaultConfig.IsCompatible(configWithDifferentBaseParameters),
                 configWithDifferentBaseParameters.IsCompatible(defaultConfig));
+        }
+
+        /// <summary>
+        /// Verifies that providing <see cref="AlgorithmTunerConfiguration.MaximumNumberParallelEvaluations"/> higher than the number of available processors on the system writes a warning to the console.
+        /// </summary>
+        [Fact]
+        public void NumberOfProcessorsLessThanNumberParallelEvaluationsWritesWarning()
+        {
+            TestUtils.CheckOutput(
+                action: () =>
+                    {
+                        var configuration =
+                            new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder().Build(Environment.ProcessorCount + 1);
+                        var number = configuration.MaximumNumberParallelEvaluations;
+                    },
+                check: consoleOutput => { Assert.True(consoleOutput.ToString().Contains("Warning"), $"No warning was written to console."); });
+        }
+
+        /// <summary>
+        /// Verifies that providing <see cref="AlgorithmTunerConfiguration.MaximumNumberParallelEvaluations"/> equal to the number of available processors on the system does not write a warning to the console.
+        /// </summary>
+        [Fact]
+        public void NumberProcessorsEqualToNumberParallelEvaluationsDoesNotWriteWarning()
+        {
+            TestUtils.CheckOutput(
+                action: () =>
+                    {
+                        var configuration = new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder().Build(Environment.ProcessorCount);
+                        var number = configuration.MaximumNumberParallelEvaluations;
+                    },
+                check: consoleOutput => { Assert.False(consoleOutput.ToString().Contains("Warning"), "Warning was written to console."); });
         }
 
         /// <summary>
@@ -1680,7 +1770,8 @@ namespace Optano.Algorithm.Tuner.Tests.Configuration
         [Fact]
         public void ZeroMaximumMiniTournamentSizeThrowsError()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => this._builder.SetMaximumMiniTournamentSize(0).Build(maximumNumberParallelEvaluations: 1));
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => this._builder.SetMaximumMiniTournamentSize(0).Build(maximumNumberParallelEvaluations: 1));
         }
 
         /// <summary>
@@ -1700,26 +1791,6 @@ namespace Optano.Algorithm.Tuner.Tests.Configuration
         public void MissingMaximumNumberParallelEvaluationsThrowsError()
         {
             Assert.Throws<InvalidOperationException>(() => this._builder.Build());
-        }
-
-        /// <summary>
-        /// Checks that setting the maximum number of parallel evaluations per node to a value higher than the maximum
-        /// mini tournament size writes out a warning.
-        /// </summary>
-        [Fact]
-        public void HigherNumberOfParallelEvaluationsThanTournamentSizeWritesWarning()
-        {
-            TestUtils.CheckOutput(
-                action: () =>
-                    {
-                        // Build configuration with suspicious settings.
-                        this._builder.SetMaximumMiniTournamentSize(3).Build(maximumNumberParallelEvaluations: 4);
-                    },
-                check: consoleOutput =>
-                    {
-                        // Check that a warning is written to console.
-                        Assert.True(consoleOutput.ToString().Contains("Warning"), "No warning was written to console.");
-                    });
         }
 
         /// <summary>

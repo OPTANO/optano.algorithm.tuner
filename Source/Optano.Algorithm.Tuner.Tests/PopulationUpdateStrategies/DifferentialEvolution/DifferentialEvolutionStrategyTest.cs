@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -36,7 +36,6 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.DifferentialEv
     using System.IO;
     using System.Linq;
 
-    using Optano.Algorithm.Tuner;
     using Optano.Algorithm.Tuner.Configuration;
     using Optano.Algorithm.Tuner.ContinuousOptimization.DifferentialEvolution;
     using Optano.Algorithm.Tuner.Genomes;
@@ -88,7 +87,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.DifferentialEv
                     configuration: null,
                     parameterTree: this.ParameterTree,
                     genomeBuilder: this.GenomeBuilder,
-                    genomeSorter: this.GenomeSorter,
+                    this.GenerationEvaluationActor,
                     targetRunResultStorage: this.ResultStorageActor));
         }
 
@@ -105,7 +104,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.DifferentialEv
                     this.Configuration,
                     parameterTree: null,
                     genomeBuilder: this.GenomeBuilder,
-                    genomeSorter: this.GenomeSorter,
+                    this.GenerationEvaluationActor,
                     targetRunResultStorage: this.ResultStorageActor));
         }
 
@@ -122,24 +121,24 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.DifferentialEv
                     this.Configuration,
                     this.ParameterTree,
                     genomeBuilder: null,
-                    genomeSorter: this.GenomeSorter,
+                    this.GenerationEvaluationActor,
                     targetRunResultStorage: this.ResultStorageActor));
         }
 
         /// <summary>
         /// Verifies that initializing an instance of the
-        /// <see cref="DifferentialEvolutionStrategy{TInstance,TResult}"/> class without a genome sorter
+        /// <see cref="DifferentialEvolutionStrategy{TInstance,TResult}"/> class without a generation evaluation actor
         /// throws an <see cref="ArgumentNullException"/>.
         /// </summary>
         [Fact]
-        public void ConstructorThrowsForMissingGenomeSorter()
+        public void ConstructorThrowsForMissingGenerationEvaluationActor()
         {
             Assert.Throws<ArgumentNullException>(
                 () => new DifferentialEvolutionStrategy<TestInstance, IntegerResult>(
                     this.Configuration,
                     this.ParameterTree,
                     this.GenomeBuilder,
-                    genomeSorter: null,
+                    null,
                     targetRunResultStorage: this.ResultStorageActor));
         }
 
@@ -156,7 +155,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.DifferentialEv
                     this.Configuration,
                     this.ParameterTree,
                     this.GenomeBuilder,
-                    this.GenomeSorter,
+                    this.GenerationEvaluationActor,
                     targetRunResultStorage: null));
         }
 
@@ -212,7 +211,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.DifferentialEv
                 noIncumbentFocusConfiguration,
                 this.ParameterTree,
                 this.GenomeBuilder,
-                this.GenomeSorter,
+                this.GenerationEvaluationActor,
                 this.ResultStorageActor);
             var incumbentFocusConfiguration = base.CreateTunerConfigurationBuilder()
                 .AddDetailedConfigurationBuilder(
@@ -226,7 +225,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.DifferentialEv
                 incumbentFocusConfiguration,
                 this.ParameterTree,
                 this.GenomeBuilder,
-                this.GenomeSorter,
+                this.GenerationEvaluationActor,
                 this.ResultStorageActor);
 
             // Create a population.
@@ -298,7 +297,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.DifferentialEv
                 .OrderByDescending(point => point.Values[0])
                 .First().Genome.CreateMutableGenome();
             Assert.True(
-                new Genome.GeneValueComparator().Equals(bestGenome, incumbent.IncumbentGenome),
+                Genome.GenomeComparer.Equals(bestGenome, incumbent.IncumbentGenome),
                 $"Incumbent is {incumbent.IncumbentGenome} but should be {bestGenome}.");
         }
 
@@ -387,7 +386,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.DifferentialEv
                 this.Configuration,
                 this.ParameterTree,
                 this.GenomeBuilder,
-                this.GenomeSorter,
+                this.GenerationEvaluationActor,
                 this.ResultStorageActor);
             newStrategy.UseStatusDump(null);
             newStrategy.DumpStatus();
@@ -447,7 +446,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.DifferentialEv
                 this.Configuration,
                 this.ParameterTree,
                 this.GenomeBuilder,
-                this.GenomeSorter,
+                this.GenerationEvaluationActor,
                 this.ResultStorageActor);
         }
 

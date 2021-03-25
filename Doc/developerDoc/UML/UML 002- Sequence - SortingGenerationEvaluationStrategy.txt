@@ -1,0 +1,48 @@
+// https://sequencediagram.org/
+title Evaluation with SortingGenerationEvaluationStrategy
+participant GenerationEvaluationActor
+participant ResultStorageActor
+participant EvaluationActor
+
+rbox over GenerationEvaluationActor:Ready
+rbox over EvaluationActor:Ready
+
+[-#blue>GenerationEvaluationActor:<color:#blue>GenerationEvaluation
+activate GenerationEvaluationActor
+rbox over GenerationEvaluationActor:FetchingResultsFromStorage
+loop FORALL g in Genomes
+GenerationEvaluationActor-#blue>ResultStorageActor:<color:#blue>GenomeResultsRequest(g)
+activate ResultStorageActor
+ResultStorageActor-#blue>GenerationEvaluationActor:<color:#blue>GenomeResults(g)
+deactivate ResultStorageActor
+GenerationEvaluationActor->GenerationEvaluationActor:Update GenomeStats(g,Results)
+
+end
+rbox over GenerationEvaluationActor:Working
+
+GenerationEvaluationActor-#blue>EvaluationActor:<color:#blue>Poll
+deactivate GenerationEvaluationActor
+activate EvaluationActor
+EvaluationActor--#blue>(2)GenerationEvaluationActor:<color:#blue>Accept
+activate GenerationEvaluationActor
+deactivate EvaluationActor
+
+loop WHILE NOT IsGenerationFinished
+GenerationEvaluationActor->GenerationEvaluationActor:Get next GIP\n[GenomeInstancePair]
+GenerationEvaluationActor-#blue>EvaluationActor:<color:#blue>GenomeInstancePairEvaluation(GIP)
+activate EvaluationActor
+rbox over EvaluationActor:Evaluating
+
+EvaluationActor->(2)EvaluationActor:Evaluate GIP
+
+rbox over EvaluationActor:Ready
+
+EvaluationActor--#blue>(2)GenerationEvaluationActor:<color:#blue>EvaluationResult(GIP)
+deactivate EvaluationActor
+
+GenerationEvaluationActor->GenerationEvaluationActor:Update GenomeStats(GIP,Result)
+end
+
+GenerationEvaluationActor--#blue>[:<color:#blue>SortResult
+deactivate GenerationEvaluationActor
+rbox over GenerationEvaluationActor:Ready

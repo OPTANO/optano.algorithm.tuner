@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -149,7 +149,9 @@ namespace Optano.Algorithm.Tuner.Tests.Parameters.Domains
             }
 
             // Apply the Anderson-Darling test.
-            AndersonDarlingTest uniformTest = new AndersonDarlingTest(generatedValues, new UniformContinuousDistribution(ContinuousDomainTest.minimum, ContinuousDomainTest.maximum));
+            AndersonDarlingTest uniformTest = new AndersonDarlingTest(
+                generatedValues,
+                new UniformContinuousDistribution(ContinuousDomainTest.minimum, ContinuousDomainTest.maximum));
             Assert.False(
                 uniformTest.Significant,
                 $"Random generation was found to be not uniform by the Anderson-Darling test with significance level of {uniformTest.Size}.");

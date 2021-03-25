@@ -1,30 +1,30 @@
 ﻿#region Copyright (c) OPTANO GmbH
 
 // ////////////////////////////////////////////////////////////////////////////////
-//
+// 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
-//
+// 
 //    The entire contents of this file is protected by German and
 //    International Copyright Laws. Unauthorized reproduction,
 //    reverse-engineering, and distribution of all or any portion of
 //    the code contained in this file is strictly prohibited and may
 //    result in severe civil and criminal penalties and will be
 //    prosecuted to the maximum extent possible under the law.
-//
+// 
 //    RESTRICTIONS
-//
+// 
 //    THIS SOURCE CODE AND ALL RESULTING INTERMEDIATE FILES
 //    ARE CONFIDENTIAL AND PROPRIETARY TRADE SECRETS OF
 //    OPTANO GMBH.
-//
+// 
 //    THE SOURCE CODE CONTAINED WITHIN THIS FILE AND ALL RELATED
 //    FILES OR ANY PORTION OF ITS CONTENTS SHALL AT NO TIME BE
 //    COPIED, TRANSFERRED, SOLD, DISTRIBUTED, OR OTHERWISE MADE
 //    AVAILABLE TO OTHER INDIVIDUALS WITHOUT WRITTEN CONSENT
 //    AND PERMISSION FROM OPTANO GMBH.
-//
+// 
 // ////////////////////////////////////////////////////////////////////////////////
 
 #endregion
@@ -41,9 +41,8 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
     using Optano.Algorithm.Tuner.AkkaConfiguration;
     using Optano.Algorithm.Tuner.Configuration;
     using Optano.Algorithm.Tuner.GenomeEvaluation;
-    using Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments.Actors;
+    using Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation;
     using Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage;
-    using Optano.Algorithm.Tuner.GenomeEvaluation.Sorting;
     using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.MachineLearning;
     using Optano.Algorithm.Tuner.MachineLearning.RandomForest;
@@ -82,10 +81,11 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
         #region Properties
 
         /// <summary>
-        /// Gets the <see cref="Optano.Algorithm.Tuner.TargetAlgorithm.RunEvaluators.IRunEvaluator{TResult}"/> used in
+        /// Gets the <see cref="Optano.Algorithm.Tuner.TargetAlgorithm.RunEvaluators.IRunEvaluator{TInstance, TResult}"/> used in
         /// tests.
         /// </summary>
-        protected IRunEvaluator<IntegerResult> RunEvaluator { get; } = new TargetAlgorithm.InterfaceImplementations.ValueConsideration.SortByValue();
+        protected IRunEvaluator<TestInstance, IntegerResult> RunEvaluator { get; } =
+            new TargetAlgorithm.InterfaceImplementations.ValueConsideration.SortByValue<TestInstance>();
 
         /// <summary>
         /// Gets a list of <see cref="TestInstance"/>s consisting of a single instance.
@@ -109,15 +109,9 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
         protected IActorRef ResultStorageActor { get; private set; }
 
         /// <summary>
-        /// Gets the <see cref="IActorRef" /> to a <see cref="TournamentSelector{TTargetAlgorithm,TInstance,TResult}"/>
-        /// to use in tests.
+        /// Gets an <see cref="IActorRef" /> to a <see cref="GenerationEvaluationActor" />.
         /// </summary>
-        protected IActorRef TournamentSelector { get; private set; }
-
-        /// <summary>
-        /// Gets an <see cref="IActorRef" /> to a <see cref="GenomeSorter{TInstance,TResult}" />.
-        /// </summary>
-        protected IActorRef GenomeSorter { get; private set; }
+        protected IActorRef GenerationEvaluationActor { get; private set; }
 
         /// <summary>
         /// Gets or sets a <see cref="AlgorithmTunerConfiguration"/> with many default values.
@@ -199,7 +193,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
             var population = this.CreatePopulation();
             this.Strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance);
             Assert.Throws<ArgumentOutOfRangeException>(
-                () => this.Strategy.PerformIteration(generationIndex: -1, instancesForEvaluation: this.SingleTestInstance));
+                () => this.Strategy.PerformIteration(-1, this.SingleTestInstance));
         }
 
         /// <summary>
@@ -360,7 +354,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
                 this.Configuration,
                 this.ParameterTree,
                 this.GenomeBuilder,
-                this.TournamentSelector,
+                this.GenerationEvaluationActor,
                 geneticEngineering);
 
             var strategies = new List<IPopulationUpdateStrategy<TestInstance, IntegerResult>>
@@ -440,22 +434,19 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
                 new ValueNode<string>("categorical", new CategoricalDomain<string>(new List<string> { "a", "b" })));
             this.ParameterTree = new ParameterTree(root);
 
-            this.GenomeSorter = this.ActorSystem.ActorOf(
-                Props.Create(() => new GenomeSorter<TestInstance, IntegerResult>(this.RunEvaluator)),
-                AkkaNames.GenomeSorter);
-
             this.ResultStorageActor = this.ActorSystem.ActorOf(
                 Props.Create(() => new ResultStorageActor<TestInstance, IntegerResult>()),
                 AkkaNames.ResultStorageActor);
-            this.TournamentSelector = this.ActorSystem.ActorOf(
+
+            this.GenerationEvaluationActor = this.ActorSystem.ActorOf(
                 Props.Create(
-                    () => new TournamentSelector<ExtractIntegerValue, TestInstance, IntegerResult>(
+                    () => new GenerationEvaluationActor<ExtractIntegerValue, TestInstance, IntegerResult>(
                         new ExtractIntegerValueCreator(),
                         this.RunEvaluator,
                         this.Configuration,
                         this.ResultStorageActor,
                         this.ParameterTree)),
-                AkkaNames.TournamentSelector);
+                AkkaNames.GenerationEvaluationActor);
 
             this.GenomeBuilder = new ValueGenomeBuilder(this.ParameterTree, this.Configuration, this._genomeValues);
 

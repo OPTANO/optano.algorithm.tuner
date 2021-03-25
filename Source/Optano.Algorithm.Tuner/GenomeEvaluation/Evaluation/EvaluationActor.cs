@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -32,19 +32,14 @@
 namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading;
+    using System.Threading.Tasks;
 
     using Akka.Actor;
 
-    using Optano.Algorithm.Tuner.AkkaConfiguration;
     using Optano.Algorithm.Tuner.Configuration;
-    using Optano.Algorithm.Tuner.GenomeEvaluation.Communication;
-    using Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation.Messages;
-    using Optano.Algorithm.Tuner.GenomeEvaluation.InstanceSelection.Messages;
-    using Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments.Messages;
+    using Optano.Algorithm.Tuner.GenomeEvaluation.Messages;
     using Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage.Messages;
-    using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.Logging;
     using Optano.Algorithm.Tuner.Parameters;
     using Optano.Algorithm.Tuner.TargetAlgorithm;
@@ -52,19 +47,11 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
     using Optano.Algorithm.Tuner.TargetAlgorithm.Results;
 
     /// <summary>
-    /// Actor responsible for conducting single genome - instance evaluations.
+    /// The evaluation actor is responsible for evaluating single genome instance pairs.
     /// </summary>
-    /// <typeparam name="TTargetAlgorithm">
-    /// The algorithm that is tuned.
-    /// </typeparam>
-    /// <typeparam name="TInstance">
-    /// Type of instance the target algorithm is able to process.
-    /// Must be a subtype of <see cref="InstanceBase"/>.
-    /// </typeparam>
-    /// <typeparam name="TResult">
-    /// Type of result of a target algorithm run.
-    /// Must be a subtype of <see cref="ResultBase{TResultType}"/>.
-    /// </typeparam>
+    /// <typeparam name="TTargetAlgorithm">The target algorithm type.</typeparam>
+    /// <typeparam name="TInstance">The instance type.</typeparam>
+    /// <typeparam name="TResult">The result type of a single target algorithm evaluation.</typeparam>
     public class EvaluationActor<TTargetAlgorithm, TInstance, TResult> : ReceiveActor, ILogReceive
         where TTargetAlgorithm : ITargetAlgorithm<TInstance, TResult> where TInstance : InstanceBase where TResult : ResultBase<TResult>, new()
     {
@@ -81,20 +68,9 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
         private readonly ParameterTree _parameterTree;
 
         /// <summary>
-        /// Reference to the actor which is responsible for storing all evaluation results that have been observed so
-        /// far.
-        /// </summary>
-        private readonly IActorRef _resultStorageActor;
-
-        /// <summary>
         /// An object producing configured target algorithms to run with the genomes.
         /// </summary>
         private readonly ITargetAlgorithmFactory<TTargetAlgorithm, TInstance, TResult> _targetAlgorithmFactory;
-
-        /// <summary>
-        /// The current evaluation progress.
-        /// </summary>
-        private readonly GenomeEvaluationProgress<TInstance, TResult> _currentEvaluationProgress;
 
         /// <summary>
         /// The target algorithm that was configured using the current genome.
@@ -109,22 +85,17 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
         /// <summary>
         /// Genome that currently gets evaluated.
         /// </summary>
-        private ImmutableGenome _currentGenome;
+        private GenomeInstancePair<TInstance> _currentGenomeInstancePair;
 
         /// <summary>
-        /// The <see cref="CancellationTokenSource" /> used for the most recent evaluation.
+        /// The evaluation cancellation token source.
         /// </summary>
         private CancellationTokenSource _evaluationCancellationTokenSource;
 
         /// <summary>
-        /// All instances that have to be tested for an evaluation.
+        /// The number of evaluation attempts.
         /// </summary>
-        private List<TInstance> _instancesForEvaluation;
-
-        /// <summary>
-        /// Timeout for the sum of all target runs using the configured algorithm.
-        /// </summary>
-        private TimeSpan _totalEvaluationTimeout = TimeSpan.MaxValue;
+        private int _evaluationTries;
 
         #endregion
 
@@ -133,31 +104,24 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
         /// <summary>
         /// Initializes a new instance of the <see cref="EvaluationActor{TTargetAlgorithm, TInstance, TResult}" /> class.
         /// </summary>
-        /// <param name="targetAlgorithmFactory">Produces configured target algorithms to run with the genomes.</param>
-        /// <param name="resultStorageActor">
-        /// Actor which is responsible for storing all evaluation results that have
-        /// been observed so far.
-        /// </param>
-        /// <param name="configuration">Algorithm tuner configuration parameters.</param>
-        /// <param name="parameterTree">Specifies parameters and their relationships.</param>
+        /// <param name="targetAlgorithmFactory">The target algorithm factory.</param>
+        /// <param name="configuration">The algorithm tuner configuration.</param>
+        /// <param name="parameterTree">The parameter tree.</param>
+        /// <param name="generationEvaluationActor">The generation evaluation actor.</param>
         public EvaluationActor(
             ITargetAlgorithmFactory<TTargetAlgorithm, TInstance, TResult> targetAlgorithmFactory,
-            IActorRef resultStorageActor,
             AlgorithmTunerConfiguration configuration,
-            ParameterTree parameterTree)
+            ParameterTree parameterTree,
+            IActorRef generationEvaluationActor)
         {
+            LoggingHelper.WriteLine(VerbosityLevel.Info, $"Starting new evaluation actor! Address: {this.Self}");
+
             this._targetAlgorithmFactory = targetAlgorithmFactory ?? throw new ArgumentNullException(nameof(targetAlgorithmFactory));
-            this._resultStorageActor = resultStorageActor ?? throw new ArgumentNullException(nameof(resultStorageActor));
             this._configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             this._parameterTree = parameterTree ?? throw new ArgumentNullException(nameof(parameterTree));
 
-            this._currentEvaluationProgress = new GenomeEvaluationProgress<TInstance, TResult>();
-
-            // Start in wait for instances state.
-            this.WaitForInstances();
-
-            // Finally, volunteer for work.
-            UntypedActor.Context.System.ActorSelection($"/*/{AkkaNames.GenomeSorter}").Tell(new Accept());
+            this.Become(this.Ready);
+            generationEvaluationActor.Tell(new HelloWorld());
         }
 
         #endregion
@@ -172,143 +136,42 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
         {
             this._evaluationCancellationTokenSource?.Cancel();
             this._evaluationCancellationTokenSource?.Dispose();
+            this.DisposeTargetAlgorithm();
 
             base.PostStop();
         }
 
         /// <summary>
-        /// Actor is ignorant about which instances to evaluate genomes on.
-        /// </summary>
-        private void WaitForInstances()
-        {
-            // If a poll comes in, decline and ask for configuration first.
-            this.Receive<Poll>(
-                poll =>
-                    {
-                        this.Sender.Tell(new Decline());
-                        this.Sender.Tell(new InstancesRequest());
-                    });
-
-            // Timeout can be updated.
-            this.Receive<UpdateTimeout>(update => this.HandleTimeoutUpdate(update));
-
-            // Timeout can be reset.
-            this.Receive<ResetTimeout>(reset => this._totalEvaluationTimeout = TimeSpan.MaxValue);
-
-            // Instances can be updated.
-            this.Receive<ClearInstances>(update => this._instancesForEvaluation = new List<TInstance>());
-            this.Receive<AddInstances<TInstance>>(update => this._instancesForEvaluation.AddRange(update.Instances));
-
-            // If an instance update finishes successfully, change to ready state.
-            this.Receive<InstanceUpdateFinished>(
-                update => this.Become(this.Ready),
-                update => this._instancesForEvaluation.Count == update.ExpectedInstanceCount);
-
-            // Else request a new instance specification.
-            this.Receive<InstanceUpdateFinished>(
-                update =>
-                    {
-                        this.Sender.Tell(new InstancesRequest());
-                        LoggingHelper.WriteLine(
-                            VerbosityLevel.Warn,
-                            $"Request instances again because we received {this._instancesForEvaluation.Count} instead of {update.ExpectedInstanceCount} instances from {this.Sender}.");
-                    },
-                update => this._instancesForEvaluation.Count != update.ExpectedInstanceCount);
-        }
-
-        /// <summary>
-        /// Actor is ready to process evaluation tasks sent to it from external senders.
+        /// Actor is ready to process polls sent to it from external senders.
         /// </summary>
         private void Ready()
         {
-            // Polls are accepted.
-            this.Receive<Poll>(poll => this.Sender.Tell(new Accept()));
-
-            // Timeout can be updated.
-            this.Receive<UpdateTimeout>(update => this.HandleTimeoutUpdate(update));
-
-            // Timeout can be reset.
-            this.Receive<ResetTimeout>(reset => this._totalEvaluationTimeout = TimeSpan.MaxValue);
-
-            // Instances updates can be started.
-            this.Receive<ClearInstances>(
-                update =>
+            this.Receive<Poll>(
+                message =>
                     {
-                        this._instancesForEvaluation = new List<TInstance>();
-                        this.Become(this.WaitForInstances);
+                        this.Become(this.WaitingForEvaluation);
+                        this.Sender.Tell(new Accept());
                     });
+        }
 
-            // Instance updates without earlier reset indicate missing messages.
-            this.Receive<AddInstances<TInstance>>(
-                update =>
-                    {
-                        this.Sender.Tell(new InstancesRequest());
-                        this.Become(this.WaitForInstances);
-                    });
-            this.Receive<InstanceUpdateFinished>(
-                update =>
-                    {
-                        this.Sender.Tell(new InstancesRequest());
-                        this.Become(this.WaitForInstances);
-                    });
-
-            // Switch to reading from storage state if receiving a genome evaluation.
-            this.Receive<GenomeEvaluation>(
+        /// <summary>
+        /// Waiting for evaluation state.
+        /// </summary>
+        private void WaitingForEvaluation()
+        {
+            this.Receive<GenomeInstancePair<TInstance>>(
                 evaluation =>
                     {
+                        this._currentGenomeInstancePair = evaluation;
                         this._currentEvaluationIssuer = this.Sender;
-                        this.BecomeReadingFromStorage(evaluation);
-                    });
-        }
-
-        /// <summary>
-        /// Actor has accepted a <see cref="GenomeEvaluation" /> and migrates to the <see cref="ReadingFromStorage" />
-        /// state.
-        /// </summary>
-        /// <param name="evaluation">The accepted <see cref="GenomeEvaluation" />.</param>
-        private void BecomeReadingFromStorage(GenomeEvaluation evaluation)
-        {
-            // Configure target algorithm.
-            this._currentGenome = evaluation.Genome;
-            this._configuredTargetAlgorithm = this._targetAlgorithmFactory.ConfigureTargetAlgorithm(
-                this._currentGenome.GetFilteredGenes(this._parameterTree));
-
-            // Initialize evaluation progress
-            this._currentEvaluationProgress.Initialize(evaluation, this._instancesForEvaluation);
-
-            // Change state to reading from storage.
-            this.Become(this.ReadingFromStorage);
-
-            // Start working.
-            this.WorkOnNextInstance();
-        }
-
-        /// <summary>
-        /// Actor is currently trying to read a result from storage.
-        /// </summary>
-        private void ReadingFromStorage()
-        {
-            // Polls are declined.
-            this.Receive<Poll>(poll => this.Sender.Tell(new Decline()));
-
-            // Timeout can be updated.
-            this.Receive<UpdateTimeout>(update => this.HandleTimeoutUpdate(update));
-
-            // Received a result from storage: Remember it and continue working. 
-            this.Receive<ResultMessage<TInstance, TResult>>(
-                resultMessage =>
-                    {
-                        this._currentEvaluationProgress.AddResult(resultMessage.RunResult);
-                        this.WorkOnNextInstance();
-                    });
-
-            // Received a storage miss: Switch state and start running the target algorithm.
-            this.Receive<StorageMiss<TInstance>>(
-                storageMiss =>
-                    {
+                        this._evaluationTries = 0;
+                        this.ConfigureTargetAlgorithm();
                         this.Become(this.Evaluating);
-                        this.StartEvaluation(storageMiss.Instance);
+                        this.StartEvaluation();
                     });
+
+            this.Receive<NoJob>(
+                noJob => { this.Become(this.Ready); });
         }
 
         /// <summary>
@@ -316,168 +179,89 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
         /// </summary>
         private void Evaluating()
         {
-            // Polls are declined.
-            this.Receive<Poll>(poll => this.Sender.Tell(new Decline()));
-
-            // Timeout can be updated.
-            this.Receive<UpdateTimeout>(update => this.HandleTimeoutUpdate(update));
-
-            // Received a result: Add to storage, remember it yourself, change state to reading from storage,
-            // and continue working.
-            this.Receive<ResultMessage<TInstance, TResult>>(
-                resultMessage =>
+            // ignore all messages
+            this.Receive<EvaluationResult<TInstance, TResult>>(
+                r =>
                     {
-                        LoggingHelper.WriteLine(
-                            VerbosityLevel.Trace,
-                            $"Target algorithm run of configuration {resultMessage.Genome.ToFilteredGeneString(this._parameterTree)} on instance {resultMessage.Instance} returned with result {resultMessage.RunResult}.");
-
-                        this._resultStorageActor.Tell(resultMessage);
-                        this._currentEvaluationProgress.AddResult(resultMessage.RunResult);
-
-                        this.Become(this.ReadingFromStorage);
-                        this.WorkOnNextInstance();
+                        this.DisposeTargetAlgorithm();
+                        this.Become(this.Ready);
+                        this._currentEvaluationIssuer.Tell(r);
                     });
 
-            // Received a message that the last evaluation did not work: If it hasn't happened too often yet, 
-            // try again; otherwise, print information and throw an exception for the mini tournament actor to 
-            // handle. 
             this.Receive<Faulted<TInstance>>(
-                faultMessage =>
+                f =>
                     {
-                        // Update the number of faulted evaluations for the instance.
-                        var numberFaultedEvaluationsForInstance = this._currentEvaluationProgress.AddFaultedEvaluation(faultMessage.Instance);
-
-                        // If it is small enough, just try again.
-                        if (numberFaultedEvaluationsForInstance <= this._configuration.MaximumNumberConsecutiveFailuresPerEvaluation)
-                        {
-                            LoggingHelper.WriteLine(
-                                VerbosityLevel.Debug,
-                                $"Evaluating {faultMessage.Genome.ToFilteredGeneString(this._parameterTree)} on {faultMessage.Instance} failed for the {numberFaultedEvaluationsForInstance} time. Reason: {faultMessage.Exception}. Trying again.");
-                            this.StartEvaluation(faultMessage.Instance);
-                        }
-
-                        // Otherwise, throw an exception.
-                        else
+                        if (Interlocked.Increment(ref this._evaluationTries) > this._configuration.MaximumNumberConsecutiveFailuresPerEvaluation)
                         {
                             LoggingHelper.WriteLine(
                                 VerbosityLevel.Warn,
-                                $"Genome {this._currentGenome.ToFilteredGeneString(this._parameterTree)} does not work with instance {faultMessage.Instance}: {faultMessage.Exception}.");
-                            throw faultMessage.Exception;
+                                $"Genome {this._currentGenomeInstancePair.Genome.ToFilteredGeneString(this._parameterTree)} does not work with instance {this._currentGenomeInstancePair.Instance}: {f.Reason}.");
+                            var ex = f.Reason ?? (Exception)new TaskCanceledException(
+                                         $"Aborting evaluation of {this._currentGenomeInstancePair.Genome} on {this._currentGenomeInstancePair.Instance}, since it failed {this._configuration.MaximumNumberConsecutiveFailuresPerEvaluation} times.");
+
+                            this.Become(this.Ready);
+                            this.Sender.Tell(new Status.Failure(ex));
+                            return;
                         }
+
+                        LoggingHelper.WriteLine(
+                            VerbosityLevel.Debug,
+                            $"Evaluating {this._currentGenomeInstancePair.Genome.ToFilteredGeneString(this._parameterTree)} on {this._currentGenomeInstancePair.Instance} failed for the {this._evaluationTries} time. Reason: {f.Reason}. Trying again.");
+                        this.StartEvaluation();
                     });
         }
 
         /// <summary>
-        /// Actor has finished all evaluations and migrates to <see cref="Ready" /> state.
+        /// Starts an evaluation of the current genome instance pair.
         /// </summary>
-        private void BecomeReady()
-        {
-            // Inform evaluation issuer about results.
-            foreach (var message in this._currentEvaluationProgress.CreateEvaluationResultMessages())
-            {
-                this._currentEvaluationIssuer.Tell(message);
-            }
-
-            // Dispose of target algorithm if it is disposable.
-            var targetAlgorithmToDispose = this._configuredTargetAlgorithm as IDisposable;
-            targetAlgorithmToDispose?.Dispose();
-
-            // Reset evaluation specific fields.
-            this._currentEvaluationIssuer = null;
-            this._currentEvaluationProgress.Reset();
-
-            // Change state to ready.
-            this.Become(this.Ready);
-        }
-
-        /// <summary>
-        /// Looks for next open instance and starts working on it. If there is no next instance or the timeout is
-        /// reached, working is stopped and a switch to <see cref="Ready" /> state is prompted.
-        /// </summary>
-        private void WorkOnNextInstance()
-        {
-            // Check status:
-            if (this._currentEvaluationProgress.HasOpenEvaluations && !this.ExceededTimeout())
-            {
-                this.NextStorageRequest();
-            }
-            else
-            {
-                this.BecomeReady();
-            }
-        }
-
-        /// <summary>
-        /// Checks whether the mini tournament timeout has been exceeded.
-        /// </summary>
-        /// <returns>
-        /// Whether the timeout has been exceeded.
-        /// Always false if <see cref="AlgorithmTunerConfiguration.EnableRacing" /> is false.
-        /// </returns>
-        private bool ExceededTimeout()
-        {
-            if (!this._configuration.EnableRacing)
-            {
-                return false;
-            }
-
-            return this._currentEvaluationProgress.TotalRunTime > this._totalEvaluationTimeout;
-        }
-
-        /// <summary>
-        /// Issues a storage request for the next open instance.
-        /// </summary>
-        private void NextStorageRequest()
-        {
-            // Pop an instance.
-            var currentInstance = this._currentEvaluationProgress.PopOpenInstance();
-
-            // Try to look it up in storage.
-            var resultRequest = new ResultRequest<TInstance>(this._currentGenome, currentInstance);
-            this._resultStorageActor.Tell(resultRequest);
-        }
-
-        /// <summary>
-        /// Starts an evaluation on the given instance.
-        /// </summary>
-        /// <param name="instance">The instance to run the configured target algorithm on.</param>
-        private void StartEvaluation(TInstance instance)
+        private void StartEvaluation()
         {
             LoggingHelper.WriteLine(
                 VerbosityLevel.Trace,
-                $"Starting target algorithm run with configuration {this._currentGenome.ToFilteredGeneString(this._parameterTree)} on instance {instance}.");
+                $"Starting target algorithm run with configuration {this._currentGenomeInstancePair.Genome.ToFilteredGeneString(this._parameterTree)} on instance {this._currentGenomeInstancePair.Instance}.");
 
-            // Set a CPU timeout.
+            // Set the CPU timeout.
             this._evaluationCancellationTokenSource = new CancellationTokenSource(this._configuration.CpuTimeout);
 
             // Start the target algorithm run.
-            this._configuredTargetAlgorithm.Run(instance, this._evaluationCancellationTokenSource.Token)
+            this._configuredTargetAlgorithm.Run(this._currentGenomeInstancePair.Instance, this._evaluationCancellationTokenSource.Token)
                 .ContinueWith<object>(
                     finishedTask =>
                         {
                             if (finishedTask.IsCanceled)
                             {
                                 var cancellationResult = ResultBase<TResult>.CreateCancelledResult(this._configuration.CpuTimeout);
-                                return new ResultMessage<TInstance, TResult>(this._currentGenome, instance, cancellationResult);
+                                return new EvaluationResult<TInstance, TResult>(this._currentGenomeInstancePair, cancellationResult);
                             }
 
                             if (finishedTask.IsFaulted)
                             {
-                                return new Faulted<TInstance>(this._currentGenome, instance, finishedTask.Exception);
+                                return new Faulted<TInstance>(this._currentGenomeInstancePair, finishedTask.Exception);
                             }
 
-                            return new ResultMessage<TInstance, TResult>(this._currentGenome, instance, finishedTask.Result);
+                            return new EvaluationResult<TInstance, TResult>(this._currentGenomeInstancePair, finishedTask.Result);
                         })
-                .PipeTo(this.Self);
+                .PipeTo(this.Self, sender: this.Sender);
         }
 
         /// <summary>
-        /// Updates the <see cref="_totalEvaluationTimeout" />.
+        /// Configures the current target algorithm.
         /// </summary>
-        /// <param name="update">Message that caused the update.</param>
-        private void HandleTimeoutUpdate(UpdateTimeout update)
+        private void ConfigureTargetAlgorithm()
         {
-            this._totalEvaluationTimeout = TimeSpanUtil.Min(update.Timeout, this._totalEvaluationTimeout);
+            this._configuredTargetAlgorithm =
+                this._targetAlgorithmFactory.ConfigureTargetAlgorithm(this._currentGenomeInstancePair.Genome.GetFilteredGenes(this._parameterTree));
+        }
+
+        /// <summary>
+        /// Disposes the current target algorithm.
+        /// </summary>
+        private void DisposeTargetAlgorithm()
+        {
+            if (this._configuredTargetAlgorithm is IDisposable disposableTargetAlgorithm)
+            {
+                disposableTargetAlgorithm.Dispose();
+            }
         }
 
         #endregion

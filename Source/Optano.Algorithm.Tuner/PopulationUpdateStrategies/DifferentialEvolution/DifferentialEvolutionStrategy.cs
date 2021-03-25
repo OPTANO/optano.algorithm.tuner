@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -44,8 +44,8 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.DifferentialEvolutio
     using Optano.Algorithm.Tuner.ContinuousOptimization;
     using Optano.Algorithm.Tuner.ContinuousOptimization.DifferentialEvolution;
     using Optano.Algorithm.Tuner.GenomeEvaluation;
+    using Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation;
     using Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage;
-    using Optano.Algorithm.Tuner.GenomeEvaluation.Sorting;
     using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.Logging;
     using Optano.Algorithm.Tuner.Parameters;
@@ -59,12 +59,8 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.DifferentialEvolutio
     /// <summary>
     /// Updates <see cref="Population"/> objects using <see cref="DifferentialEvolution{TSearchPoint}"/> instances.
     /// </summary>
-    /// <typeparam name="TInstance">
-    /// The instance type to use.
-    /// </typeparam>
-    /// <typeparam name="TResult">
-    /// The result for an individual evaluation.
-    /// </typeparam>
+    /// <typeparam name="TInstance">The instance type.</typeparam>
+    /// <typeparam name="TResult">The result type of a single target algorithm evaluation.</typeparam>
     public class DifferentialEvolutionStrategy<TInstance, TResult> : ContinuousOptimizationStrategyBase<GenomeSearchPoint, TInstance, TResult>
         where TInstance : InstanceBase
         where TResult : ResultBase<TResult>, new()
@@ -104,8 +100,8 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.DifferentialEvolutio
         /// <param name="parameterTree">Provides the tunable parameters.</param>
         /// <param name="genomeBuilder">Responsible for creation, modification and crossover of genomes.
         /// Needs to be compatible with the given parameter tree and configuration.</param>
-        /// <param name="genomeSorter">
-        /// An <see cref="IActorRef" /> to a <see cref="GenomeSorter{TInstance,TResult}" />.
+        /// <param name="generationEvaluationActor">
+        /// An <see cref="IActorRef" /> to a <see cref="GenerationEvaluationActor{TTargetAlgorithm,TInstance,TResult}"/>.
         /// </param>
         /// <param name="targetRunResultStorage">
         /// An <see cref="IActorRef" /> to a <see cref="ResultStorageActor{TInstance,TResult}" />
@@ -115,9 +111,9 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.DifferentialEvolutio
             AlgorithmTunerConfiguration configuration,
             ParameterTree parameterTree,
             GenomeBuilder genomeBuilder,
-            IActorRef genomeSorter,
+            IActorRef generationEvaluationActor,
             IActorRef targetRunResultStorage)
-            : base(configuration, parameterTree, targetRunResultStorage, new GenomeSearchPointSorter<TInstance>(genomeSorter))
+            : base(configuration, parameterTree, targetRunResultStorage, new GenomeSearchPointSorter<TInstance, TResult>(generationEvaluationActor))
         {
             this._strategyConfiguration =
                 this.Configuration.ExtractDetailedConfiguration<DifferentialEvolutionStrategyConfiguration>(

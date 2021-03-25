@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -31,41 +31,51 @@
 
 namespace Optano.Algorithm.Tuner.Tests.TargetAlgorithm.InterfaceImplementations
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
 
+    using Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation;
     using Optano.Algorithm.Tuner.Genomes;
+    using Optano.Algorithm.Tuner.TargetAlgorithm.Instances;
     using Optano.Algorithm.Tuner.TargetAlgorithm.Results;
     using Optano.Algorithm.Tuner.TargetAlgorithm.RunEvaluators;
 
     /// <summary>
-    /// An implementation of <see cref="IRunEvaluator{TResult}"/> that doesn't reorder the genomes at all.
+    /// An implementation of <see cref="IRunEvaluator{TInstance,TResult}"/> that doesn't reorder the genomes at all.
     /// </summary>
+    /// <typeparam name="TInstance">The instance type.</typeparam>
     /// <typeparam name="TResult">The result type.</typeparam>
-    internal class KeepSuggestedOrder<TResult> : IRunEvaluator<TResult>
+    internal class KeepSuggestedOrder<TInstance, TResult> : IRunEvaluator<TInstance, TResult>
+        where TInstance : InstanceBase
         where TResult : ResultBase<TResult>, new()
     {
-        #region Public properties
-
-        /// <summary>
-        /// Gets a value indicating whether the sorting is ascending or descending.
-        /// Dummy stub to meet interface requirement.
-        /// </summary>
-        public bool SortAscending => true;
-
-        #endregion
-
         #region Public Methods and Operators
 
-        /// <summary>
-        /// Sorts the genomes by results, best genome first.
-        /// In this case, we just keep the order suggested by the successful run result dictionary.
-        /// </summary>
-        /// <param name="runResults">Results from target algorithm runs, grouped by genome.</param>
-        /// <returns>The given genomes as a list.</returns>
-        public IEnumerable<ImmutableGenome> Sort(Dictionary<ImmutableGenome, IEnumerable<TResult>> runResults)
+        /// <inheritdoc />
+        public IEnumerable<ImmutableGenomeStats<TInstance, TResult>> Sort(
+            IEnumerable<ImmutableGenomeStats<TInstance, TResult>> allGenomeStatsOfMiniTournament)
         {
-            return runResults.Select(keyValuePair => keyValuePair.Key);
+            return allGenomeStatsOfMiniTournament;
+        }
+
+        /// <inheritdoc />
+        public IEnumerable<ImmutableGenome> GetGenomesThatCanBeCancelledByRacing(
+            IReadOnlyList<ImmutableGenomeStats<TInstance, TResult>> allGenomeStatsOfMiniTournament,
+            int numberOfMiniTournamentWinners)
+        {
+            return Enumerable.Empty<ImmutableGenome>();
+        }
+
+        /// <summary>
+        /// Uses the <paramref name="genomeStats"/>.Genome.Age - OpenInstances.Count as priority.
+        /// </summary>
+        /// <param name="genomeStats">The genome stats.</param>
+        /// <param name="cpuTimeout">The timeout.</param>
+        /// <returns><see cref="ImmutableGenomeStats{TInstance,TResult}.Genome"/>.Age.</returns>
+        public double ComputeEvaluationPriorityOfGenome(ImmutableGenomeStats<TInstance, TResult> genomeStats, TimeSpan cpuTimeout)
+        {
+            return genomeStats.Genome.Age - genomeStats.OpenInstances.Count;
         }
 
         #endregion

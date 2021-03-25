@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -44,9 +44,8 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage.Messages
     /// A message containing all results a <see cref="ResultStorageActor{TInstance, TResult}"/> has collected up to the message send
     /// point.
     /// </summary>
-    /// <typeparam name="TInstance">Instance type the results have been evaluated on.
-    /// Must extend <see cref="InstanceBase"/>.</typeparam>
-    /// <typeparam name="TResult">Type of the results. Must extend <see cref="ResultBase{TResultType}"/>.</typeparam>
+    /// <typeparam name="TInstance">The instance type.</typeparam>
+    /// <typeparam name="TResult">The result type of a single target algorithm evaluation.</typeparam>
     public class AllResults<TInstance, TResult>
         where TInstance : InstanceBase where TResult : ResultBase<TResult>, new()
     {

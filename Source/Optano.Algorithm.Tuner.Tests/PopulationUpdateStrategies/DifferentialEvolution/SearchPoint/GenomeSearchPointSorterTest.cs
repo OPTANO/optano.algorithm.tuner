@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -40,17 +40,18 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.DifferentialEv
     using MathNet.Numerics.LinearAlgebra;
 
     using Optano.Algorithm.Tuner.ContinuousOptimization;
-    using Optano.Algorithm.Tuner.GenomeEvaluation.Sorting;
+    using Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation;
     using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.Parameters;
     using Optano.Algorithm.Tuner.PopulationUpdateStrategies;
     using Optano.Algorithm.Tuner.PopulationUpdateStrategies.DifferentialEvolution.SearchPoint;
     using Optano.Algorithm.Tuner.Tests.TargetAlgorithm.InterfaceImplementations;
+    using Optano.Algorithm.Tuner.Tests.TargetAlgorithm.InterfaceImplementations.ValueConsideration;
 
     using Xunit;
 
     /// <summary>
-    /// Contains tests for the <see cref="GenomeSearchPointSorter{TInstance}"/> class.
+    /// Contains tests for the <see cref="GenomeSearchPointSorter{TInstance,TResult}"/> class.
     /// </summary>
     [Collection(TestUtils.NonParallelCollectionGroupOneName)]
     public class GenomeSearchPointSorterTest : GenomeAssistedSorterBaseTest<GenomeSearchPoint>
@@ -58,36 +59,35 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.DifferentialEv
         #region Fields
 
         /// <summary>
-        /// The <see cref="GenomeSearchPointSorter{TInstance}"/> to test.
+        /// The <see cref="GenomeSearchPointSorter{TInstance,TResult}"/> to test.
         /// </summary>
-        private GenomeSearchPointSorter<TestInstance> _sorter;
+        private GenomeSearchPointSorter<TestInstance, IntegerResult> _sorter;
 
         #endregion
 
         #region Properties
 
         /// <summary>
-        /// Gets the <see cref="GenomeAssistedSorterBase{TSearchPoint,TInstance}"/> used in tests.
+        /// Gets the <see cref="GenomeAssistedSorterBase{TSearchPoint,TInstance,TResult}"/> used in tests.
         /// </summary>
-        protected override GenomeAssistedSorterBase<GenomeSearchPoint, TestInstance> GenomeAssistedSorter
-            => this._sorter;
+        protected override GenomeAssistedSorterBase<GenomeSearchPoint, TestInstance, IntegerResult> GenomeAssistedSorter => this._sorter;
 
         #endregion
 
         #region Public Methods and Operators
 
         /// <summary>
-        /// Checks that <see cref="GenomeSearchPointSorter{TInstance}"/>'s constructor throws a
-        /// <see cref="ArgumentNullException"/> if called without a <see cref="GenomeSorter{TInstance,TResult}"/>.
+        /// Checks that <see cref="GenomeSearchPointSorter{TInstance, TResult}"/>'s constructor throws a
+        /// <see cref="ArgumentNullException"/> if called without a <see cref="GenerationEvaluationActor{TTargetAlgorithm,TInstance,TResult}"/>.
         /// </summary>
         [Fact]
-        public override void ConstructorThrowsForMissingGenomeSorter()
+        public override void ConstructorThrowsForMissingGenerationEvaluationActor()
         {
-            Assert.Throws<ArgumentNullException>(() => new GenomeSearchPointSorter<TestInstance>(genomeSorter: null));
+            Assert.Throws<ArgumentNullException>(() => new GenomeSearchPointSorter<TestInstance, TestResult>(null));
         }
 
         /// <summary>
-        /// Checks that <see cref="GenomeSearchPointSorter{TInstance}.Sort"/> sorts <see cref="Genome"/>s by
+        /// Checks that <see cref="GenomeSearchPointSorter{TInstance, TResult}.Sort"/> sorts <see cref="Genome"/>s by
         /// performance.
         /// </summary>
         [Fact]
@@ -106,7 +106,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.DifferentialEv
         }
 
         /// <summary>
-        /// Checks that <see cref="GenomeSearchPointSorter{TInstance}.Sort"/> and
+        /// Checks that <see cref="GenomeSearchPointSorter{TInstance, TResult}.Sort"/> and
         /// <see cref="ISearchPointSorter{TSearchPoint}.DetermineRanks"/> are consistent.
         /// </summary>
         [Fact]
@@ -122,7 +122,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.DifferentialEv
         }
 
         /// <summary>
-        /// Checks that <see cref="GenomeSearchPointSorter{TInstance}.Sort"/> can handle duplicates.
+        /// Checks that <see cref="GenomeSearchPointSorter{TInstance, TResult}.Sort"/> can handle duplicates.
         /// </summary>
         [Fact]
         public override void SortingCanHandleDuplicates()
@@ -153,12 +153,12 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.DifferentialEv
         /// <summary>
         /// Initializes <see cref="GenomeAssistedSorterBaseTest{TSearchPoint}.GenomeAssistedSorter"/>.
         /// </summary>
-        /// <param name="genomeSorter">
-        /// An <see cref="IActorRef" /> to a <see cref="GenomeSorter{TInstance,TResult}" />.
+        /// <param name="generationEvaluationActor">
+        /// An <see cref="IActorRef" /> to a <see cref="GenerationEvaluationActor{TTargetAlgorithm,TInstance,TResult}" />.
         /// </param>
-        protected override void InitializeSorter(IActorRef genomeSorter)
+        protected override void InitializeSorter(IActorRef generationEvaluationActor)
         {
-            this._sorter = new GenomeSearchPointSorter<TestInstance>(genomeSorter);
+            this._sorter = new GenomeSearchPointSorter<TestInstance, IntegerResult>(generationEvaluationActor);
         }
 
         /// <summary>

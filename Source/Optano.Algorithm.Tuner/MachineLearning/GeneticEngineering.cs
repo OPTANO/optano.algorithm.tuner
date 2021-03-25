@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -54,6 +54,7 @@ namespace Optano.Algorithm.Tuner.MachineLearning
 
     using SharpLearning.Containers.Matrices;
     using SharpLearning.DecisionTrees.Models;
+    using SharpLearning.DecisionTrees.SplitSearchers;
 
     /// <summary>
     /// This class preforms the training of the random forest predicting parameter combination quality, and performs
@@ -144,7 +145,7 @@ namespace Optano.Algorithm.Tuner.MachineLearning
         private IBulkGenomeTransformation GenomeTransformator { get; }
 
         /// <summary>
-        /// Gets the Custom random forest learner that uses the <see cref="TopPerformerFocusSplitCriterion" /> and
+        /// Gets the Custom random forest learner that uses the <see cref="LinearSplitSearcher{TImpurityCalculator}" /> and
         /// <see cref="TopPerformerFocusImpurityCalculator" />.
         /// </summary>
         private TLearnerModel RandomForestLearner { get; }
@@ -190,8 +191,8 @@ namespace Optano.Algorithm.Tuner.MachineLearning
 
             // Prepare data for distance computation
             // handle each individual genome once in algorithm. don't forget actual occurrence count.
-            var distanceComputationGenomeCounts = genomesForDistanceComputation.GroupBy(g => g, new Genome.GeneValueComparator())
-                .ToDictionary(g => g.Key, g => g.Count(), new Genome.GeneValueComparator());
+            var distanceComputationGenomeCounts = genomesForDistanceComputation.GroupBy(g => g, Genome.GenomeComparer)
+                .ToDictionary(g => g.Key, g => g.Count(), Genome.GenomeComparer);
             var orderedUniqueDistanceComputationGenomes = distanceComputationGenomeCounts.Keys.ToArray();
             var distanceGenomeOccurrences = orderedUniqueDistanceComputationGenomes.Select(g => distanceComputationGenomeCounts[g]).ToArray();
 

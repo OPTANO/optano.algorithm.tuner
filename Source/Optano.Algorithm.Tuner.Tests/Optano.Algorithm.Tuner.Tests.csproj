@@ -25,8 +25,9 @@
   
   <ItemGroup>
     <PackageReference Include="Accord.Statistics" Version="3.8.0" />
-    <PackageReference Include="Akka.TestKit.Xunit2" Version="1.4.3" />
+    <PackageReference Include="Akka.TestKit.Xunit2" Version="1.4.14" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+    <PackageReference Include="Moq" Version="4.16.1" />
     <PackageReference Include="Shouldly" Version="3.0.2" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
@@ -53,12 +54,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="app.config">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="app.hocon">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
 	<None Include="..\..\Tools\TestApplication.dll" Link="Tools\TestApplication.dll">
 		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	</None>
@@ -93,6 +88,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="xunit.runner.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="app.hocon">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

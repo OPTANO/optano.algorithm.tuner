@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="FullSignature">
-  <Interface Name="Optano.Algorithm.Tuner.Data.MachineLearning.ISamplingStrategy">
+  <Interface Name="Optano.Algorithm.Tuner.MachineLearning.TrainingData.ISamplingStrategy">
     <Position X="0.5" Y="0.5" Width="4.75" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAQAA=</HashCode>
-      <FileName>Data\MachineLearning\ISamplingStrategy.cs</FileName>
+      <FileName>MachineLearning\TrainingData\ISamplingStrategy.cs</FileName>
     </TypeIdentifier>
   </Interface>
-  <Interface Name="Optano.Algorithm.Tuner.Data.MachineLearning.IEnsembleSamplingStrategy&lt;TGenomePredictor&gt;">
+  <Interface Name="Optano.Algorithm.Tuner.MachineLearning.TrainingData.IEnsembleSamplingStrategy&lt;TGenomePredictor&gt;">
     <Position X="0.5" Y="2.25" Width="4.75" />
     <TypeIdentifier>
       <HashCode>EAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Data\MachineLearning\ISamplingStrategy.cs</FileName>
+      <FileName>MachineLearning\TrainingData\IEnsembleSamplingStrategy.cs</FileName>
     </TypeIdentifier>
   </Interface>
   <Font Name="Segoe UI" Size="9" />

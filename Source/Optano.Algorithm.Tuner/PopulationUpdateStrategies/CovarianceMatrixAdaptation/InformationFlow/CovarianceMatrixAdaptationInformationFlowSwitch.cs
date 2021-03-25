@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -36,8 +36,8 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.CovarianceMatrixAdap
     using Akka.Actor;
 
     using Optano.Algorithm.Tuner.Configuration;
+    using Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation;
     using Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage;
-    using Optano.Algorithm.Tuner.GenomeEvaluation.Sorting;
     using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.Parameters;
     using Optano.Algorithm.Tuner.PopulationUpdateStrategies.CovarianceMatrixAdaptation.InformationFlow.Global;
@@ -58,18 +58,14 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.CovarianceMatrixAdap
         /// Creates a <see cref="CovarianceMatrixAdaptationStrategyBase{TSearchPoint, TInstance, TResult}"/> depending
         /// on the <see cref="CovarianceMatrixAdaptationStrategyConfiguration"/>.
         /// </summary>
-        /// <typeparam name="TInstance">
-        /// The instance type to use.
-        /// </typeparam>
-        /// <typeparam name="TResult">
-        /// The result for an individual evaluation.
-        /// </typeparam>
+        /// <typeparam name="TInstance">The instance type.</typeparam>
+        /// <typeparam name="TResult">The result type of a single target algorithm evaluation.</typeparam>
         /// <param name="configuration">Options to use.</param>
         /// <param name="parameterTree">Provides the tunable parameters.</param>
         /// <param name="genomeBuilder">Responsible for creation, modification and crossover of genomes.
         /// Needs to be compatible with the given parameter tree and configuration.</param>
-        /// <param name="genomeSorter">
-        /// An <see cref="IActorRef" /> to a <see cref="GenomeSorter{TInstance,TResult}" />.
+        /// <param name="generationEvaluationActor">
+        /// An <see cref="IActorRef" /> to a <see cref="GenerationEvaluationActor{TTargetAlgorithm,TInstance,TResult}"/>.
         /// </param>
         /// <param name="targetRunResultStorage">
         /// An <see cref="IActorRef" /> to a <see cref="ResultStorageActor{TInstance,TResult}" />
@@ -82,7 +78,7 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.CovarianceMatrixAdap
             AlgorithmTunerConfiguration configuration,
             ParameterTree parameterTree,
             GenomeBuilder genomeBuilder,
-            IActorRef genomeSorter,
+            IActorRef generationEvaluationActor,
             IActorRef targetRunResultStorage)
             where TInstance : InstanceBase
             where TResult : ResultBase<TResult>, new()
@@ -93,7 +89,7 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.CovarianceMatrixAdap
                     configuration,
                     parameterTree,
                     genomeBuilder,
-                    genomeSorter,
+                    generationEvaluationActor,
                     targetRunResultStorage);
             }
             else
@@ -102,7 +98,7 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.CovarianceMatrixAdap
                     configuration,
                     parameterTree,
                     genomeBuilder,
-                    genomeSorter,
+                    generationEvaluationActor,
                     targetRunResultStorage);
             }
         }
@@ -112,12 +108,8 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.CovarianceMatrixAdap
         /// <see cref="CovarianceMatrixAdaptationStrategyBase{TSearchPoint,TInstance,TResult}"/> to create according to
         /// the provided <see cref="AlgorithmTunerConfiguration"/>.
         /// </summary>
-        /// <typeparam name="TInstance">
-        /// The instance type to use.
-        /// </typeparam>
-        /// <typeparam name="TResult">
-        /// The result for an individual evaluation.
-        /// </typeparam>
+        /// <typeparam name="TInstance">The instance type.</typeparam>
+        /// <typeparam name="TResult">The result type of a single target algorithm evaluation.</typeparam>
         /// <param name="configuration">The <see cref="AlgorithmTunerConfiguration"/> to check.</param>
         /// <returns>
         /// The type of the <see cref="CovarianceMatrixAdaptationStrategyBase{TSearchPoint,TInstance,TResult}"/> to

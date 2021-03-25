@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -41,8 +41,8 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm
     /// Class responsible for providing the target algorithm in configured form.
     /// </summary>
     /// <typeparam name="TTargetAlgorithm">Type of the target algorithm.</typeparam>
-    /// <typeparam name="TInstance">Type of instances the target algorithm accepts.</typeparam>
-    /// <typeparam name="TResult">Type of result that is produced by running the target algorithm.</typeparam>
+    /// <typeparam name="TInstance">The instance type.</typeparam>
+    /// <typeparam name="TResult">The result type of a single target algorithm evaluation.</typeparam>
     public interface ITargetAlgorithmFactory<TTargetAlgorithm, TInstance, TResult>
         where TTargetAlgorithm : ITargetAlgorithm<TInstance, TResult>
         where TInstance : InstanceBase

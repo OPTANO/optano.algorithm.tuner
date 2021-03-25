@@ -1,30 +1,30 @@
 ﻿#region Copyright (c) OPTANO GmbH
 
 // ////////////////////////////////////////////////////////////////////////////////
-//
+// 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
-//
+// 
 //    The entire contents of this file is protected by German and
 //    International Copyright Laws. Unauthorized reproduction,
 //    reverse-engineering, and distribution of all or any portion of
 //    the code contained in this file is strictly prohibited and may
 //    result in severe civil and criminal penalties and will be
 //    prosecuted to the maximum extent possible under the law.
-//
+// 
 //    RESTRICTIONS
-//
+// 
 //    THIS SOURCE CODE AND ALL RESULTING INTERMEDIATE FILES
 //    ARE CONFIDENTIAL AND PROPRIETARY TRADE SECRETS OF
 //    OPTANO GMBH.
-//
+// 
 //    THE SOURCE CODE CONTAINED WITHIN THIS FILE AND ALL RELATED
 //    FILES OR ANY PORTION OF ITS CONTENTS SHALL AT NO TIME BE
 //    COPIED, TRANSFERRED, SOLD, DISTRIBUTED, OR OTHERWISE MADE
 //    AVAILABLE TO OTHER INDIVIDUALS WITHOUT WRITTEN CONSENT
 //    AND PERMISSION FROM OPTANO GMBH.
-//
+// 
 // ////////////////////////////////////////////////////////////////////////////////
 
 #endregion
@@ -54,6 +54,15 @@ namespace Optano.Algorithm.Tuner.Configuration
         /// File name to use for serialized data.
         /// </summary>
         public const string FileName = "status.oatstat";
+
+        #endregion
+
+        #region Fields
+
+        /// <summary>
+        /// Private field corresponding to <see cref="AlgorithmTunerConfiguration.MaximumNumberParallelEvaluations"/>.
+        /// </summary>
+        private int _maximumNumberParallelEvaluations;
 
         #endregion
 
@@ -173,7 +182,20 @@ namespace Optano.Algorithm.Tuner.Configuration
         /// <summary>
         /// Gets the maximum number of parallel evaluations allowed per node.
         /// </summary>
-        public int MaximumNumberParallelEvaluations { get; private set; }
+        public int MaximumNumberParallelEvaluations
+        {
+            get
+            {
+                if (this._maximumNumberParallelEvaluations > Environment.ProcessorCount)
+                {
+                    LoggingHelper.WriteLine(
+                        VerbosityLevel.Warn,
+                        $"Warning: You specified {this._maximumNumberParallelEvaluations} parallel evaluations, but only have {Environment.ProcessorCount} processors. Processes may fight for resources.");
+                }
+
+                return this._maximumNumberParallelEvaluations;
+            }
+        }
 
         /// <summary>
         /// Gets the maximum number of parallel threads allowed per node.
@@ -340,7 +362,10 @@ namespace Optano.Algorithm.Tuner.Configuration
         /// </summary>
         /// <param name="other">Configuration used for the start of tuning.</param>
         /// <returns>True iff this configuration can be used for continued tuning.</returns>
-        [SuppressMessage("NDepend", "ND1001:MethodsTooComplexCritical", Justification = "The method needs to check all relevant configuration parameters.")]
+        [SuppressMessage(
+            "NDepend",
+            "ND1001:MethodsTooComplexCritical",
+            Justification = "The method needs to check all relevant configuration parameters.")]
         public override bool IsCompatible(ConfigurationBase other)
         {
             if (!(other is AlgorithmTunerConfiguration))
@@ -459,7 +484,7 @@ namespace Optano.Algorithm.Tuner.Configuration
             descriptionBuilder.AppendLine("Target algorithm specific : {");
             descriptionBuilder.AppendLine(Indent + $"racing : {this.EnableRacing}");
             descriptionBuilder.AppendLine(Indent + $"cpuTimeout : {this.CpuTimeout}");
-            descriptionBuilder.AppendLine(Indent + $"maxParallelEvaluations : {this.MaximumNumberParallelEvaluations}");
+            descriptionBuilder.AppendLine(Indent + $"maxParallelEvaluations : {this._maximumNumberParallelEvaluations}");
             descriptionBuilder.AppendLine(Indent + $"instanceNumbers.Minimum : {this.StartNumInstances}");
             descriptionBuilder.AppendLine(Indent + $"instanceNumbers.Maximum : {this.EndNumInstances}");
             descriptionBuilder.AppendLine(Indent + $"addDefaultGenome : {this.AddDefaultGenome}");
@@ -535,13 +560,6 @@ namespace Optano.Algorithm.Tuner.Configuration
         /// </summary>
         public void Validate()
         {
-            if (this.MaximumNumberParallelEvaluations > this.MaximumMiniTournamentSize)
-            {
-                LoggingHelper.WriteLine(
-                    VerbosityLevel.Warn,
-                    $"Warning: Maximum mini tournament size of {this.MaximumMiniTournamentSize} implies at most {this.MaximumMiniTournamentSize} parallel evaluations, but {this.MaximumNumberParallelEvaluations} is given as explicit maximum.");
-            }
-
             if (this.ContinuousOptimizationMethod == ContinuousOptimizationMethod.None)
             {
                 if (this.MaximumNumberGgaGenerations < this.Generations)
@@ -1732,8 +1750,10 @@ namespace Optano.Algorithm.Tuner.Configuration
                 configuration.EndNumInstances = this._endNumInstances ?? fallback?.EndNumInstances ?? 100;
                 configuration.GoalGeneration = this._goalGeneration ?? fallback?.GoalGeneration ?? 74;
 
+                var fallbackHoconFile = new FileInfo("app.hocon");
+                var hoconFallbackString = fallbackHoconFile.Exists ? File.ReadAllText(fallbackHoconFile.FullName) : "";
                 configuration.AkkaConfiguration =
-                    this._akkaConfiguration ?? fallback?.AkkaConfiguration ?? ConfigurationFactory.Load();
+                    this._akkaConfiguration ?? fallback?.AkkaConfiguration ?? ConfigurationFactory.ParseString(hoconFallbackString);
 
                 configuration.Verbosity = this._verbosity ?? fallback?.Verbosity ?? VerbosityLevel.Info;
                 configuration.StatusFileDirectory = this._statusFileDirectory ?? fallback?.StatusFileDirectory ?? DefaultStatusFileDirectory;
@@ -1769,15 +1789,15 @@ namespace Optano.Algorithm.Tuner.Configuration
                 configuration.DistanceMetric =
                     this._distanceMetric ?? fallback?.DistanceMetric ?? DistanceMetric.HammingDistance;
 
-                configuration.MaximumNumberParallelEvaluations =
+                configuration._maximumNumberParallelEvaluations =
                     this._maximumNumberParallelEvaluations
-                    ?? fallback?.MaximumNumberParallelEvaluations
+                    ?? fallback?._maximumNumberParallelEvaluations
                     ?? throw new InvalidOperationException("You must set a maximum number of parallel evaluations!");
 
                 configuration.MaximumNumberParallelThreads =
                     this._maximumNumberParallelThreads
                     ?? fallback?.MaximumNumberParallelThreads
-                    ?? configuration.MaximumNumberParallelEvaluations;
+                    ?? configuration._maximumNumberParallelEvaluations;
 
                 configuration.AddDefaultGenome =
                     this._addDefaultGenome

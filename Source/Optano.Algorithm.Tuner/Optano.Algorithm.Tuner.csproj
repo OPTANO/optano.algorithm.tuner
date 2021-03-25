@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
@@ -25,11 +25,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Akka.Cluster" Version="1.4.3" />
-    <PackageReference Include="Akka.Logger.NLog" Version="1.3.5" />
-    <PackageReference Include="Akka.Serialization.Hyperion" Version="1.4.3" />
+    <PackageReference Include="Akka.Cluster" Version="1.4.14" />
+    <PackageReference Include="Akka.Logger.NLog" Version="1.4.10" />
+    <PackageReference Include="Akka.Serialization.Hyperion" Version="1.4.14" />
     <PackageReference Include="MathNet.Numerics" Version="4.9.0" />
-    <PackageReference Include="NDesk.Options" Version="0.2.1" />
+    <PackageReference Include="NDesk.Options.Patched" Version="0.3.2" />
+    <PackageReference Include="OptimizedPriorityQueue" Version="5.0.0" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -49,7 +50,7 @@
 
   <ItemGroup>
     <None Update="parameterTree.xsd">
-      <CopyToOutputDirectory>CopyAlways</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
 	<AdditionalFiles Include="..\..\stylecop.json" />
   </ItemGroup>

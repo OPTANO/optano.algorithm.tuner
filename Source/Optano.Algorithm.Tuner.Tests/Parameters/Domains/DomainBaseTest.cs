@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -32,8 +32,8 @@
 namespace Optano.Algorithm.Tuner.Tests.Parameters.Domains
 {
     using System;
+    using System.Globalization;
 
-    using Optano.Algorithm.Tuner;
     using Optano.Algorithm.Tuner.Genomes.Values;
     using Optano.Algorithm.Tuner.Parameters.Domains;
 
@@ -52,6 +52,7 @@ namespace Optano.Algorithm.Tuner.Tests.Parameters.Domains
         /// </summary>
         protected DomainBaseTest()
         {
+            ProcessUtils.SetDefaultCultureInfo(CultureInfo.InvariantCulture);
             Randomizer.Reset();
             Randomizer.Configure(new Random().Next());
         }

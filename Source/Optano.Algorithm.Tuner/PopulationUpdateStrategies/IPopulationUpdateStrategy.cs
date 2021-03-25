@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -44,8 +44,8 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies
     /// <summary>
     /// A strategy to update <see cref="Population"/> objects.
     /// </summary>
-    /// <typeparam name="TInstance">The instance type to use.</typeparam>
-    /// <typeparam name="TResult">The result for an individual evaluation.</typeparam>
+    /// <typeparam name="TInstance">The instance type.</typeparam>
+    /// <typeparam name="TResult">The result type of a single target algorithm evaluation.</typeparam>
     public interface IPopulationUpdateStrategy<TInstance, TResult>
         where TInstance : InstanceBase
         where TResult : ResultBase<TResult>, new()
@@ -66,10 +66,10 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies
         /// <summary>
         /// Performs an iteration of the population update strategy.
         /// </summary>
-        /// <param name="generationIndex">The current generation index.</param>
+        /// <param name="currentGeneration">The current generation index.</param>
         /// <param name="instancesForEvaluation">Instances to use for evaluation.</param>
         void PerformIteration(
-            int generationIndex,
+            int currentGeneration,
             IEnumerable<TInstance> instancesForEvaluation);
 
         /// <summary>

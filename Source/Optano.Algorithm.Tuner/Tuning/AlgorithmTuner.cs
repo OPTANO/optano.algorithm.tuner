@@ -1,30 +1,30 @@
 ﻿#region Copyright (c) OPTANO GmbH
 
 // ////////////////////////////////////////////////////////////////////////////////
-//
+// 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
-//
+// 
 //    The entire contents of this file is protected by German and
 //    International Copyright Laws. Unauthorized reproduction,
 //    reverse-engineering, and distribution of all or any portion of
 //    the code contained in this file is strictly prohibited and may
 //    result in severe civil and criminal penalties and will be
 //    prosecuted to the maximum extent possible under the law.
-//
+// 
 //    RESTRICTIONS
-//
+// 
 //    THIS SOURCE CODE AND ALL RESULTING INTERMEDIATE FILES
 //    ARE CONFIDENTIAL AND PROPRIETARY TRADE SECRETS OF
 //    OPTANO GMBH.
-//
+// 
 //    THE SOURCE CODE CONTAINED WITHIN THIS FILE AND ALL RELATED
 //    FILES OR ANY PORTION OF ITS CONTENTS SHALL AT NO TIME BE
 //    COPIED, TRANSFERRED, SOLD, DISTRIBUTED, OR OTHERWISE MADE
 //    AVAILABLE TO OTHER INDIVIDUALS WITHOUT WRITTEN CONSENT
 //    AND PERMISSION FROM OPTANO GMBH.
-//
+// 
 // ////////////////////////////////////////////////////////////////////////////////
 
 #endregion
@@ -41,17 +41,17 @@ namespace Optano.Algorithm.Tuner.Tuning
     using System.IO;
     using System.IO.Compression;
     using System.Linq;
+    using System.Threading.Tasks;
 
     using Akka.Actor;
 
     using Optano.Algorithm.Tuner.AkkaConfiguration;
     using Optano.Algorithm.Tuner.Configuration;
     using Optano.Algorithm.Tuner.GenomeEvaluation;
+    using Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation;
     using Optano.Algorithm.Tuner.GenomeEvaluation.InstanceSelection;
-    using Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments.Actors;
     using Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage;
     using Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage.Messages;
-    using Optano.Algorithm.Tuner.GenomeEvaluation.Sorting;
     using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.Genomes.Values;
     using Optano.Algorithm.Tuner.Logging;
@@ -77,12 +77,8 @@ namespace Optano.Algorithm.Tuner.Tuning
     /// <typeparam name="TTargetAlgorithm">
     /// The algorithm that should be tuned.
     /// </typeparam>
-    /// <typeparam name="TInstance">
-    /// The instance type to use.
-    /// </typeparam>
-    /// <typeparam name="TResult">
-    /// The result for an individual evaluation.
-    /// </typeparam>
+    /// <typeparam name="TInstance">The instance type.</typeparam>
+    /// <typeparam name="TResult">The result type of a single target algorithm evaluation.</typeparam>
     /// <typeparam name="TModelLearner">
     /// The machine learning model that trains the specified <typeparamref name="TPredictorModel"/>.
     /// </typeparam>
@@ -125,23 +121,22 @@ namespace Optano.Algorithm.Tuner.Tuning
         /// <summary>
         /// Object for evaluating target algorithm runs.
         /// </summary>
-        private readonly IRunEvaluator<TResult> _runEvaluator;
+        private readonly IRunEvaluator<TInstance, TResult> _runEvaluator;
 
         /// <summary>
         /// Actor system where all actors live.
         /// </summary>
-        private readonly ActorSystem _targetAlgorithmRunActors;
+        private readonly ActorSystem _actorSystem;
 
         /// <summary>
-        /// An <see cref="IActorRef" /> to a <see cref="ResultStorageActor{TInstance,TResult}" />
-        /// which knows about all executed target algorithm runs and their results.
+        /// An <see cref="IActorRef" /> to the <see cref="ResultStorageActor{TInstance,TResult}"/>.
         /// </summary>
-        private readonly IActorRef _targetRunResultStorage;
+        private readonly IActorRef _resultStorageActor;
 
         /// <summary>
-        /// A <see cref="IActorRef"/> to a <see cref="GenomeSorter{TInstance,TResult}"/>.
+        /// An <see cref="IActorRef" /> to the <see cref="GenerationEvaluationActor{TTargetAlgorithm,TInstance,TResult}"/>.
         /// </summary>
-        private readonly IActorRef _genomeSorter;
+        private readonly IActorRef _generationEvaluationActor;
 
         /// <summary>
         /// A number of options used for this instance.
@@ -203,7 +198,7 @@ namespace Optano.Algorithm.Tuner.Tuning
         /// </param>
         public AlgorithmTuner(
             ITargetAlgorithmFactory<TTargetAlgorithm, TInstance, TResult> targetAlgorithmFactory,
-            IRunEvaluator<TResult> runEvaluator,
+            IRunEvaluator<TInstance, TResult> runEvaluator,
             IEnumerable<TInstance> trainingInstances,
             ParameterTree parameterTree,
             AlgorithmTunerConfiguration configuration)
@@ -242,7 +237,7 @@ namespace Optano.Algorithm.Tuner.Tuning
         /// </param>
         public AlgorithmTuner(
             ITargetAlgorithmFactory<TTargetAlgorithm, TInstance, TResult> targetAlgorithmFactory,
-            IRunEvaluator<TResult> runEvaluator,
+            IRunEvaluator<TInstance, TResult> runEvaluator,
             IEnumerable<TInstance> trainingInstances,
             ParameterTree parameterTree,
             AlgorithmTunerConfiguration configuration,
@@ -264,18 +259,24 @@ namespace Optano.Algorithm.Tuner.Tuning
             this._parameterTree = parameterTree;
             this._genomeBuilder = genomeBuilder;
 
-            this._targetAlgorithmRunActors = ActorSystem.Create(AkkaNames.ActorSystemName, configuration.AkkaConfiguration);
-            this._targetRunResultStorage = this._targetAlgorithmRunActors.ActorOf(
+            this._actorSystem = ActorSystem.Create(AkkaNames.ActorSystemName, configuration.AkkaConfiguration);
+            this._resultStorageActor = this._actorSystem.ActorOf(
                 Props.Create(() => new ResultStorageActor<TInstance, TResult>()),
                 AkkaNames.ResultStorageActor);
-            this._genomeSorter = this._targetAlgorithmRunActors.ActorOf(
-                Props.Create(() => new GenomeSorter<TInstance, TResult>(runEvaluator)),
-                AkkaNames.GenomeSorter);
+            this._generationEvaluationActor = this._actorSystem.ActorOf(
+                Props.Create(
+                    () => new GenerationEvaluationActor<TTargetAlgorithm, TInstance, TResult>(
+                        targetAlgorithmFactory,
+                        runEvaluator,
+                        configuration,
+                        this._resultStorageActor,
+                        parameterTree)),
+                AkkaNames.GenerationEvaluationActor);
 
             this._logWriter = new LogWriter<TInstance, TResult>(parameterTree, configuration);
 
             this._populationUpdateStrategyManager = new PopulationUpdateStrategyManager<TInstance, TResult>(
-                this.CreatePopulationUpdateStrategies(targetAlgorithmFactory, runEvaluator).ToList(),
+                this.CreatePopulationUpdateStrategies().ToList(),
                 configuration);
         }
 
@@ -339,7 +340,7 @@ namespace Optano.Algorithm.Tuner.Tuning
             if (this._configuration.StrictCompatibilityCheck && !this._configuration.IsCompatible(status.Configuration))
             {
                 throw new InvalidOperationException(
-                    $"Current configuration is too different from the one used to create status file {pathToStatusFile}.");
+                    $"Current configuration differs in non-technical parameters from the one used to create status file {pathToStatusFile}.");
             }
 
             if (!this._configuration.IsTechnicallyCompatible(status.Configuration))
@@ -366,7 +367,8 @@ namespace Optano.Algorithm.Tuner.Tuning
             {
                 foreach (var result in genomeResults.Value)
                 {
-                    this._targetRunResultStorage.Tell(new ResultMessage<TInstance, TResult>(genomeResults.Key, result.Key, result.Value));
+                    this._resultStorageActor.Tell(
+                        new EvaluationResult<TInstance, TResult>(new GenomeInstancePair<TInstance>(genomeResults.Key, result.Key), result.Value));
                 }
             }
 
@@ -440,11 +442,11 @@ namespace Optano.Algorithm.Tuner.Tuning
         public void CompleteAndExportGenerationHistory()
         {
             if (this._configuration.ScoreGenerationHistory &&
-                this._runEvaluator is IMetricRunEvaluator<TResult> metricRunEvaluator)
+                this._runEvaluator is IMetricRunEvaluator<TInstance, TResult> metricRunEvaluator)
             {
                 var scorer = new GenerationInformationScorer<TInstance, TResult>(
-                    this._genomeSorter,
-                    this._targetRunResultStorage,
+                    this._generationEvaluationActor,
+                    this._resultStorageActor,
                     metricRunEvaluator);
 
                 scorer.ScoreInformationHistory(this._informationHistory, this._trainingInstances, this._testInstances);
@@ -459,8 +461,9 @@ namespace Optano.Algorithm.Tuner.Tuning
         /// </summary>
         public void Dispose()
         {
-            System.Threading.Tasks.Task.Run(async () => await this._targetAlgorithmRunActors?.Terminate()).Wait();
-            this._targetAlgorithmRunActors?.Dispose();
+            this._generationEvaluationActor?.Tell(PoisonPill.Instance);
+            Task.Run(async () => await this._actorSystem?.Terminate()).Wait();
+            this._actorSystem?.Dispose();
         }
 
         #endregion
@@ -496,7 +499,7 @@ namespace Optano.Algorithm.Tuner.Tuning
         /// </param>
         private static void ValidateParameters(
             ITargetAlgorithmFactory<TTargetAlgorithm, TInstance, TResult> targetAlgorithmFactory,
-            IRunEvaluator<TResult> runEvaluator,
+            IRunEvaluator<TInstance, TResult> runEvaluator,
             IEnumerable<TInstance> trainingInstances,
             ParameterTree parameterTree,
             AlgorithmTunerConfiguration configuration,
@@ -558,31 +561,14 @@ namespace Optano.Algorithm.Tuner.Tuning
         /// Creates the different <see cref="IPopulationUpdateStrategy{TInstance,TResult}"/>s that may be used to
         /// update the population.
         /// </summary>
-        /// <param name="targetAlgorithmFactory">
-        /// Produces configured instances of the target algorithm to tune.
-        /// </param>
-        /// <param name="runEvaluator">
-        /// Object for evaluating target algorithm runs.
-        /// </param>
         /// <returns>The created <see cref="IPopulationUpdateStrategy{TInstance,TResult}"/>s.</returns>
-        private IEnumerable<IPopulationUpdateStrategy<TInstance, TResult>> CreatePopulationUpdateStrategies(
-            ITargetAlgorithmFactory<TTargetAlgorithm, TInstance, TResult> targetAlgorithmFactory,
-            IRunEvaluator<TResult> runEvaluator)
+        private IEnumerable<IPopulationUpdateStrategy<TInstance, TResult>> CreatePopulationUpdateStrategies()
         {
-            var tournamentSelector = this._targetAlgorithmRunActors.ActorOf(
-                Props.Create(
-                    () => new TournamentSelector<TTargetAlgorithm, TInstance, TResult>(
-                        targetAlgorithmFactory,
-                        runEvaluator,
-                        this._configuration,
-                        this._targetRunResultStorage,
-                        this._parameterTree)),
-                AkkaNames.TournamentSelector);
             yield return new GgaStrategy<TInstance, TResult>(
                 this._configuration,
                 this._parameterTree,
                 this._genomeBuilder,
-                tournamentSelector,
+                this._generationEvaluationActor,
                 this.GeneticEngineering);
 
             if (this._configuration.ContinuousOptimizationMethod == ContinuousOptimizationMethod.Jade)
@@ -591,8 +577,8 @@ namespace Optano.Algorithm.Tuner.Tuning
                     this._configuration,
                     this._parameterTree,
                     this._genomeBuilder,
-                    this._genomeSorter,
-                    this._targetRunResultStorage);
+                    this._generationEvaluationActor,
+                    this._resultStorageActor);
             }
 
             if (this._configuration.ContinuousOptimizationMethod == ContinuousOptimizationMethod.CmaEs)
@@ -601,8 +587,8 @@ namespace Optano.Algorithm.Tuner.Tuning
                     this._configuration,
                     this._parameterTree,
                     this._genomeBuilder,
-                    this._genomeSorter,
-                    this._targetRunResultStorage);
+                    this._generationEvaluationActor,
+                    this._resultStorageActor);
             }
         }
 
@@ -613,7 +599,7 @@ namespace Optano.Algorithm.Tuner.Tuning
         private void UpdateGenerationHistory(IPopulationUpdateStrategy<TInstance, TResult> currentStrategy)
         {
             var evaluationCountRequest =
-                this._targetRunResultStorage.Ask<EvaluationStatistic>(new EvaluationStatisticRequest());
+                this._resultStorageActor.Ask<EvaluationStatistic>(new EvaluationStatisticRequest());
             evaluationCountRequest.Wait();
 
             var generationInformation = new GenerationInformation(
@@ -633,7 +619,7 @@ namespace Optano.Algorithm.Tuner.Tuning
         /// </returns>
         private bool IsEvaluationLimitMet()
         {
-            var evaluationCountRequest = this._targetRunResultStorage.Ask<EvaluationStatistic>(new EvaluationStatisticRequest());
+            var evaluationCountRequest = this._resultStorageActor.Ask<EvaluationStatistic>(new EvaluationStatisticRequest());
             evaluationCountRequest.Wait();
 
             if (evaluationCountRequest.Result.TotalEvaluationCount >= this._configuration.EvaluationLimit)
@@ -655,12 +641,12 @@ namespace Optano.Algorithm.Tuner.Tuning
         private void LogFinishedGeneration()
         {
             // Ask for all run results of best genome.
-            var resultRequest = this._targetRunResultStorage.Ask<GenomeResults<TInstance, TResult>>(
+            var resultRequest = this._resultStorageActor.Ask<GenomeResults<TInstance, TResult>>(
                 new GenomeResultsRequest(new ImmutableGenome(this._incumbentGenomeWrapper.IncumbentGenome)));
             resultRequest.Wait();
 
             // Ask for total number evaluations.
-            var evaluationCountRequest = this._targetRunResultStorage.Ask<EvaluationStatistic>(new EvaluationStatisticRequest());
+            var evaluationCountRequest = this._resultStorageActor.Ask<EvaluationStatistic>(new EvaluationStatisticRequest());
             evaluationCountRequest.Wait();
 
             this._logWriter.LogFinishedGeneration(
@@ -697,7 +683,7 @@ namespace Optano.Algorithm.Tuner.Tuning
                 this._logWriter.TotalElapsedTime);
 
             // Ask for run results and add those.
-            var resultRequest = this._targetRunResultStorage.Ask<AllResults<TInstance, TResult>>(new AllResultsRequest());
+            var resultRequest = this._resultStorageActor.Ask<AllResults<TInstance, TResult>>(new AllResultsRequest());
             resultRequest.Wait();
             status.SetRunResults(resultRequest.Result.RunResults);
 
@@ -715,7 +701,7 @@ namespace Optano.Algorithm.Tuner.Tuning
         /// </summary>
         private void LogStatistics()
         {
-            var evaluationStatisticRequest = this._targetRunResultStorage.Ask<EvaluationStatistic>(new EvaluationStatisticRequest());
+            var evaluationStatisticRequest = this._resultStorageActor.Ask<EvaluationStatistic>(new EvaluationStatisticRequest());
             evaluationStatisticRequest.Wait();
             var statistic = evaluationStatisticRequest.Result;
             LoggingHelper.WriteLine(
@@ -798,7 +784,7 @@ namespace Optano.Algorithm.Tuner.Tuning
         /// </param>
         private void UpdateIncumbentGenomeWrapper(IncumbentGenomeWrapper<TResult> generationBest)
         {
-            if (this._incumbentGenomeWrapper == null || !new Genome.GeneValueComparator().Equals(
+            if (this._incumbentGenomeWrapper == null || !Genome.GenomeComparer.Equals(
                     this._incumbentGenomeWrapper.IncumbentGenome,
                     generationBest.IncumbentGenome))
             {
@@ -824,8 +810,7 @@ namespace Optano.Algorithm.Tuner.Tuning
         /// </summary>
         private void TrackConvergenceBehavior()
         {
-            var metricRunEvaluator = this._runEvaluator as IMetricRunEvaluator<TResult>;
-            if (metricRunEvaluator == null || !this._configuration.TrackConvergenceBehavior)
+            if (!(this._runEvaluator is IMetricRunEvaluator<TInstance, TResult> metricRunEvaluator) || !this._configuration.TrackConvergenceBehavior)
             {
                 return;
             }

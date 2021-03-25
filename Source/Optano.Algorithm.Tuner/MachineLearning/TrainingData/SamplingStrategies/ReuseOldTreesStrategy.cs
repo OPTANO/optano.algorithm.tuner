@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -89,13 +89,14 @@ namespace Optano.Algorithm.Tuner.MachineLearning.TrainingData.SamplingStrategies
         /// This method only selects the newest tournament results as training data.
         /// </summary>
         /// <param name="data">All historical training data.</param>
-        /// <returns>Only the training data where <see cref="TrainingDataWrapper.CurrentGeneration"/> == <see cref="GenomeTournamentResult.Generation"/>.</returns>
+        /// <returns>Only the training data where <see cref="TrainingDataWrapper.CurrentGeneration"/> == <see cref="GenomeTournamentRank.GenerationId"/>.</returns>
         public AggregatedTrainingDataWrapper AggregateTargets(TrainingDataWrapper data)
         {
             // we just want to train on the newest results
             // assumption: list of known results for genome g is ordered
             // we need to be able to handle duplicates, since genomes are not neccessarily unique
-            var filteredObservations = data.Genomes.Select(g => data.TournamentResults[g].Where(t => t.Generation == data.CurrentGeneration).ToList())
+            var filteredObservations = data.Genomes
+                .Select(g => data.TournamentResults[g].Where(t => t.GenerationId == data.CurrentGeneration).ToList())
                 .ToArray();
 
             var relevantCount = filteredObservations.Sum(r => r.Count);

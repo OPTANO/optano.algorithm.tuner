@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -130,37 +130,44 @@ namespace Optano.Algorithm.Tuner.MachineLearning.RandomForest.Configuration
                                 {
                                     {
                                         RegressionForestArgumentParser.TreeCountName,
-                                        $"The number of trees in the random forest.\nDefault is {GenomePredictionRandomForestConfig.GenomePredictionRandomForestConfigBuilder.DefaultTreeCount}.\nThis must be an integer greater than 0.",
+                                        () =>
+                                            $"The number of trees in the random forest.\nDefault is {GenomePredictionRandomForestConfig.GenomePredictionRandomForestConfigBuilder.DefaultTreeCount}.\nThis must be an integer greater than 0.",
                                         (int tC) => this.InternalConfigurationBuilder.SetTreeCount(tC)
                                     },
                                     {
                                         RegressionForestArgumentParser.FeaturesPerSplitRatioName,
-                                        $"The percentage of features to use per split in each tree. Commonly used values in literature are ~1/3, or sqrt(#features). Keep in mind that #features may be larger than the number of parameters in your tree. Refer to the \"Parameter Selection\" chapter in the user documentation.\nDefault is {GenomePredictionRandomForestConfig.GenomePredictionRandomForestConfigBuilder.DefaultFeaturesPerSplitRatio}.\nThis must be a double in the range of (0, 1].",
+                                        () =>
+                                            $"The percentage of features to use per split in each tree. Commonly used values in literature are ~1/3, or sqrt(#features). Keep in mind that #features may be larger than the number of parameters in your tree. Refer to the \"Parameter Selection\" chapter in the user documentation.\nDefault is {GenomePredictionRandomForestConfig.GenomePredictionRandomForestConfigBuilder.DefaultFeaturesPerSplitRatio}.\nThis must be a double in the range of (0, 1].",
                                         (double fps) => this.InternalConfigurationBuilder.SetFeaturesPerSplitRatio(fps)
                                     },
                                     {
                                         RegressionForestArgumentParser.MaximumTreeDepthName,
-                                        $"The maximum depth of a tree.\nDefault is {GenomePredictionRandomForestConfig.GenomePredictionRandomForestConfigBuilder.DefaultMaximumTreeDepth}.\nThis must be an integer greater than 0.",
+                                        () =>
+                                            $"The maximum depth of a tree.\nDefault is {GenomePredictionRandomForestConfig.GenomePredictionRandomForestConfigBuilder.DefaultMaximumTreeDepth}.\nThis must be an integer greater than 0.",
                                         (int depth) => this.InternalConfigurationBuilder.SetMaximumTreeDepth(depth)
                                     },
                                     {
                                         RegressionForestArgumentParser.MinimumInformationGainName,
-                                        $"The minimum information gain for a split in the trees.\nDefault is {GenomePredictionRandomForestConfig.GenomePredictionRandomForestConfigBuilder.DefaultMinimumInformationGain}.\nThis must be a double greater than 0.",
+                                        () =>
+                                            $"The minimum information gain for a split in the trees.\nDefault is {GenomePredictionRandomForestConfig.GenomePredictionRandomForestConfigBuilder.DefaultMinimumInformationGain}.\nThis must be a double greater than 0.",
                                         (double gain) => this.InternalConfigurationBuilder.SetMinimumInformationGain(gain)
                                     },
                                     {
                                         RegressionForestArgumentParser.MinimumSplitSizeName,
-                                        $"The minimum size of a split in the trees.\nDefault is {GenomePredictionRandomForestConfig.GenomePredictionRandomForestConfigBuilder.DefaultMinimumSplitSize}.\nThis must be an integer greater than 0.",
+                                        () =>
+                                            $"The minimum size of a split in the trees.\nDefault is {GenomePredictionRandomForestConfig.GenomePredictionRandomForestConfigBuilder.DefaultMinimumSplitSize}.\nThis must be an integer greater than 0.",
                                         (int split) => this.InternalConfigurationBuilder.SetMinimumSplitSize(split)
                                     },
                                     {
                                         RegressionForestArgumentParser.RunParallelName,
-                                        $"Enables parallel learning for the Regression Forest.\nDefault is {GenomePredictionRandomForestConfig.GenomePredictionRandomForestConfigBuilder.DefaultRunParallel}.\nThis must be a boolean",
+                                        () =>
+                                            $"Enables parallel learning for the Regression Forest.\nDefault is {GenomePredictionRandomForestConfig.GenomePredictionRandomForestConfigBuilder.DefaultRunParallel}.\nThis must be a boolean",
                                         (bool parallel) => this.InternalConfigurationBuilder.SetRunParallel(parallel)
                                     },
                                     {
                                         RegressionForestArgumentParser.SubSampleRatioName,
-                                        $"The proportion of the observation subset that is passed to each tree during training.\nDefault is {GenomePredictionRandomForestConfig.GenomePredictionRandomForestConfigBuilder.DefaultSubSampleRatio}.\nThis must be a double in the range of (0, 1].",
+                                        () =>
+                                            $"The proportion of the observation subset that is passed to each tree during training.\nDefault is {GenomePredictionRandomForestConfig.GenomePredictionRandomForestConfigBuilder.DefaultSubSampleRatio}.\nThis must be a double in the range of (0, 1].",
                                         (double subSampleRatio) => this.InternalConfigurationBuilder.SetSubSampleRatio(subSampleRatio)
                                     },
                                 };

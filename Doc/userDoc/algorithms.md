@@ -20,7 +20,7 @@ The algorithm was introduced in [A Gender-Based Genetic Algorithm for the Automa
 
 ## GGA++
 
-GGA++ enhances [GGA](#gga) by a [model-based crossover](model_based_crossover.md) and is considered as a state-of-the-art algorithm by the algorithm tuning research community.
+GGA++ enhances [GGA](#gga) by a [model-based crossover](../developerDoc/model_based_crossover.md) and is considered as a state-of-the-art algorithm by the algorithm tuning research community.
 
 It was first presented in [Model-Based Genetic Algorithms for Algorithm Configuration](https://www.ijcai.org/Proceedings/15/Papers/109.pdf) by Carlos Ansótegui, Yuri Malitsky, Horst Samulowitz, Meinolf Sellmann and Kevin Tierney, which was published in the Proceedings of the Twenty-Fourth International Joint Conference on Artificial Intelligence [(IJCAI 2015)](http://www.ijcai.org/proceedings/2015).
 

@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -74,7 +74,7 @@ namespace Optano.Algorithm.Tuner.Parameters.ParameterConverters
         /// </param>
         public GenomeTransformation(ParameterTree tree)
         {
-            this.KnownTransformations = new Dictionary<Genome, double[]>(new Genome.GeneValueComparator());
+            this.KnownTransformations = new Dictionary<Genome, double[]>(Genome.GenomeComparer);
             this.EncodedCategories = new Dictionary<string, object>();
             this.CategoricalEncoding = new TCategoricalEncoding();
 

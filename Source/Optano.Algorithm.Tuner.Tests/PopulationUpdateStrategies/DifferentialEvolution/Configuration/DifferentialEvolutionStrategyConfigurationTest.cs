@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -51,8 +51,9 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.DifferentialEv
         /// <summary>
         /// A default <see cref="DifferentialEvolutionConfiguration.DifferentialEvolutionConfigurationBuilder"/>.
         /// </summary>
-        private readonly DifferentialEvolutionConfiguration.DifferentialEvolutionConfigurationBuilder _defaultDifferentialEvolutionConfigurationBuilder
-            = new DifferentialEvolutionConfiguration.DifferentialEvolutionConfigurationBuilder();
+        private readonly DifferentialEvolutionConfiguration.DifferentialEvolutionConfigurationBuilder
+            _defaultDifferentialEvolutionConfigurationBuilder
+                = new DifferentialEvolutionConfiguration.DifferentialEvolutionConfigurationBuilder();
 
         /// <summary>
         /// Builder used for tests.

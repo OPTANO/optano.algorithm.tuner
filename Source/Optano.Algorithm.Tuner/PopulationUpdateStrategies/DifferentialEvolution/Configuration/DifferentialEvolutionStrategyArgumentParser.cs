@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -140,23 +140,27 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.DifferentialEvolutio
 
             optionSet.Add(
                 "maxGenerationsPerDePhase=",
-                $"The maximum number of generations per differential evolution phase.\nDefault is {DifferentialEvolutionStrategyConfiguration.DifferentialEvolutionStrategyConfigurationBuilder.DefaultMaximumNumberGenerations}.\nThis must be a positive integer.",
+                () =>
+                    $"The maximum number of generations per differential evolution phase.\nDefault is {DifferentialEvolutionStrategyConfiguration.DifferentialEvolutionStrategyConfigurationBuilder.DefaultMaximumNumberGenerations}.\nThis must be a positive integer.",
                 (int number) => this.InternalConfigurationBuilder.SetMaximumNumberGenerations(number));
             optionSet.Add(
                 "minDomainSize=",
-                $"The minimum size an integer domain needs to have to be handled as continuous.\nDefault is {DifferentialEvolutionStrategyConfiguration.DifferentialEvolutionStrategyConfigurationBuilder.DefaultMinimumDomainSize}.\nThis must be a positive integer.",
+                () =>
+                    $"The minimum size an integer domain needs to have to be handled as continuous.\nDefault is {DifferentialEvolutionStrategyConfiguration.DifferentialEvolutionStrategyConfigurationBuilder.DefaultMinimumDomainSize}.\nThis must be a positive integer.",
                 (int size) => this.InternalConfigurationBuilder.SetMinimumDomainSize(size));
             optionSet.Add(
                 "focusOnIncumbent=",
-                $"Whether JADE should focus on improving the incumbent. If not, it works on the complete population.\nDefault is {DifferentialEvolutionStrategyConfiguration.DifferentialEvolutionStrategyConfigurationBuilder.DefaultFocusOnIncumbent}.",
+                () =>
+                    $"Whether JADE should focus on improving the incumbent. If not, it works on the complete population.\nDefault is {DifferentialEvolutionStrategyConfiguration.DifferentialEvolutionStrategyConfigurationBuilder.DefaultFocusOnIncumbent}.",
                 (bool incumbentFocus) => this.InternalConfigurationBuilder.SetFocusOnIncumbent(incumbentFocus));
             optionSet.Add(
                 "replacementRate=",
-                $"The percentage of competitive genomes which get replaced by the best search points found by differential evolution at the end of a phase. A replacement rate of 0 indicates that only the incumbent itself should be replaced.\nDefault is {DifferentialEvolutionStrategyConfiguration.DifferentialEvolutionStrategyConfigurationBuilder.DefaultReplacementRate}.\nThis must be a double in [0, 0.5].",
+                () =>
+                    $"The percentage of competitive genomes which get replaced by the best search points found by differential evolution at the end of a phase. A replacement rate of 0 indicates that only the incumbent itself should be replaced.\nDefault is {DifferentialEvolutionStrategyConfiguration.DifferentialEvolutionStrategyConfigurationBuilder.DefaultReplacementRate}.\nThis must be a double in [0, 0.5].",
                 (double rate) => this.InternalConfigurationBuilder.SetReplacementRate(rate));
             optionSet.Add(
                 "fixInstances",
-                "Add if the set of instances to evaluate on should stay the same during a differential evolution phase.",
+                () => "Add if the set of instances to evaluate on should stay the same during a differential evolution phase.",
                 y => this.InternalConfigurationBuilder.SetFixInstances(true));
 
             return optionSet;

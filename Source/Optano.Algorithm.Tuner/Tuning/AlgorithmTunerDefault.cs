@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -52,14 +52,8 @@ namespace Optano.Algorithm.Tuner.Tuning
     /// Type of the target algorithm.
     /// Must implement <see cref="ITargetAlgorithm{TInstance,TResult}"/>.
     /// </typeparam>
-    /// <typeparam name="TInstance">
-    /// Type of instance the target algorithm is able to process.
-    /// Must be a subtype of <see cref="InstanceBase"/>.
-    /// </typeparam>
-    /// <typeparam name="TResult">
-    /// Type of result of a target algorithm run.
-    /// Must be a subtype of <see cref="ResultBase{TResultType}"/>.
-    /// </typeparam>
+    /// <typeparam name="TInstance">The instance type.</typeparam>
+    /// <typeparam name="TResult">The result type of a single target algorithm evaluation.</typeparam>
     public class AlgorithmTuner<TTargetAlgorithm, TInstance, TResult> : AlgorithmTuner<TTargetAlgorithm, TInstance, TResult,
         StandardRandomForestLearner<ReuseOldTreesStrategy>, GenomePredictionForestModel<GenomePredictionTree>, ReuseOldTreesStrategy>
         where TTargetAlgorithm : ITargetAlgorithm<TInstance, TResult> where TInstance : InstanceBase where TResult : ResultBase<TResult>, new()
@@ -86,7 +80,7 @@ namespace Optano.Algorithm.Tuner.Tuning
         /// </param>
         public AlgorithmTuner(
             ITargetAlgorithmFactory<TTargetAlgorithm, TInstance, TResult> targetAlgorithmFactory,
-            IRunEvaluator<TResult> runEvaluator,
+            IRunEvaluator<TInstance, TResult> runEvaluator,
             IEnumerable<TInstance> trainingInstances,
             ParameterTree parameterTree,
             AlgorithmTunerConfiguration configuration)
@@ -123,7 +117,7 @@ namespace Optano.Algorithm.Tuner.Tuning
         /// </param>
         public AlgorithmTuner(
             ITargetAlgorithmFactory<TTargetAlgorithm, TInstance, TResult> targetAlgorithmFactory,
-            IRunEvaluator<TResult> runEvaluator,
+            IRunEvaluator<TInstance, TResult> runEvaluator,
             IEnumerable<TInstance> trainingInstances,
             ParameterTree parameterTree,
             AlgorithmTunerConfiguration configuration,

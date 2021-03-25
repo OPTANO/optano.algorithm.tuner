@@ -10,7 +10,7 @@ The intermediate results include
 - current internal state, and
 - all [parameters](parameters.md) inherent to the tuning, e.g. the total number of iterations to run or the mutation rate.
 
-Therefore, to continue with a tuning, all you have to do is to add the parameter `--continue` to your usual command and leave out all parameters that are tuning-specific. You can still set the following, technical parameters:
+Therefore, to continue with a tuning, all you have to do is to add the parameter `--continue` to your usual command. Make sure to leave all parameters that are tuning-specific unaltered. You can still set the following, technical parameters:
 
 - --statusFileDir={PATH}
 - --maxParallelEvaluations={NUMBER}
@@ -33,7 +33,7 @@ If you do not specify `ownHostName`, `port`, `trainingInstanceFolder` or `testIn
 
 A call to continue with a basic application of *OAT* may look like this:
 
-	dotnet Optano.Algorithm.Tuner.Application.dll --master --continue --basicCommand=<commandToExecuteYourAlgorithmWith> --parameterTree=<pathToXML> --trainingInstanceFolder=<instanceFolder> <optionalTechnicalParametersOverwrites>
+	dotnet Optano.Algorithm.Tuner.Application.dll --master --continue --maxParallelEvaluations=4 --basicCommand=<commandToExecuteYourAlgorithmWith> --parameterTree=<pathToXML> --trainingInstanceFolder=<instanceFolder> <optionalTechnicalParametersOverwrites>
 
 ## Configuration changes
 

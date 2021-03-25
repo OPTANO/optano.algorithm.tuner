@@ -1,30 +1,30 @@
 ﻿#region Copyright (c) OPTANO GmbH
 
 // ////////////////////////////////////////////////////////////////////////////////
-//
+// 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
-//
+// 
 //    The entire contents of this file is protected by German and
 //    International Copyright Laws. Unauthorized reproduction,
 //    reverse-engineering, and distribution of all or any portion of
 //    the code contained in this file is strictly prohibited and may
 //    result in severe civil and criminal penalties and will be
 //    prosecuted to the maximum extent possible under the law.
-//
+// 
 //    RESTRICTIONS
-//
+// 
 //    THIS SOURCE CODE AND ALL RESULTING INTERMEDIATE FILES
 //    ARE CONFIDENTIAL AND PROPRIETARY TRADE SECRETS OF
 //    OPTANO GMBH.
-//
+// 
 //    THE SOURCE CODE CONTAINED WITHIN THIS FILE AND ALL RELATED
 //    FILES OR ANY PORTION OF ITS CONTENTS SHALL AT NO TIME BE
 //    COPIED, TRANSFERRED, SOLD, DISTRIBUTED, OR OTHERWISE MADE
 //    AVAILABLE TO OTHER INDIVIDUALS WITHOUT WRITTEN CONSENT
 //    AND PERMISSION FROM OPTANO GMBH.
-//
+// 
 // ////////////////////////////////////////////////////////////////////////////////
 
 #endregion
@@ -39,9 +39,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
     using Optano.Algorithm.Tuner.Configuration;
     using Optano.Algorithm.Tuner.ContinuousOptimization;
     using Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation;
-    using Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments.Actors;
     using Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage;
-    using Optano.Algorithm.Tuner.GenomeEvaluation.Sorting;
     using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.Parameters;
     using Optano.Algorithm.Tuner.Parameters.Domains;
@@ -55,14 +53,12 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
 
     using Xunit;
 
-    using SortByValue = Optano.Algorithm.Tuner.Tests.TargetAlgorithm.InterfaceImplementations.ValueConsideration.SortByValue;
-
     /// <summary>
-    /// Contains tests for the <see cref="GenomeAssistedSorterBase{TSearchPoint,TInstance}"/> class.
+    /// Contains tests for the <see cref="GenomeAssistedSorterBase{TSearchPoint,TInstance,TResult}"/> class.
     /// </summary>
     /// <typeparam name="TSearchPoint">
     /// The type of <see cref="SearchPoint"/> handled by the
-    /// <see cref="GenomeAssistedSorterBase{TSearchPoint,TInstance}"/>.
+    /// <see cref="GenomeAssistedSorterBase{TSearchPoint, TInstance, TResult}"/>.
     /// </typeparam>
     [Collection(TestUtils.NonParallelCollectionGroupOneName)]
     public abstract class GenomeAssistedSorterBaseTest<TSearchPoint> : SearchPointSorterTestBase<TSearchPoint>
@@ -81,9 +77,10 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
         #region Fields
 
         /// <summary>
-        /// <see cref="IRunEvaluator{TResult}"/> used in test.
+        /// <see cref="IRunEvaluator{TInstance,TResult}"/> used in test.
         /// </summary>
-        private readonly IRunEvaluator<IntegerResult> _runEvaluator = new SortByValue();
+        private readonly IRunEvaluator<TestInstance, IntegerResult> _runEvaluator =
+            new TargetAlgorithm.InterfaceImplementations.ValueConsideration.SortByValue<TestInstance>();
 
         #endregion
 
@@ -100,9 +97,9 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
         protected GenomeBuilder GenomeBuilder { get; private set; }
 
         /// <summary>
-        /// Gets a reference to the <see cref="GenomeSorter{TInstance,TResult}"/> used in tests.
+        /// Gets a reference to the <see cref="GenerationEvaluationActor"/> used in tests.
         /// </summary>
-        protected IActorRef GenomeSorter { get; private set; }
+        protected IActorRef GenerationEvaluationActor { get; private set; }
 
         /// <summary>
         /// Gets the <see cref="ISearchPointSorter{TSearchPoint}"/> used in tests.
@@ -110,20 +107,20 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
         protected override ISearchPointSorter<TSearchPoint> Sorter => this.GenomeAssistedSorter;
 
         /// <summary>
-        /// Gets the <see cref="GenomeAssistedSorterBase{TSearchPoint,TInstance}"/> used in tests.
+        /// Gets the <see cref="GenomeAssistedSorterBase{TSearchPoint, TInstance, TResult}"/> used in tests.
         /// </summary>
-        protected abstract GenomeAssistedSorterBase<TSearchPoint, TestInstance> GenomeAssistedSorter { get; }
+        protected abstract GenomeAssistedSorterBase<TSearchPoint, TestInstance, IntegerResult> GenomeAssistedSorter { get; }
 
         #endregion
 
         #region Public Methods and Operators
 
         /// <summary>
-        /// Checks that <see cref="GenomeAssistedSorterBase{TSearchPoint, TInstance}"/>'s constructor throws a
-        /// <see cref="ArgumentNullException"/> iif called without a <see cref="GenomeSorter{TInstance, TResult}"/>.
+        /// Checks that <see cref="GenomeAssistedSorterBase{TSearchPoint, TInstance, TResult}"/>'s constructor throws a
+        /// <see cref="ArgumentNullException"/> iif called without a <see cref="GenerationEvaluationActor"/>.
         /// </summary>
         [Fact]
-        public abstract void ConstructorThrowsForMissingGenomeSorter();
+        public abstract void ConstructorThrowsForMissingGenerationEvaluationActor();
 
         #endregion
 
@@ -135,17 +132,27 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
         protected override void InitializeDefault()
         {
             var configuration = this.GetDefaultAlgorithmTunerConfiguration();
+            var targetAlgorithmFactory = new ExtractIntegerValueCreator();
             this.ParameterTree = GenomeAssistedSorterBaseTest<TSearchPoint>.CreateParameterTree();
             this.ActorSystem = ActorSystem.Create(TestBase.ActorSystemName, configuration.AkkaConfiguration);
 
-            this.GenomeSorter = this.ActorSystem.ActorOf(
-                Props.Create(() => new GenomeSorter<TestInstance, IntegerResult>(this._runEvaluator)),
-                AkkaNames.GenomeSorter);
-            this.BuildUpRelatedActors(this.ActorSystem, configuration);
+            var resultStorageActor = this.ActorSystem.ActorOf(
+                Props.Create(() => new ResultStorageActor<TestInstance, IntegerResult>()),
+                AkkaNames.ResultStorageActor);
+
+            this.GenerationEvaluationActor = this.ActorSystem.ActorOf(
+                Props.Create(
+                    () => new GenerationEvaluationActor<ExtractIntegerValue, TestInstance, IntegerResult>(
+                        targetAlgorithmFactory,
+                        this._runEvaluator,
+                        configuration,
+                        resultStorageActor,
+                        this.ParameterTree)),
+                AkkaNames.GenerationEvaluationActor);
 
             this.GenomeBuilder = this.CreateGenomeBuilderWithForbiddenValue(configuration);
 
-            this.InitializeSorter(this.GenomeSorter);
+            this.InitializeSorter(this.GenerationEvaluationActor);
             // Ensure sorting data exists.
             this.GenomeAssistedSorter.UpdateInstances(new[] { new TestInstance("test") });
         }
@@ -153,10 +160,10 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
         /// <summary>
         /// Initializes <see cref="GenomeAssistedSorter"/>.
         /// </summary>
-        /// <param name="genomeSorter">
-        /// An <see cref="IActorRef" /> to a <see cref="GenomeSorter{TInstance, TResult}" />.
+        /// <param name="generationEvaluationActor">
+        /// An <see cref="IActorRef" /> to a <see cref="GenerationEvaluationActor" />.
         /// </param>
-        protected abstract void InitializeSorter(IActorRef genomeSorter);
+        protected abstract void InitializeSorter(IActorRef generationEvaluationActor);
 
         /// <summary>
         /// Creates a <see cref="Optano.Algorithm.Tuner.Parameters.ParameterTree"/> which consists of two independent parameters:
@@ -173,29 +180,6 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
         }
 
         /// <summary>
-        /// Builds up a <see cref="TournamentSelector{TTargetAlgorithm,TInstance,TResult}"/>.
-        /// This is necessary to have <see cref="EvaluationActor{TTargetAlgorithm,TInstance,TResult}"/>s.
-        /// </summary>
-        /// <param name="actorSystem">The <see cref="ActorSystem"/> to add the actors to.</param>
-        /// <param name="configuration">The <see cref="AlgorithmTunerConfiguration"/> for the actors.</param>
-        private void BuildUpRelatedActors(ActorSystem actorSystem, AlgorithmTunerConfiguration configuration)
-        {
-            var resultStorageActor = actorSystem.ActorOf(
-                Props.Create(() => new ResultStorageActor<TestInstance, IntegerResult>()),
-                AkkaNames.ResultStorageActor);
-            var targetAlgorithmFactory = new ExtractIntegerValueCreator();
-            var tournamentSelector = actorSystem.ActorOf(
-                Props.Create(
-                    () => new TournamentSelector<ExtractIntegerValue, TestInstance, IntegerResult>(
-                        targetAlgorithmFactory,
-                        this._runEvaluator,
-                        configuration,
-                        resultStorageActor,
-                        this.ParameterTree)),
-                AkkaNames.TournamentSelector);
-        }
-
-        /// <summary>
         /// Creates a <see cref="Optano.Algorithm.Tuner.Genomes.GenomeBuilder"/> which forbids using "3" for <see cref="FreeParameterName"/>.
         /// </summary>
         /// <param name="configuration">
@@ -204,13 +188,14 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
         /// <returns>The created <see cref="Optano.Algorithm.Tuner.Genomes.GenomeBuilder"/>.</returns>
         private ConfigurableGenomeBuilder CreateGenomeBuilderWithForbiddenValue(AlgorithmTunerConfiguration configuration)
         {
-            Func<Genome, bool> invalidityFunction = candidate =>
+            static bool InvalidityFunction(Genome candidate) =>
                 !object.Equals(
                     candidate.GetGeneValue(GenomeAssistedSorterBaseTest<TSearchPoint>.FreeParameterName).GetValue(),
                     3);
+
             return new ConfigurableGenomeBuilder(
                 this.ParameterTree,
-                invalidityFunction,
+                InvalidityFunction,
                 configuration.MutationRate);
         }
 

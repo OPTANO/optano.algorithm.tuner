@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -41,10 +41,7 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.DifferentialEvolutio
     /// An object wrapping the current status of <see cref="DifferentialEvolutionStrategy{TInstance,TResult}"/>.
     /// Can be serialized to a file and deserialized from one.
     /// </summary>
-    /// <typeparam name="TInstance">
-    /// Type of <see cref="InstanceBase"/> handled by the
-    /// <see cref="DifferentialEvolutionStrategy{TInstance,TResult}"/>.
-    /// </typeparam>
+    /// <typeparam name="TInstance">The instance type.</typeparam>
     public class DifferentialEvolutionStrategyStatus<TInstance>
         : ContinuousOptimizationStrategyStatusBase<GenomeSearchPoint, TInstance>
         where TInstance : InstanceBase

@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -71,7 +71,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
                     configuration: null,
                     parameterTree: this.ParameterTree,
                     genomeBuilder: this.GenomeBuilder,
-                    genomeSorter: this.GenomeSorter,
+                    this.GenerationEvaluationActor,
                     targetRunResultStorage: this.ResultStorageActor));
         }
 
@@ -88,7 +88,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
                     this.Configuration,
                     parameterTree: null,
                     genomeBuilder: this.GenomeBuilder,
-                    genomeSorter: this.GenomeSorter,
+                    this.GenerationEvaluationActor,
                     targetRunResultStorage: this.ResultStorageActor));
         }
 
@@ -105,24 +105,24 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
                     this.Configuration,
                     this.ParameterTree,
                     genomeBuilder: null,
-                    genomeSorter: this.GenomeSorter,
+                    this.GenerationEvaluationActor,
                     targetRunResultStorage: this.ResultStorageActor));
         }
 
         /// <summary>
         /// Verifies that initializing an instance of the
-        /// <see cref="LocalCovarianceMatrixAdaptationStrategy{TInstance,TResult}"/> class without a genome sorter
+        /// <see cref="LocalCovarianceMatrixAdaptationStrategy{TInstance,TResult}"/> class without a generation evaluation actor
         /// throws an <see cref="ArgumentNullException"/>.
         /// </summary>
         [Fact]
-        public void ConstructorThrowsForMissingGenomeSorter()
+        public void ConstructorThrowsForMissingGenerationEvaluationActor()
         {
             Assert.Throws<ArgumentNullException>(
                 () => new LocalCovarianceMatrixAdaptationStrategy<TestInstance, IntegerResult>(
                     this.Configuration,
                     this.ParameterTree,
                     this.GenomeBuilder,
-                    genomeSorter: null,
+                    null,
                     targetRunResultStorage: this.ResultStorageActor));
         }
 
@@ -139,7 +139,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
                     this.Configuration,
                     this.ParameterTree,
                     this.GenomeBuilder,
-                    this.GenomeSorter,
+                    this.GenerationEvaluationActor,
                     targetRunResultStorage: null));
         }
 
@@ -235,22 +235,22 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
             Assert.True(
                 updatedPopulation.GetCompetitiveIndividuals().Contains(
                     searchPoints[0].Genome.CreateMutableGenome(),
-                    new Genome.GeneValueComparator()),
+                    Genome.GenomeComparer),
                 "Updated population should contain best search point, but does not.");
             Assert.True(
                 updatedPopulation.GetCompetitiveIndividuals().Contains(
                     searchPoints[1].Genome.CreateMutableGenome(),
-                    new Genome.GeneValueComparator()),
+                    Genome.GenomeComparer),
                 "Updated population should contain second best search point, but does not.");
             Assert.False(
                 updatedPopulation.GetCompetitiveIndividuals().Contains(
                     searchPoints[2].Genome.CreateMutableGenome(),
-                    new Genome.GeneValueComparator()),
+                    Genome.GenomeComparer),
                 "Updated population should not contain worst search point.");
 
             // Incumbent should still exist.
             Assert.True(
-                updatedPopulation.GetCompetitiveIndividuals().Contains(incumbent.IncumbentGenome, new Genome.GeneValueComparator()),
+                updatedPopulation.GetCompetitiveIndividuals().Contains(incumbent.IncumbentGenome, Genome.GenomeComparer),
                 "Updated population should contain incumbent, but does not.");
 
             // Finally, check ages.
@@ -295,7 +295,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
                 configuration.Build(),
                 this.ParameterTree,
                 this.GenomeBuilder,
-                this.GenomeSorter,
+                this.GenerationEvaluationActor,
                 this.ResultStorageActor);
 
             // Perform an iteration and finish the phase.
@@ -306,7 +306,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
 
             // Incumbent should still exist.
             Assert.True(
-                updatedPopulation.GetCompetitiveIndividuals().Contains(incumbent.IncumbentGenome, new Genome.GeneValueComparator()),
+                updatedPopulation.GetCompetitiveIndividuals().Contains(incumbent.IncumbentGenome, Genome.GenomeComparer),
                 "Updated population should contain incumbent, but does not.");
 
             // Age structure should be correct.
@@ -364,7 +364,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
                 this.Configuration,
                 this.ParameterTree,
                 this.GenomeBuilder,
-                this.GenomeSorter,
+                this.GenerationEvaluationActor,
                 this.ResultStorageActor);
         }
 

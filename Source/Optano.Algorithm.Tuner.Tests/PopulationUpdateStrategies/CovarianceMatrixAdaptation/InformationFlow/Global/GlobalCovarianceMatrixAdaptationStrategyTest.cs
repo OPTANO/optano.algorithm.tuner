@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -73,7 +73,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
                     configuration: null,
                     parameterTree: this.ParameterTree,
                     genomeBuilder: this.GenomeBuilder,
-                    genomeSorter: this.GenomeSorter,
+                    this.GenerationEvaluationActor,
                     targetRunResultStorage: this.ResultStorageActor));
         }
 
@@ -90,7 +90,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
                     this.Configuration,
                     parameterTree: null,
                     genomeBuilder: this.GenomeBuilder,
-                    genomeSorter: this.GenomeSorter,
+                    this.GenerationEvaluationActor,
                     targetRunResultStorage: this.ResultStorageActor));
         }
 
@@ -107,24 +107,24 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
                     this.Configuration,
                     this.ParameterTree,
                     genomeBuilder: null,
-                    genomeSorter: this.GenomeSorter,
+                    this.GenerationEvaluationActor,
                     targetRunResultStorage: this.ResultStorageActor));
         }
 
         /// <summary>
         /// Verifies that initializing an instance of the
-        /// <see cref="GlobalCovarianceMatrixAdaptationStrategy{TInstance,TResult}"/> class without a genome sorter
+        /// <see cref="GlobalCovarianceMatrixAdaptationStrategy{TInstance,TResult}"/> class without a generation evaluation actor
         /// throws an <see cref="ArgumentNullException"/>.
         /// </summary>
         [Fact]
-        public void ConstructorThrowsForMissingGenomeSorter()
+        public void ConstructorThrowsForMissingGenerationEvaluationActor()
         {
             Assert.Throws<ArgumentNullException>(
                 () => new GlobalCovarianceMatrixAdaptationStrategy<TestInstance, IntegerResult>(
                     this.Configuration,
                     this.ParameterTree,
                     this.GenomeBuilder,
-                    genomeSorter: null,
+                    null,
                     targetRunResultStorage: this.ResultStorageActor));
         }
 
@@ -141,7 +141,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
                     this.Configuration,
                     this.ParameterTree,
                     this.GenomeBuilder,
-                    this.GenomeSorter,
+                    this.GenerationEvaluationActor,
                     targetRunResultStorage: null));
         }
 
@@ -226,7 +226,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
                 originalPopulation.GetCompetitiveIndividuals().Count,
                 updatedPopulation.GetCompetitiveIndividuals().Count);
 
-            var valueComparer = new Genome.GeneValueComparator();
+            var valueComparer = Genome.GenomeComparer;
             foreach (var point in searchPoints.Take(searchPoints.Count - 1))
             {
                 var mappedGenome = point.Genome.CreateMutableGenome();
@@ -273,7 +273,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
                 originalPopulation.GetCompetitiveIndividuals().Count,
                 updatedPopulation.GetCompetitiveIndividuals().Count);
 
-            var valueComparer = new Genome.GeneValueComparator();
+            var valueComparer = Genome.GenomeComparer;
             foreach (var point in searchPoints)
             {
                 var mappedGenome = point.Genome.CreateMutableGenome();
@@ -303,7 +303,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
                 this.Configuration,
                 this.ParameterTree,
                 this.GenomeBuilder,
-                this.GenomeSorter,
+                this.GenerationEvaluationActor,
                 this.ResultStorageActor);
         }
 

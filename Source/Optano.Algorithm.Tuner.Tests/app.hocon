@@ -24,16 +24,16 @@
 		provider = "Akka.Cluster.ClusterActorRefProvider, Akka.Cluster"			
 		deployment
 		{
-			/TournamentSelector/MiniTournamentWorkers
+			/GenerationEvaluationActor/EvaluationActorRouter
 			{
-				router = round-robin-pool # routing strategy
-				nr-of-instances = 1
+				router = broadcast-pool # routing strategy
+                cluster
+				{
+					max-nr-of-instances-per-node = 2 # Set to 2 here, but to maximumNumberParallelEvaluations outside the test project.
+					enabled = on
+					allow-local-routees = on
+                }
 			}
-/GenomeSorter/SortingGroup
-{
-	router = broadcast-group
-	routees.paths = ["/*/*/*/*/EvaluationActors/*"]
-}
 		}
 	}
 	remote.dot-netty.tcp {

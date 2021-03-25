@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -28,6 +28,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 
 #endregion
+
 namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.ResultStorage.Messages
 {
     using System;
@@ -85,7 +86,7 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.ResultStorage.Messages
         }
 
         /// <summary>
-        /// Checks that <see cref="ResultRequest{I}.Genome"/> returns the genome that was used for initialization.
+        /// Checks that <see cref="GenomeResultsRequest.Genome"/> returns the genome that was used for initialization.
         /// </summary>
         [Fact]
         public void GenomeIsSetCorrectly()

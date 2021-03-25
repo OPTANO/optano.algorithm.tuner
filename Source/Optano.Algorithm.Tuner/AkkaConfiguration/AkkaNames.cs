@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -32,9 +32,7 @@
 namespace Optano.Algorithm.Tuner.AkkaConfiguration
 {
     using Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation;
-    using Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments.Actors;
     using Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage;
-    using Optano.Algorithm.Tuner.GenomeEvaluation.Sorting;
 
     /// <summary>
     /// Contains names used for Akka.NET objects that get used multiple times throughout the solution.
@@ -44,49 +42,33 @@ namespace Optano.Algorithm.Tuner.AkkaConfiguration
         #region Constants
 
         /// <summary>
-        /// Name for the <see cref="TournamentSelector{TTargetAlgorithm,TInstance,TResult}"/> instance.
+        /// The name for the actor system employed by master and worker.
         /// </summary>
-        public const string TournamentSelector = "TournamentSelector";
+        public const string ActorSystemName = "OptanoAlgorithmTunerActorSystem";
 
         /// <summary>
-        /// Name for the <see cref="ResultStorageActor{TInstance,TResult}"/> instance.
+        /// The name for the <see cref="ResultStorageActor{TInstance,TResult}"/> instance.
         /// </summary>
         public const string ResultStorageActor = "ResultStorageActor";
 
         /// <summary>
-        /// Name for the router of <see cref="MiniTournamentActor{TTargetAlgorithm,TInstance,TResult}"/>s.
+        /// The name for the <see cref="GenerationEvaluationActor{TTargetAlgorithm,TInstance,TResult}"/> instance.
         /// </summary>
-        public const string MiniTournamentWorkers = "MiniTournamentWorkers";
+        public const string GenerationEvaluationActor = "GenerationEvaluationActor";
 
         /// <summary>
-        /// Name for the router creating and managing
-        /// <see cref="EvaluationActor{TTargetAlgorithm,TInstance,TResult}"/>s.
+        /// The name for the router, who is managing the <see cref="EvaluationActor{TTargetAlgorithm,TInstance,TResult}"/> instances.
+        /// This router is responsible for starting new evaluation actors, whenever a node joins the cluster.
         /// </summary>
-        public const string EvaluationActorRouter = "EvaluationActors";
+        public const string EvaluationActorRouter = "EvaluationActorRouter";
 
         /// <summary>
-        /// Name for the <see cref="GenomeSorter{TInstance,TResult}"/> instance.
-        /// </summary>
-        public const string GenomeSorter = "GenomeSorter";
-
-        /// <summary>
-        /// Name for <see cref="GenomeSorter"/>'s router for
-        /// <see cref="EvaluationActor{TTargetAlgorithm,TInstance,TResult}"/>s.
-        /// </summary>
-        public const string SortingRouter = "SortingGroup";
-
-        /// <summary>
-        /// Name for the actor system employed by master and worker.
-        /// </summary>
-        public const string ActorSystemName = "TargetAlgorithmRunActors";
-
-        /// <summary>
-        /// Path to common HOCON configuration used for both master and worker.
+        /// The path to common HOCON configuration used for both master and worker.
         /// </summary>
         public const string CommonAkkaConfigFileName = "Optano.Algorithm.Tuner.AkkaConfiguration.Common.conf";
 
         /// <summary>
-        /// Path to HOCON configuration that activates Akka logging on debug level.
+        /// The path to HOCON configuration that activates Akka logging on debug level.
         /// </summary>
         public const string ExtensiveAkkaLoggingFileName = "Optano.Algorithm.Tuner.AkkaConfiguration.ExtensiveAkkaLogging.conf";
 

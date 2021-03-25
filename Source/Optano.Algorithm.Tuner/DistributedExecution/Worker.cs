@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -31,6 +31,7 @@
 
 namespace Optano.Algorithm.Tuner.DistributedExecution
 {
+    using System.Globalization;
     using System.Reflection;
 
     using Akka.Actor;
@@ -39,11 +40,11 @@ namespace Optano.Algorithm.Tuner.DistributedExecution
 
     using Optano.Algorithm.Tuner.AkkaConfiguration;
     using Optano.Algorithm.Tuner.Configuration.ArgumentParsers;
-    using Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments.Actors;
+    using Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation;
     using Optano.Algorithm.Tuner.Logging;
 
     /// <summary>
-    /// Responsible for starting an actor system that can support <see cref="MiniTournamentActor{TTargetAlgorithm,TInstance,TResult}"/>s.
+    /// Responsible for starting an actor system that can support <see cref="EvaluationActor{TTargetAlgorithm,TInstance,TResult}"/>s.
     /// </summary>
     public static class Worker
     {
@@ -58,6 +59,7 @@ namespace Optano.Algorithm.Tuner.DistributedExecution
         /// </param>
         public static void Run(string[] args)
         {
+            ProcessUtils.SetDefaultCultureInfo(CultureInfo.InvariantCulture);
             LoggingHelper.Configure($"consoleOutput_Worker_{ProcessUtils.GetCurrentProcessId()}.log");
             Randomizer.Configure();
 

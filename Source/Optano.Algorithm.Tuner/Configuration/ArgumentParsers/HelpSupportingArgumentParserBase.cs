@@ -1,30 +1,30 @@
 ﻿#region Copyright (c) OPTANO GmbH
 
 // ////////////////////////////////////////////////////////////////////////////////
-//
+// 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
-//
+// 
 //    The entire contents of this file is protected by German and
 //    International Copyright Laws. Unauthorized reproduction,
 //    reverse-engineering, and distribution of all or any portion of
 //    the code contained in this file is strictly prohibited and may
 //    result in severe civil and criminal penalties and will be
 //    prosecuted to the maximum extent possible under the law.
-//
+// 
 //    RESTRICTIONS
-//
+// 
 //    THIS SOURCE CODE AND ALL RESULTING INTERMEDIATE FILES
 //    ARE CONFIDENTIAL AND PROPRIETARY TRADE SECRETS OF
 //    OPTANO GMBH.
-//
+// 
 //    THE SOURCE CODE CONTAINED WITHIN THIS FILE AND ALL RELATED
 //    FILES OR ANY PORTION OF ITS CONTENTS SHALL AT NO TIME BE
 //    COPIED, TRANSFERRED, SOLD, DISTRIBUTED, OR OTHERWISE MADE
 //    AVAILABLE TO OTHER INDIVIDUALS WITHOUT WRITTEN CONSENT
 //    AND PERMISSION FROM OPTANO GMBH.
-//
+// 
 // ////////////////////////////////////////////////////////////////////////////////
 
 #endregion
@@ -60,6 +60,15 @@ namespace Optano.Algorithm.Tuner.Configuration.ArgumentParsers
         #region Fields
 
         /// <summary>
+        /// Gets or sets all console arguments.
+        /// </summary>
+        [SuppressMessage(
+            "StyleCop.CSharp.MaintainabilityRules",
+            "SA1401:FieldsMustBePrivate",
+            Justification = "Reviewed. Property with capital name exists.")]
+        protected string[] _allArguments;
+
+        /// <summary>
         /// A value indicating whether the parsed arguments requested the help text to be printed.
         /// </summary>
         private bool _helpTextRequested;
@@ -84,12 +93,6 @@ namespace Optano.Algorithm.Tuner.Configuration.ArgumentParsers
         /// </summary>
         private OptionSet _options;
 
-        /// <summary>
-        /// Gets or sets all console arguments.
-        /// </summary>
-        [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:FieldsMustBePrivate", Justification = "Reviewed. Property with capital name exists.")]
-        protected string[] _allArguments;
-
         #endregion
 
         #region Constructors and Destructors
@@ -102,32 +105,13 @@ namespace Optano.Algorithm.Tuner.Configuration.ArgumentParsers
         /// </param>
         protected HelpSupportingArgumentParserBase(bool allowAdditionalArguments = false)
         {
+            ProcessUtils.SetDefaultCultureInfo(CultureInfo.InvariantCulture);
             this.AllowAdditionalArguments = allowAdditionalArguments;
-
-            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
         }
 
         #endregion
 
         #region Public properties
-
-        /// <summary>
-        /// Gets the argument options that can be recognized by this parser.
-        /// </summary>
-        protected OptionSet Options
-        {
-            get
-            {
-                if (this._options == null)
-                {
-                    this._options = this.CreateOptionSet();
-                }
-
-                return this._options;
-            }
-        }
-
-
 
         /// <summary>
         /// Gets a value indicating whether the parsed arguments required the print of a help text.
@@ -182,6 +166,22 @@ namespace Optano.Algorithm.Tuner.Configuration.ArgumentParsers
         #region Properties
 
         /// <summary>
+        /// Gets the argument options that can be recognized by this parser.
+        /// </summary>
+        protected OptionSet Options
+        {
+            get
+            {
+                if (this._options == null)
+                {
+                    this._options = this.CreateOptionSet();
+                }
+
+                return this._options;
+            }
+        }
+
+        /// <summary>
         /// Gets a value indicating whether <see cref="ParseArguments(string[])"/> should accept unknown arguments or not.
         /// </summary>
         protected bool AllowAdditionalArguments { get; }
@@ -204,7 +204,8 @@ namespace Optano.Algorithm.Tuner.Configuration.ArgumentParsers
         /// </exception>
         public virtual void ParseArguments(string[] args)
         {
-            this._allArguments = args?.Concat(this._allArguments ?? new string[0]).Distinct(StringComparer.InvariantCulture).ToArray() ?? new string[0];
+            this._allArguments = args?.Concat(this._allArguments ?? new string[0]).Distinct(StringComparer.InvariantCulture).ToArray()
+                                 ?? new string[0];
 
             // Parse arguments one by one.
             this._additionalArguments = this.Options.Parse(args);
@@ -301,7 +302,7 @@ namespace Optano.Algorithm.Tuner.Configuration.ArgumentParsers
             var options = new OptionSet
                               {
                                   {
-                                      HelpSupportingArgumentParserBase.HelpPrototypeText, "Information about usage will be printed.",
+                                      HelpSupportingArgumentParserBase.HelpPrototypeText, () => "Information about usage will be printed.",
                                       h => this._helpTextRequested = true
                                   },
                               };

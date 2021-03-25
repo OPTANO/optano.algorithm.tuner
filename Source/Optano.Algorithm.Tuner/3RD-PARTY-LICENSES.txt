@@ -4,8 +4,9 @@ Akka.Cluster, https://www.nuget.org/packages/Akka.Cluster/
 Akka.Logger.NLog, https://www.nuget.org/packages/Akka.Logger.NLog/
 Akka.Serialization.Hyperion, https://www.nuget.org/packages/Akka.Serialization.Hyperion/
 MathNet.Numerics, https://www.nuget.org/packages/MathNet.Numerics/
-NDesk.Options, https://www.nuget.org/packages/NDesk.Options/
+NDesk.Options.Patched, https://www.nuget.org/packages/NDesk.Options.Patched/
 OPTANO.Modeling.Gurobi, https://www.nuget.org/packages/OPTANO.Modeling.Gurobi/
+OptimizedPriorityQueue, https://www.nuget.org/packages/OptimizedPriorityQueue/
 StyleCop.Analyzers, https://www.nuget.org/packages/StyleCop.Analyzers/
 
 Moreover its test project links to the following nuget packages:
@@ -14,6 +15,7 @@ Accord.Statistics, https://www.nuget.org/packages/Accord.Statistics/
 Akka.TestKit.Xunit2, https://www.nuget.org/packages/Akka.TestKit.Xunit2/
 coverlet.collector, https://www.nuget.org/packages/coverlet.collector/
 Microsoft.NET.Test.Sdk, https://www.nuget.org/packages/Microsoft.NET.Test.Sdk/
+Moq, https://www.nuget.org/packages/Moq/
 Shouldly, https://www.nuget.org/packages/Shouldly/
 xunit, https://www.nuget.org/packages/xunit/
 xunit.runner.visualstudio, https://www.nuget.org/packages/xunit.runner.visualstudio/

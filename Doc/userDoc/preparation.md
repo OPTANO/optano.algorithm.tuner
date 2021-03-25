@@ -35,7 +35,7 @@ This page is a collection of questions that will start you off when considering 
 
 ## Know your options
 
-- Is [basic usage](basic_usage.md) of *OPTANO Algorithm Tuner* sufficient or do you need to [customize](advanced.md)?
-- Are there any [existing implementations](examples.md) you can use or learn from?
+- Is [basic usage](basic_usage.md) of *OPTANO Algorithm Tuner* sufficient or do you need to [customize](../developerDoc/advanced.md)?
+- Are there any [existing implementations](../developerDoc/examples.md) you can use or learn from?
 - Which [tuning algorithm](algorithms.md) do you want to apply?
 - Which [parameters](parameters.md) should you set? Take a look at [some of our hints](parameter_selection.md) for an idea on how they relate to you algorithm, input and resources.

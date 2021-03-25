@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -36,7 +36,6 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.GeneticAlgorit
     using System.IO;
     using System.Linq;
 
-    using Optano.Algorithm.Tuner;
     using Optano.Algorithm.Tuner.Configuration;
     using Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments.Results;
     using Optano.Algorithm.Tuner.Genomes;
@@ -114,7 +113,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.GeneticAlgorit
                     this._population,
                     iterationCounter: -1,
                     incumbentKeptCounter: this._incumbentKeptCounter,
-                    allKnownRanks: new Dictionary<Genome, List<GenomeTournamentResult>>()));
+                    allKnownRanks: new Dictionary<Genome, List<GenomeTournamentRank>>()));
         }
 
         /// <summary>
@@ -129,7 +128,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.GeneticAlgorit
                     this._population,
                     iterationCounter: this._iterationCounter,
                     incumbentKeptCounter: -1,
-                    allKnownRanks: new Dictionary<Genome, List<GenomeTournamentResult>>()));
+                    allKnownRanks: new Dictionary<Genome, List<GenomeTournamentRank>>()));
         }
 
         /// <summary>
@@ -144,7 +143,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.GeneticAlgorit
                     this._population,
                     iterationCounter: 4,
                     incumbentKeptCounter: 5,
-                    allKnownRanks: new Dictionary<Genome, List<GenomeTournamentResult>>()));
+                    allKnownRanks: new Dictionary<Genome, List<GenomeTournamentRank>>()));
         }
 
         /// <summary>
@@ -158,7 +157,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.GeneticAlgorit
                 this._population,
                 this._iterationCounter,
                 this._incumbentKeptCounter,
-                new Dictionary<Genome, List<GenomeTournamentResult>>());
+                new Dictionary<Genome, List<GenomeTournamentRank>>());
             Assert.Equal(
                 this._population,
                 status.Population);
@@ -175,7 +174,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.GeneticAlgorit
                 this._population,
                 13,
                 this._incumbentKeptCounter,
-                new Dictionary<Genome, List<GenomeTournamentResult>>());
+                new Dictionary<Genome, List<GenomeTournamentRank>>());
             Assert.Equal(
                 13,
                 status.IterationCounter);
@@ -188,7 +187,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.GeneticAlgorit
         [Fact]
         public void AllKnownRanksAreSetCorrectly()
         {
-            var ranks = new Dictionary<Genome, List<GenomeTournamentResult>>();
+            var ranks = new Dictionary<Genome, List<GenomeTournamentRank>>();
             var status = new GgaStatus(this._population, this._iterationCounter, this._incumbentKeptCounter, ranks);
             Assert.Equal(
                 ranks,
@@ -214,14 +213,14 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.GeneticAlgorit
             int counter = 12;
             int stagnation = 7;
             /* (3) ranks */
-            var result = new GenomeTournamentResult
+            var result = new GenomeTournamentRank
                              {
                                  TournamentRank = 2,
-                                 Generation = 24,
+                                 GenerationId = 24,
                                  TournamentId = 11,
                              };
-            var results = new List<GenomeTournamentResult> { result };
-            var ranks = new Dictionary<Genome, List<GenomeTournamentResult>> { { new Genome(), results } };
+            var results = new List<GenomeTournamentRank> { result };
+            var ranks = new Dictionary<Genome, List<GenomeTournamentRank>> { { new Genome(), results } };
             var status = new GgaStatus(this._population, counter, stagnation, ranks);
 
             /* Write and read it from file. */
@@ -235,7 +234,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.GeneticAlgorit
                 deserializedStatus.Population.GetCompetitiveIndividuals().Count);
             var deserializedCompetitiveGenome = deserializedStatus.Population.GetCompetitiveIndividuals().First();
             Assert.True(
-                new Genome.GeneValueComparator().Equals(competitiveGenome, deserializedCompetitiveGenome),
+                Genome.GenomeComparer.Equals(competitiveGenome, deserializedCompetitiveGenome),
                 "Expected different competive genome.");
             Assert.Equal(
                 competitiveGenome.Age,
@@ -245,7 +244,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.GeneticAlgorit
                 deserializedStatus.Population.GetNonCompetitiveMates().Count);
             var deserializedNonCompetitiveGenome = deserializedStatus.Population.GetNonCompetitiveMates().First();
             Assert.True(
-                new Genome.GeneValueComparator().Equals(nonCompetitiveGenome, deserializedNonCompetitiveGenome),
+                Genome.GenomeComparer.Equals(nonCompetitiveGenome, deserializedNonCompetitiveGenome),
                 "Expected different non-competive genome.");
             Assert.Equal(
                 nonCompetitiveGenome.Age,
@@ -259,7 +258,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.GeneticAlgorit
                 deserializedStatus.IncumbentKeptCounter);
             /* (c) ranks */
             var singleResult = deserializedStatus.AllKnownRanks.Single().Value.Single();
-            Assert.Equal(result.Generation, singleResult.Generation);
+            Assert.Equal(result.GenerationId, singleResult.GenerationId);
             Assert.Equal(result.TournamentId, singleResult.TournamentId);
             Assert.Equal(result.TournamentRank, singleResult.TournamentRank);
         }
@@ -287,7 +286,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.GeneticAlgorit
                 this._population,
                 this._iterationCounter,
                 this._incumbentKeptCounter,
-                new Dictionary<Genome, List<GenomeTournamentResult>>());
+                new Dictionary<Genome, List<GenomeTournamentRank>>());
         }
 
         #endregion

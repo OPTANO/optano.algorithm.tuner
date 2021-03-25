@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -40,7 +40,6 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
 
     using Akka.Configuration;
 
-    using Optano.Algorithm.Tuner;
     using Optano.Algorithm.Tuner.Configuration;
     using Optano.Algorithm.Tuner.DistributedExecution;
     using Optano.Algorithm.Tuner.GenomeEvaluation;
@@ -250,7 +249,7 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
             bool runIsStarted = false;
 
             // Call to Master.Run providing required parameters, but also the --help parameter.
-            var args = new[] { "--help", "--cores=1" };
+            var args = new[] { "--help", "--maxParallelEvaluations=1" };
             Master<NoOperation, TestInstance, TestResult>.Run(
                 args,
                 (config, trainingInstancePath, testInstancePath) =>
@@ -494,7 +493,7 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
             // Make sure it does not get used:
             string[] args =
                 {
-                    "--cores=1",
+                    "--maxParallelEvaluations=1",
                     "--verbose=0",
                     "--numGens=1",
                     "--goalGen=0",
@@ -543,6 +542,7 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
                                // Akka config parameters
                                "--port=1234",
                                "--ownHostName=foo",
+                               "--maxParallelEvaluations=1",
                            };
             Master<NoOperation, TestInstance, TestResult>.Run(
                 args,
@@ -621,7 +621,7 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
                         // Call to Master.Run with parameters for a quick execution and minimal logging.
                         var args = new[]
                                        {
-                                           "--cores=1",
+                                           "--maxParallelEvaluations=1",
                                            "--verbose=1",
                                            "--numGens=1",
                                            "--goalGen=0",
@@ -639,7 +639,7 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
                             var output = reader.ReadToEnd();
                             var lastLine = output
                                 .Split('\r', '\n')
-                                .TakeWhile(s => !s.Contains("Shutting down remote daemon"))
+                                .SkipWhile(s => !s.Contains("Best Configuration"))
                                 .Last(s => s != "");
                             Assert.True(
                                 lastLine.Contains("a: 1"),
@@ -658,7 +658,7 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
         {
             var quickExecutionArgs = new[]
                                          {
-                                             "--cores=1",
+                                             "--maxParallelEvaluations=1",
                                              "--numGens=1",
                                              "--goalGen=0",
                                              "--instanceNumbers=1:1",
@@ -784,7 +784,7 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
             return new AlgorithmTuner<NoOperation, TestInstance, TestResult>(
                 new TargetAlgorithmFactory<NoOperation, TestInstance, TestResult>(
                     () => new NoOperation()),
-                new KeepSuggestedOrder<TestResult>(),
+                new KeepSuggestedOrder<TestInstance, TestResult>(),
                 new[] { new TestInstance("train") },
                 this.ParameterTree,
                 config);
@@ -819,7 +819,7 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
                     elapsedTime: TimeSpan.Zero);
             status.SetRunResults(
                 new Dictionary<ImmutableGenome, ImmutableDictionary<TestInstance, TestResult>>().ToImmutableDictionary());
-            var ggaStatus = new GgaStatus(new Population(config), 0, 0, new Dictionary<Genome, List<GenomeTournamentResult>>());
+            var ggaStatus = new GgaStatus(new Population(config), 0, 0, new Dictionary<Genome, List<GenomeTournamentRank>>());
 
             // Write them to file.
             status.WriteToFile(pathToStatusFile);

@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -31,17 +31,21 @@
 
 namespace Optano.Algorithm.Tuner.TargetAlgorithm.RunEvaluators
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
 
+    using Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation;
     using Optano.Algorithm.Tuner.Genomes;
+    using Optano.Algorithm.Tuner.TargetAlgorithm.Instances;
     using Optano.Algorithm.Tuner.TargetAlgorithm.Results;
 
     /// <summary>
-    /// An implementation of <see cref="IRunEvaluator{R}" /> that sorts genomes by average
-    /// value in target algorithm runs.
+    /// An implementation of <see cref="IRunEvaluator{I,R}" /> that sorts genomes by average value in target algorithm runs.
     /// </summary>
-    public class SortByValue : IMetricRunEvaluator<ContinuousResult>
+    /// <typeparam name="TInstance">The instance type.</typeparam>
+    public class SortByValue<TInstance> : IMetricRunEvaluator<TInstance, ContinuousResult>
+        where TInstance : InstanceBase
     {
         #region Fields
 
@@ -55,9 +59,9 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm.RunEvaluators
         #region Constructors and Destructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SortByValue"/> class.
+        /// Initializes a new instance of the <see cref="SortByValue{TInstance}"/> class.
         /// </summary>
-        /// <param name="ascending">Whether values should be sorting ascendingly.</param>
+        /// <param name="ascending">A value indicating whether values should be sorted ascendingly.</param>
         public SortByValue(bool ascending = true)
         {
             this._ascending = ascending;
@@ -67,39 +71,44 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm.RunEvaluators
 
         #region Public Methods and Operators
 
-        /// <summary>
-        /// Sorts the genomes by results, best genome first.
-        /// We decided to sort genomes by the number of valid results first and by the average value of these results afterwards. Typically the number of runs should be the same for every genome.
-        /// </summary>
-        /// <param name="runResults">Results from target algorithm runs, grouped by genome.</param>
-        /// <returns>The sorted genomes.</returns>
-        public IEnumerable<ImmutableGenome> Sort(Dictionary<ImmutableGenome, IEnumerable<ContinuousResult>> runResults)
+        /// <inheritdoc />
+        public IEnumerable<ImmutableGenomeStats<TInstance, ContinuousResult>> Sort(
+            IEnumerable<ImmutableGenomeStats<TInstance, ContinuousResult>> allGenomeStatsOfMiniTournament)
         {
-            var orderByNumberOfValidResults = this.OrderByNumberOfValidResults(runResults);
+            var orderByNumberOfValidResults = allGenomeStatsOfMiniTournament
+                .OrderByDescending(gs => gs.FinishedInstances.Values.Count(SortByValue<TInstance>.HasValidResultValue));
+
             if (this._ascending)
             {
                 return orderByNumberOfValidResults
                     .ThenBy(
-                        genomeToResult => genomeToResult.Value.Where(this.HasValidResultValue).Select(this.GetMetricRepresentation)
-                            .DefaultIfEmpty().Average())
-                    .Select(genomeToResult => genomeToResult.Key);
+                        gs => gs.FinishedInstances.Values.Where(SortByValue<TInstance>.HasValidResultValue).Select(this.GetMetricRepresentation)
+                            .DefaultIfEmpty().Average());
             }
-            else
-            {
-                return orderByNumberOfValidResults
-                    .ThenByDescending(
-                        genomeToResult => genomeToResult.Value.Where(this.HasValidResultValue).Select(this.GetMetricRepresentation)
-                            .DefaultIfEmpty().Average())
-                    .Select(genomeToResult => genomeToResult.Key);
-            }
+
+            return orderByNumberOfValidResults
+                .ThenByDescending(
+                    gs => gs.FinishedInstances.Values.Where(SortByValue<TInstance>.HasValidResultValue).Select(this.GetMetricRepresentation)
+                        .DefaultIfEmpty().Average());
         }
 
-        /// <summary>
-        /// Gets a metric representation of the provided result.
-        /// <para><see cref="IRunEvaluator{TResult}.Sort"/> needs to be based on this.</para>
-        /// </summary>
-        /// <param name="result">The result.</param>
-        /// <returns><see cref="ContinuousResult.Value"/>.</returns>
+        /// <inheritdoc />
+        public IEnumerable<ImmutableGenome> GetGenomesThatCanBeCancelledByRacing(
+            IReadOnlyList<ImmutableGenomeStats<TInstance, ContinuousResult>> allGenomeStatsOfMiniTournament,
+            int numberOfMiniTournamentWinners)
+        {
+            // Implementing a useful racing strategy is not possible without knowing the global minimum or maximum. Therefore no genome can be cancelled by racing.
+            return Enumerable.Empty<ImmutableGenome>();
+        }
+
+        /// <inheritdoc />
+        public double ComputeEvaluationPriorityOfGenome(ImmutableGenomeStats<TInstance, ContinuousResult> genomeStats, TimeSpan cpuTimeout)
+        {
+            // Implementing a useful racing strategy is not possible without knowing the global minimum or maximum. Therefore all genomes have the same priority.
+            return 42;
+        }
+
+        /// <inheritdoc />
         public double GetMetricRepresentation(ContinuousResult result)
         {
             return result.Value;
@@ -110,24 +119,13 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm.RunEvaluators
         #region Methods
 
         /// <summary>
-        /// Sorts the genomes descending by the number of valid results, genomes with most valid results first.
-        /// </summary>
-        /// <param name="runResults">Results from target algorithm runs, grouped by genome.</param>
-        /// <returns>The sorted genomes.</returns>
-        private IOrderedEnumerable<KeyValuePair<ImmutableGenome, IEnumerable<ContinuousResult>>> OrderByNumberOfValidResults(
-            Dictionary<ImmutableGenome, IEnumerable<ContinuousResult>> runResults)
-        {
-            return runResults.OrderByDescending(kvp => kvp.Value.Count(this.HasValidResultValue));
-        }
-
-        /// <summary>
         /// Checks, if the result has a valid result value.
         /// </summary>
-        /// <param name="runResult">Result from target algorithm run.</param>
+        /// <param name="result">The result.</param>
         /// <returns>True, if the result has a valid result value.</returns>
-        private bool HasValidResultValue(ContinuousResult runResult)
+        private static bool HasValidResultValue(ContinuousResult result)
         {
-            return !runResult.IsCancelled && !double.IsNaN(runResult.Value) && !double.IsInfinity(runResult.Value);
+            return !result.IsCancelled && !double.IsNaN(result.Value) && !double.IsInfinity(result.Value);
         }
 
         #endregion

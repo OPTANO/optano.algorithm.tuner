@@ -1,30 +1,30 @@
 ﻿#region Copyright (c) OPTANO GmbH
 
 // ////////////////////////////////////////////////////////////////////////////////
-//
+// 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
-//
+// 
 //    The entire contents of this file is protected by German and
 //    International Copyright Laws. Unauthorized reproduction,
 //    reverse-engineering, and distribution of all or any portion of
 //    the code contained in this file is strictly prohibited and may
 //    result in severe civil and criminal penalties and will be
 //    prosecuted to the maximum extent possible under the law.
-//
+// 
 //    RESTRICTIONS
-//
+// 
 //    THIS SOURCE CODE AND ALL RESULTING INTERMEDIATE FILES
 //    ARE CONFIDENTIAL AND PROPRIETARY TRADE SECRETS OF
 //    OPTANO GMBH.
-//
+// 
 //    THE SOURCE CODE CONTAINED WITHIN THIS FILE AND ALL RELATED
 //    FILES OR ANY PORTION OF ITS CONTENTS SHALL AT NO TIME BE
 //    COPIED, TRANSFERRED, SOLD, DISTRIBUTED, OR OTHERWISE MADE
 //    AVAILABLE TO OTHER INDIVIDUALS WITHOUT WRITTEN CONSENT
 //    AND PERMISSION FROM OPTANO GMBH.
-//
+// 
 // ////////////////////////////////////////////////////////////////////////////////
 
 #endregion
@@ -37,7 +37,6 @@ namespace Optano.Algorithm.Tuner.Tests.Genomes
 
     using Accord.Statistics.Testing;
 
-    using Optano.Algorithm.Tuner;
     using Optano.Algorithm.Tuner.Configuration;
     using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.Genomes.Values;
@@ -82,7 +81,7 @@ namespace Optano.Algorithm.Tuner.Tests.Genomes
         /// <summary>
         /// An <see cref="IEqualityComparer{T}"/> that only checks for gene values regardless of genome age.
         /// </summary>
-        private static readonly IEqualityComparer<Genome> genomeValueComparer = new Genome.GeneValueComparator();
+        private static readonly IEqualityComparer<Genome> genomeValueComparer = Genome.GenomeComparer;
 
         /// <summary>
         /// The number of times each test using randomness is performed.
@@ -138,8 +137,8 @@ namespace Optano.Algorithm.Tuner.Tests.Genomes
         {
             Assert.Throws<ArgumentNullException>(
                 () => new GenomeBuilder(
-                parameterTree: GenomeBuilderTest.BuildParameterTree(),
-                configuration: null));
+                    parameterTree: GenomeBuilderTest.BuildParameterTree(),
+                    configuration: null));
         }
 
         /// <summary>
@@ -176,8 +175,8 @@ namespace Optano.Algorithm.Tuner.Tests.Genomes
             // Create genome builder with a mutation rate of 1.
             var configuration =
                 new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder()
-                .SetMutationRate(1)
-                .Build(maximumNumberParallelEvaluations: 1);
+                    .SetMutationRate(1)
+                    .Build(maximumNumberParallelEvaluations: 1);
             var genomeBuilder = new GenomeBuilder(GenomeBuilderTest.BuildParameterTree(), configuration);
 
             // Build a fitting genome and store original description.
@@ -202,8 +201,8 @@ namespace Optano.Algorithm.Tuner.Tests.Genomes
             double mutationRate = 0.35;
             var configuration =
                 new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder()
-                .SetMutationRate(mutationRate)
-                .Build(maximumNumberParallelEvaluations: 1);
+                    .SetMutationRate(mutationRate)
+                    .Build(maximumNumberParallelEvaluations: 1);
             var genomeBuilder = new GenomeBuilder(GenomeBuilderTest.BuildParameterTree(), configuration);
 
             // Create genome.
@@ -251,7 +250,13 @@ namespace Optano.Algorithm.Tuner.Tests.Genomes
             var genome = GenomeBuilderTest.BuildFittingGenome();
 
             // Prepare structure to store which values have been mutated.
-            string[] identifiers = { GenomeBuilderTest.DecisionParameter, GenomeBuilderTest.SmallValueParameter, GenomeBuilderTest.DiscreteParameter, GenomeBuilderTest.ContinuousParameter };
+            string[] identifiers =
+                {
+                    GenomeBuilderTest.DecisionParameter,
+                    GenomeBuilderTest.SmallValueParameter,
+                    GenomeBuilderTest.DiscreteParameter,
+                    GenomeBuilderTest.ContinuousParameter,
+                };
             Dictionary<string, bool> hasBeenMutated = identifiers.ToDictionary(
                 identifier => identifier,
                 identifier => false);
@@ -364,7 +369,7 @@ namespace Optano.Algorithm.Tuner.Tests.Genomes
             genomeBuilder.MakeGenomeValid(genome);
 
             Assert.True(
-                new Genome.GeneValueComparator().Equals(originalGenome, genome),
+                Genome.GenomeComparer.Equals(originalGenome, genome),
                 $"Genome should not have changed from {originalGenome} to {genome}.");
         }
 
@@ -607,7 +612,9 @@ namespace Optano.Algorithm.Tuner.Tests.Genomes
         public void DefaultGenomeUsesDefaultValues()
         {
             var tree = GenomeBuilderTest.BuildParameterTree(true);
-            var builder = new GenomeBuilder(tree, new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder().Build(maximumNumberParallelEvaluations: 1));
+            var builder = new GenomeBuilder(
+                tree,
+                new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder().Build(maximumNumberParallelEvaluations: 1));
 
             var defaultGenome = builder.CreateDefaultGenome(1337);
 
@@ -654,8 +661,8 @@ namespace Optano.Algorithm.Tuner.Tests.Genomes
         {
             var configuration =
                 new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder()
-                .SetMutationRate(0)
-                .Build(maximumNumberParallelEvaluations: 1);
+                    .SetMutationRate(0)
+                    .Build(maximumNumberParallelEvaluations: 1);
             return new GenomeBuilder(GenomeBuilderTest.BuildParameterTree(), configuration);
         }
 

@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -53,14 +53,8 @@ namespace Optano.Algorithm.Tuner.Tracking
     /// An object wrapping the current status of tuning a target algorithm.
     /// Can be serialized to a file and deserialized from one.
     /// </summary>
-    /// <typeparam name="TInstance">
-    /// The type of instances used for the target algorithm.
-    /// Must extend <see cref="InstanceBase"/>.
-    /// </typeparam>
-    /// <typeparam name="TResult">
-    /// The type of results the target algorithm yields.
-    /// Must extend <see cref="ResultBase{TResultType}"/>.
-    /// </typeparam>
+    /// <typeparam name="TInstance">The instance type.</typeparam>
+    /// <typeparam name="TResult">The result type of a single target algorithm evaluation.</typeparam>
     /// <typeparam name="TLearnerModel">
     /// ML model that trains a <typeparamref name="TPredictorModel"/>.
     /// </typeparam>
@@ -112,7 +106,10 @@ namespace Optano.Algorithm.Tuner.Tracking
         /// <param name="elapsedTime">
         /// The elapsed time of the tuning.
         /// </param>
-        [SuppressMessage("NDepend", "ND1002:MethodsWithTooManyParametersCritical", Justification = "The constructor needs to get all of these parameters.")]
+        [SuppressMessage(
+            "NDepend",
+            "ND1002:MethodsWithTooManyParametersCritical",
+            Justification = "The constructor needs to get all of these parameters.")]
         public Status(
             int generation,
             Population population,

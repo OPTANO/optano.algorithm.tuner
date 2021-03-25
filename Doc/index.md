@@ -13,7 +13,7 @@ _OPTANO Algorithm Tuner_ (*OAT*) is a .Net-API that helps tuning (finding near-o
 # Source code
 
 * The souce code of *OAT* can be found at https://github.com/OPTANO/optano.algorithm.tuner.
-* The source code of the [Generic OAT Application](download.md) and the [exemplary target algorithm adapters](userDoc/examples.md) can be found at https://github.com/OPTANO/optano.algorithm.tuner.examples.
+* The source code of the [Generic OAT Application](download.md) and the [exemplary target algorithm adapters](developerDoc/examples.md) can be found at https://github.com/OPTANO/optano.algorithm.tuner.examples.
 
 
 # Help and Information
@@ -22,10 +22,10 @@ _OPTANO Algorithm Tuner_ (*OAT*) is a .Net-API that helps tuning (finding near-o
 The [User Documentation](userDoc/intro.md) gives help for getting started with *OAT*. Among others it provides
 * [all information to get started](userDoc/intro.md)
 * [detailed preparation tips](userDoc/preparation.md)
-* [full list of technical preparations](userDoc/technical_preparation.md)
+* [full list of technical preparations](developerDoc/technical_preparation.md)
 * [tips for basic usage of the Generic OAT Application](userDoc/basic_usage.md)
-* [tips for advanced usage of OAT](userDoc/advanced.md)
-* [detailed information about exemplary target algorithm adapters](userDoc/examples.md)
+* [tips for advanced usage of OAT](developerDoc/advanced.md)
+* [detailed information about exemplary target algorithm adapters](developerDoc/examples.md)
 
 ## [The API Documentation](api/index.md)
 Every detail about the exposed [API](api/index.md). 
@@ -52,7 +52,7 @@ It was created by
 The theoretical foundations of *OAT* are based on several papers
 
 - The representation of problem instances and the GGA tuning algorithm were introduced in [A Gender-Based Genetic Algorithm for the Automatic Configuration of Algorithms](https://link.springer.com/chapter/10.1007/978-3-642-04244-7_14?no-access=true) by Carlos Ansotegui Gil, Meinolf Sellmann and Kevin Tierney which was published in Proceedings of the 15th intern. Conference on the Principles and Practice of Constraint Programming (CP-09), Springer LNCS 5732, pp. 142-157, 2009.
-- The [model-based crossover](userDoc/model_based_crossover.md) operator is based on the paper [Model-Based Genetic Algorithms for Algorithm Configuration](https://www.ijcai.org/Proceedings/15/Papers/109.pdf) by Carlos Ansótegui, Yuri Malitsky, Horst Samulowitz, Meinolf Sellmann and Kevin Tierney which was published in the Proceedings of the Twenty-Fourth International Joint Conference on Artificial Intelligence [(IJCAI 2015)](http://www.ijcai.org/proceedings/2015).
+- The [model-based crossover](developerDoc/model_based_crossover.md) operator is based on the paper [Model-Based Genetic Algorithms for Algorithm Configuration](https://www.ijcai.org/Proceedings/15/Papers/109.pdf) by Carlos Ansótegui, Yuri Malitsky, Horst Samulowitz, Meinolf Sellmann and Kevin Tierney which was published in the Proceedings of the Twenty-Fourth International Joint Conference on Artificial Intelligence [(IJCAI 2015)](http://www.ijcai.org/proceedings/2015).
 - The [alternative tuning algorithm JADE](userDoc/algorithms.md#jade) was introduced as a continuous optimization method in [JADE: Adaptive Differential Evolution With Optional External Archive](https://ieeexplore.ieee.org/document/5208221/) by Jingqiao Zhang and Arthur C. Sanderson, which was published in IEEE Transactions on Evolutionary Computation, vol. 13, no. 5, pp. 945-958, Oct. 2009.
 - Its technique for constraint handling has been presented in [Experimental Comparison of Methods to Handle Boundary Constraints in Differential Evolution](https://link.springer.com/chapter/10.1007/978-3-642-15871-1_42) by Jarosłlaw Arabas, Adam Szczepankiewicz and Tomasz Wroniak, which was published in Parallel Problem Solving from Nature, PPSN XI. PPSN 2010. Lecture Notes in Computer Science, vol 6239. Springer, Berlin, Heidelberg.
 - The implemenation of the [alternative tuning algorithm active CMA-ES](userDoc/algorithms.md#active-cma-es) follows [The CMA Evolution Strategy: A Tutorial.](https://hal.inria.fr/hal-01297037/file/tutorial.pdf) by Nikolaus Hansen, which is available at ArXiv e-prints, arXiv:1604.00772, 2016. 2005.<br/>It also makes use of several practical hints provided on [Nikolaus Hansen's website](https://www.lri.fr/~hansen/cmaes_inmatlab.html#practical).
@@ -80,8 +80,9 @@ This project links to the following nuget packages:
 * [Akka.Logger.NLog](https://www.nuget.org/packages/Akka.Logger.NLog/)
 * [Akka.Serialization.Hyperion](https://www.nuget.org/packages/Akka.Serialization.Hyperion/)
 * [MathNet.Numerics](https://www.nuget.org/packages/MathNet.Numerics/)
-* [NDesk.Options](https://www.nuget.org/packages/NDesk.Options/)
+* [NDesk.Options.Patched](https://www.nuget.org/packages/NDesk.Options.Patched/)
 * [OPTANO.Modeling.Gurobi](https://www.nuget.org/packages/OPTANO.Modeling.Gurobi/)
+* [OptimizedPriorityQueue](https://www.nuget.org/packages/OptimizedPriorityQueue/)
 * [StyleCop.Analyzers](https://www.nuget.org/packages/StyleCop.Analyzers/)
 
 Moreover its test project links to the following nuget packages:
@@ -90,6 +91,7 @@ Moreover its test project links to the following nuget packages:
 * [Akka.TestKit.Xunit2](https://www.nuget.org/packages/Akka.TestKit.Xunit2/)
 * [coverlet.collector](https://www.nuget.org/packages/coverlet.collector/)
 * [Microsoft.NET.Test.Sdk](https://www.nuget.org/packages/Microsoft.NET.Test.Sdk/)
+* [Moq](https://www.nuget.org/packages/Moq/)
 * [Shouldly](https://www.nuget.org/packages/Shouldly/)
 * [xunit](https://www.nuget.org/packages/xunit/)
 * [xunit.runner.visualstudio](https://www.nuget.org/packages/xunit.runner.visualstudio/)

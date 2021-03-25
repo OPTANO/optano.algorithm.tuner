@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -57,7 +57,7 @@ namespace Optano.Algorithm.Tuner.MachineLearning.TrainingData
         /// <param name="currentGeneration">
         /// The current generation.
         /// </param>
-        public TrainingDataWrapper(Dictionary<Genome, List<GenomeTournamentResult>> tournamentResults, int currentGeneration)
+        public TrainingDataWrapper(Dictionary<Genome, List<GenomeTournamentRank>> tournamentResults, int currentGeneration)
         {
             if (currentGeneration < 0)
             {
@@ -79,9 +79,9 @@ namespace Optano.Algorithm.Tuner.MachineLearning.TrainingData
         public F64Matrix ConvertedGenomes { get; set; }
 
         /// <summary>
-        /// Gets a dictionary that holds all observed <see cref="GenomeTournamentResult"/>s for each <see cref="Genome"/>.
+        /// Gets a dictionary that holds all observed <see cref="GenomeTournamentRank"/>s for each <see cref="Genome"/>.
         /// </summary>
-        public Dictionary<Genome, List<GenomeTournamentResult>> TournamentResults { get; }
+        public Dictionary<Genome, List<GenomeTournamentRank>> TournamentResults { get; }
 
         /// <summary>
         /// Gets all known genomes.

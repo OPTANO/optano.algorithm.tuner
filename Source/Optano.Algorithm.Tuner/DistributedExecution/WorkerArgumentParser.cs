@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -174,19 +174,22 @@ namespace Optano.Algorithm.Tuner.DistributedExecution
             var options = base.CreateOptionSet();
             options.Add(
                 "s|seedHostName=",
-                "The seed's host name. Must always be specified.",
+                () => "The seed's host name. Must always be specified.",
                 h => this._seedHostName = h);
             options.Add(
                 "ownHostName=",
-                "The address that the worker uses for incoming Akka messages. Default: FQDN. Note: On some systems the FQDN cannot be resolved on the fly. In that case, please provide the FQDN or an IP address.",
+                () =>
+                    "The address that the worker uses for incoming Akka messages. Default: FQDN. Note: On some systems the FQDN cannot be resolved on the fly. In that case, please provide the FQDN or an IP address.",
                 hostName => this._ownHostName = hostName);
             options.Add(
                 "p|port=",
-                "The port {NUMBER} on which the seed listens for worker connections. Must be identical for master and respective workers, but different for different parallel runs.\nDefault is 8081.\nThis must be an integer.",
+                () =>
+                    "The port {NUMBER} on which the seed listens for worker connections. Must be identical for master and respective workers, but different for different parallel runs.\nDefault is 8081.\nThis must be an integer.",
                 (int p) => this._port = p);
             options.Add(
                 "v|verbose=",
-                "The verbosity level. 0 only prints warnings, 1 regurlarly prints some status information, 2 prints more detailed information, e.g. calls to the target mechanism, and 3 is for debugging.\nDefault is 1.\nMust be one of 0, 1, 2, 3.\n",
+                () =>
+                    "The verbosity level. 0 only prints warnings, 1 regurlarly prints some status information, 2 prints more detailed information, e.g. calls to the target mechanism, and 3 is for debugging.\nDefault is 1.\nMust be one of 0, 1, 2, 3.\n",
                 (VerbosityLevel level) => this._verbosityLevel = level);
 
             return options;

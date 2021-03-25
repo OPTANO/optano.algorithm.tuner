@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -301,7 +301,7 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.DifferentialEvolutio
                 genome =>
                     genome.IsEngineered.Equals(originalIncumbent.IsEngineered)
                     && genome.Age.Equals(originalIncumbent.Age)
-                    && new Genome.GeneValueComparator().Equals(genome, originalIncumbent));
+                    && Genome.GenomeComparer.Equals(genome, originalIncumbent));
 
             // Use all other genomes.
             foreach (var originalGenome in originalGenomes)

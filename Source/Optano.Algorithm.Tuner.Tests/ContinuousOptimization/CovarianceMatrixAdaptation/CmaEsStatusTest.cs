@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -37,7 +37,6 @@ namespace Optano.Algorithm.Tuner.Tests.ContinuousOptimization.CovarianceMatrixAd
 
     using MathNet.Numerics.LinearAlgebra;
 
-    using Optano.Algorithm.Tuner;
     using Optano.Algorithm.Tuner.ContinuousOptimization.CovarianceMatrixAdaptation;
     using Optano.Algorithm.Tuner.ContinuousOptimization.CovarianceMatrixAdaptation.TerminationCriteria;
     using Optano.Algorithm.Tuner.Serialization;

@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -92,27 +92,32 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.CovarianceMatrixAdap
 
             optionSet.Add(
                 "maxGenerationsPerCmaEsPhase=",
-                $"The maximum number of generations per CMA-ES phase.\nDefault is {CovarianceMatrixAdaptationStrategyConfiguration.CovarianceMatrixAdaptationStrategyConfigurationBuilder.DefaultMaximumNumberGenerations}.\nThis must be a positive integer.",
+                () =>
+                    $"The maximum number of generations per CMA-ES phase.\nDefault is {CovarianceMatrixAdaptationStrategyConfiguration.CovarianceMatrixAdaptationStrategyConfigurationBuilder.DefaultMaximumNumberGenerations}.\nThis must be a positive integer.",
                 (int number) => this.InternalConfigurationBuilder.SetMaximumNumberGenerations(number));
             optionSet.Add(
                 "focusOnIncumbent=",
-                $"Whether CMA-ES should focus on improving the continuous parameters of the incumbent. If not, it modifies all parameters of the complete competitive population.\nDefault is {CovarianceMatrixAdaptationStrategyConfiguration.CovarianceMatrixAdaptationStrategyConfigurationBuilder.DefaultFocusOnIncumbent}.",
+                () =>
+                    $"Whether CMA-ES should focus on improving the continuous parameters of the incumbent. If not, it modifies all parameters of the complete competitive population.\nDefault is {CovarianceMatrixAdaptationStrategyConfiguration.CovarianceMatrixAdaptationStrategyConfigurationBuilder.DefaultFocusOnIncumbent}.",
                 (bool incumbentFocus) => this.InternalConfigurationBuilder.SetFocusOnIncumbent(incumbentFocus));
             optionSet.Add(
                 "minDomainSize=",
-                $"The minimum size an integer domain needs to have to be handled as continuous.\nDefault is {CovarianceMatrixAdaptationStrategyConfiguration.CovarianceMatrixAdaptationStrategyConfigurationBuilder.DefaultMinimumDomainSize}.\nThis must be a positive integer.",
+                () =>
+                    $"The minimum size an integer domain needs to have to be handled as continuous.\nDefault is {CovarianceMatrixAdaptationStrategyConfiguration.CovarianceMatrixAdaptationStrategyConfigurationBuilder.DefaultMinimumDomainSize}.\nThis must be a positive integer.",
                 (int size) => this.InternalConfigurationBuilder.SetMinimumDomainSize(size));
             optionSet.Add(
                 "replacementRate=",
-                $"Used if focusOnIncumbent=true. The percentage of competitive genomes which get replaced by the best search points found by CMA-ES at the end of a phase.\nDefault is {CovarianceMatrixAdaptationStrategyConfiguration.CovarianceMatrixAdaptationStrategyConfigurationBuilder.DefaultReplacementRate}.\nThis must be a double in (0, 1].",
+                () =>
+                    $"Used if focusOnIncumbent=true. The percentage of competitive genomes which get replaced by the best search points found by CMA-ES at the end of a phase.\nDefault is {CovarianceMatrixAdaptationStrategyConfiguration.CovarianceMatrixAdaptationStrategyConfigurationBuilder.DefaultReplacementRate}.\nThis must be a double in (0, 1].",
                 (double rate) => this.InternalConfigurationBuilder.SetReplacementRate(rate));
             optionSet.Add(
                 "fixInstances",
-                "Add if the set of instances to evaluate on should stay the same during a CMA-ES phase.",
+                () => "Add if the set of instances to evaluate on should stay the same during a CMA-ES phase.",
                 y => this.InternalConfigurationBuilder.SetFixInstances(true));
             optionSet.Add(
                 "initialStepSize=",
-                $"The step size with which to start CMA-ES phases.\nDefault is {CovarianceMatrixAdaptationStrategyConfiguration.CovarianceMatrixAdaptationStrategyConfigurationBuilder.DefaultInitialStepSize}.\nThis must be a positive double.",
+                () =>
+                    $"The step size with which to start CMA-ES phases.\nDefault is {CovarianceMatrixAdaptationStrategyConfiguration.CovarianceMatrixAdaptationStrategyConfigurationBuilder.DefaultInitialStepSize}.\nThis must be a positive double.",
                 (double size) => this.InternalConfigurationBuilder.SetInitialStepSize(size));
 
             return optionSet;

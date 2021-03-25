@@ -16,25 +16,14 @@ Finally, check the [parameter selection](parameter_selection.md) page for some g
 </dl>
 
 ### <a name="required"></a>Required parameters
-Most parameters in *OAT* have a default value, but you have to specify the parameters that depend on your hardware. As part of the tuning, your algorithm is run many, many times with different configurations. You need to specify how many of these runs can be conducted in parallel.
-
-When comparing configurations, the default [GGA algorithm](algorithms.md#gga) executed by *OAT* uses mini tournaments with a certain number of competitors. For optimal tuner run time, all of these should be run in parallel, i.e. the number of competitors should equal the number of maximum parallel evaluations. Use `--cores` to set this number. However, there might be reasons why you would want to have different numbers, e.g. if you do not have a sufficient amount of cores or your algorithm needs several cores to work. In those cases, you can use `--maxParallelEvaluations` and `--miniTournamentSize` instead.
-
-Note: If the mini tournament size is very small, the [racing framework](#racing) is not very effective and tuning might take longer.
-
-<dl>
- <dt>--cores={NUMBER} (-c)</dt>
- <dd>The number of cores per node. Used to set both --maxParallelEvaluations and --miniTournamentSize.<br>
- Either this or --maxParallelEvaluations must be specified.</dd>
+Most parameters in *OAT* have a default value, but you have to specify the parameters that depend on your hardware. As part of the tuning, your algorithm is run many, many times with different configurations. You need to specify how many of these runs can be conducted in parallel per node.
 
  <dt>--maxParallelEvaluations={NUMBER}</dt>
- <dd>The maximum number of parallel target algorithm evaluations per node.<br>
- Either this or --cores must be specified.</dd>
-</dl>
+ <dd>The maximum number of parallel target algorithm evaluations per node.</dd>
 
-Remarks:
-- If `--maxParallelEvaluations` or `--miniTournamentSize` are used at the same time as `--cores`, they will override the values given by `--cores`.
-- When executing a tuning in [several sessions](statusdump.md), you may only use `--maxParallelEvaluations`, because `--miniTournamentSize` is always adopted from the previous session.
+  <dt>--maxParallelThreads={NUMBER}[maxParallelEvaluations]</dt>
+ <dd>The maximum number of parallel threads per node to process parallelizable task related to the tuner algorithm. For example this parameter is used to speed up the genetic engineering. If not specified, maxParallelEvaluations is used.</dd>
+</dl>
 
 ### Address
 *OAT* will try to automatically detect your computing nodes' fully qualified domain names and use them for exchanging messages. If you experience connection problems on your system, you should try to set the host names explicitly.
@@ -59,7 +48,7 @@ In each iteration, configurations are evaluated using a random subset of the pro
 Note: For most applications, if you execute <i>OAT</i> in a distributed fashion, you will have to make sure that all computing nodes either can access the same instance folder or have identical instance folders stored at identical paths.</dd>
 
  <dt>--testInstanceFolder={PATH}</dt>
- <dd>Similar to <code>--trainingInstanceFolder</code>, but only used for <a href="logging.md">additional information on incumbent quality</a> in case <code>--scoreGenerationHistory</code> is provided.</dd>
+ <dd>Similar to <code>--trainingInstanceFolder</code>, but only used for <a href="../developerDoc/logging.md">additional information on incumbent quality</a> in case <code>--scoreGenerationHistory</code> is provided.</dd>
 
  <dt>--instanceNumbers={NUMBER:NUMBER} (-i) [5:100]</dt>
  <dd>The number of instances to use at the first generation and the number of instances to use at the end. Instance numbers increase linearly from the start until <i>goalGen</i> and then stay at maximum size until the end of the tuning.</dd>
@@ -68,10 +57,10 @@ Note: For most applications, if you execute <i>OAT</i> in a distributed fashion,
  <dd>Value indicating whether to include a genome that uses the target algorithm's default parameter values, if they are specified. If a parameter does not have a specified default value, a randomized value from its domain is used instead.</dd>
 </dl>
 
-#### <a name="racing"></a>Speedups in Runtime Tuning
-**Racing**: In runtime tuning, *OAT* is able to skip evaluating a configuration further once it becomes clear that it won't get to be a winner of the mini tournament it is part of. This strategy has the potential to greatly reduce the tuner's run time because the worst configurations are evaluated less often. However, if you are not tuning for run time or if another criterion is more important for you, you should not enable this functionality.
+#### <a name="racing"></a>Speedups in Tuning
+**Racing**: Loosely speaking, racing means to skip evaluating a configuration further once it becomes clear that it can not beat the current numberOfTournamentWinner-best configuration and therefore won't get to be a mini tournament winner. Of course, this ordering strongly depends on your overall tuning metric. For example, in runtime tuning with one mini tournament winner racing can skip evaluations once a configuration's total runtime exceeds the total runtime, needed by the best configuration to solve all instances. Thereby this strategy has the potential to greatly reduce the tuner's run time because the worst configurations are evaluated less often. Moreover this might lead you to introduce an evaluation priority of a configuration, based on its ability to be a racing threshold candidate. The [basic version of OAT](basic_usage.md) comes with two basic tuning metrices: (penalized) runtime tuning and pure value tuning. While you cannot use racing in pure value tuning, (penalized) runtime tuning comes with a full featured implementation of this strategy. When [tuning for custom optimization functions](../developerDoc/advanced.md) you can provide your own tuning metric, racing strategy and evaluation priority score by implementing the `IRunEvaluator` interface. The [Gurobi example](../developerDoc/gurobi.md) provides an exemplary implementation on how to customize your strategy.
 
-**CPU Timeout**: Racing is useful, but only checks the run times between algorithm runs. That means that a really long run will never be cancelled, and the bad configuration will only be ignored afterwards. To avoid this problem, a CPU timeout can be set per run. Runs will be cancelled after this time and the run time will be counted as the run time until cancellation. If you want to handle cancelled runs differently from others, you can still use racing - all configurations that cause CPU timeouts will be ignored when deciding whether a configuration should be evaluated further.
+**CPU Timeout**: Racing is useful, but only checks the run times between finished algorithm runs. That means that a really long run will never be cancelled, and the bad configuration will only be ignored afterwards. To avoid this problem, a CPU timeout can be set per run. Runs will be cancelled after this time and the run time will be counted as the run time until cancellation.
 
 <dl>
  <dt>--enableRacing={BOOLEAN} [false]</dt>
@@ -96,9 +85,6 @@ Note: For most applications, if you execute <i>OAT</i> in a distributed fashion,
 
  <dt>--evaluationLimit={NUMBER}[2147483647]</dt>
  <dd>A maximum number of (configuration - instance) evaluations after which the program terminates.</dd>
-
- <dt>--maxParallelThreads={NUMBER}[maxParallelEvaluations]</dt>
- <dd>A maximum number of parallel threads to process parallelizable task related to the tuner algorithm. For example this parameter is used to speed up the genetic engineering. If not specified, maxParallelEvaluations is used.</dd>
 </dl>
 
 ### <a name="master-output-parameters"></a>Logging
@@ -113,9 +99,9 @@ Note that workers have the same parameter for their own output.</dd>
  <dt>--logFile={ABSOLUTE_PATH} [<i>current directory</i>/tunerLog.txt]</dt>
   <dd>Path to which log file should be written to after every generation.</dd>
  <dt>--trackConvergenceBehavior</dt>
-  <dd>Add to create <code>averageConvergence.csv</code> <a href="logging.md">logging file</a>.<br/>
+  <dd>Add to create <code>averageConvergence.csv</code> <a href="../developerDoc/logging.md">logging file</a>.<br/>
  <dt>--scoreGenerationHistory</dt>
-  <dd>Add to create <code>scores.csv</code> <a href="logging.md">logging file</a>.<br/>
+  <dd>Add to create <code>scores.csv</code> <a href="../developerDoc/logging.md">logging file</a>.<br/>
 Can significantly increase total software runtime as it adds a post-processing phase. However, best parameterization is printed before that phase.</dd>
 </dl>
 
@@ -164,8 +150,7 @@ By default, *OAT* uses [GGA](algorithms.md#gga), a genetic algorithm, as the bas
 
  <dt>--miniTournamentSize={NUMBER} [8]</dt>
  <dd>The maximum number of participants per mini tournament.<br/>
-For optimal tuner run time, all of these should be run in parallel, i.e. the number of competitors should equal the number of maximum parallel evaluations. However, there might be reasons why you would want to have different numbers, e.g. if you do not have a sufficient amount of cores or your algorithm needs several cores to work.<br/>
-Note: If the mini tournament size is very small, the racing framework is not very effective and tuning might take longer.
+Note: If the mini tournament size is very small, the [racing framework](#racing) is not very effective and tuning might take longer.
 </dd>
 
  <dt>--maxGenomeAge={NUMBER} [3]</dt>
@@ -193,7 +178,7 @@ Note: If the mini tournament size is very small, the racing framework is not ver
  <dd>Add if a performance model should be trained even if genetic engineering and sexual selection are turned off.</dd>
 </dl>
 
-#### <a id="model-based-parameters" name="model-based-parameters"></a>[Model-Based Crossover](model_based_crossover.md) Parameters
+#### <a id="model-based-parameters" name="model-based-parameters"></a>[Model-Based Crossover](../developerDoc/model_based_crossover.md) Parameters
 *OAT* also implements [GGA++](algorithms.md#gga-1) by providing a model-based crossover operator that can be used for creating new offspring. Note that some of the parameters can have a significant impact on the time consumed for the population update. The application of this operator is also referred to as _Genetic Engineering_.
 <dl>
   <dt>--engineeredProportion={PERCENTAGE} [0]</dt>

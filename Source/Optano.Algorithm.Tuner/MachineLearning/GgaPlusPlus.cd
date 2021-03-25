@@ -1,100 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
-  <Class Name="Optano.Algorithm.Tuner.Data.MachineLearning.TopPerformerFocusImpurityCalculator">
-    <Position X="10.25" Y="10" Width="2.75" />
-    <Members>
-      <Property Name="AlphaLeft" Hidden="true" />
-      <Property Name="AlphaRight" Hidden="true" />
-      <Property Name="AlphaTotalInterval" Hidden="true" />
-      <Method Name="ChildImpurities" Hidden="true" />
-      <Method Name="ComputeAlpha" Hidden="true" />
-      <Property Name="CurrentPosition" Hidden="true" />
-      <Method Name="TopPerformerFocusImpurityCalculator" Hidden="true" />
-      <Method Name="Init" Hidden="true" />
-      <Method Name="LeafProbabilities" Hidden="true" />
-      <Property Name="LeftTopCount" Hidden="true" />
-      <Property Name="LeftWeight" Hidden="true" />
-      <Property Name="MeanTotal" Hidden="true" />
-      <Property Name="MinimumSplitSize" Hidden="true" />
-      <Method Name="NodeImpurity" Hidden="true" />
-      <Method Name="Reset" Hidden="true" />
-      <Property Name="RightTopCount" Hidden="true" />
-      <Property Name="RightWeight" Hidden="true" />
-      <Method Name="SetTopPerformers" Hidden="true" />
-      <Property Name="TargetNames" Hidden="true" />
-      <Property Name="Targets" Hidden="true" />
-      <Property Name="TopThresoldValue" Hidden="true" />
-      <Property Name="TotalTopCount" Hidden="true" />
-      <Property Name="TotalWeight" Hidden="true" />
-      <Method Name="UpdateIndex" Hidden="true" />
-      <Method Name="UpdateInterval" Hidden="true" />
-      <Property Name="WeightedLeft" Hidden="true" />
-      <Property Name="WeightedRight" Hidden="true" />
-      <Property Name="WeightedSumTotalInterval" Hidden="true" />
-      <Property Name="Weights" Hidden="true" />
-    </Members>
-    <TypeIdentifier>
-      <HashCode>AEAAGBQEARCADEAAEogAAgAAAhAgAkAAENADAAAACwQ=</HashCode>
-      <FileName>Data\MachineLearning\RandomForestTopPerformerFocus\TopPerformerFocusImpurityCalculator.cs</FileName>
-    </TypeIdentifier>
-    <Lollipop Position="0.2" />
-  </Class>
-  <Class Name="Optano.Algorithm.Tuner.Data.MachineLearning.TopPerformerFocusSplitCriterion">
-    <Position X="13.25" Y="10" Width="2.25" />
-    <Members>
-      <Method Name="TopPerformerFocusSplitCriterion" Hidden="true" />
-    </Members>
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAQAAAAAABAAAAAAAAAAAAAAAAEAAAAAAAQA=</HashCode>
-      <FileName>Data\MachineLearning\RandomForestTopPerformerFocus\TopPerformerFocusSplitCriterion.cs</FileName>
-    </TypeIdentifier>
-    <Lollipop Position="0.2" />
-  </Class>
-  <Class Name="Optano.Algorithm.Tuner.Data.MachineLearning.GeneticEngineering&lt;TLearnerModel, TPredictorModel, TSamplingStrategy&gt;">
-    <Position X="6.25" Y="4" Width="3.75" />
-    <Members>
-      <Field Name="_atomicParentCounter" Hidden="true" />
-      <Field Name="_currentGeneration" Hidden="true" />
-      <Method Name="ComputeAverageMinkowskiDistance" Hidden="true" />
-      <Method Name="ComputeDistanceForSinglePotentialOffspring" Hidden="true" />
-      <Method Name="ComputeDistancesForAllPotentialOffspring" Hidden="true" />
-      <Method Name="ComputeHammingDistanceTotalSum" Hidden="true" />
-      <Method Name="ComputeNormalizedDistancesWithInfluenceFactor" Hidden="true" />
-      <Method Name="ComputeReachableLeavesAndRestrictions" Hidden="true" />
-      <Method Name="ComputeReachedTargetLeavesForTree" Hidden="true" />
-      <Method Name="ComputeTargetLeafForGenomeToFollow" Hidden="true" />
-      <Property Name="Configuration" Hidden="true" />
-      <Method Name="ConstructOffspring" Hidden="true" />
-      <Method Name="CountUniqueFeatures" Hidden="true" />
-      <Method Name="CreateSingleTargetSampleOffspring" Hidden="true" />
-      <Method Name="DetermineBestOffspringOverAllLeaves" Hidden="true" />
-      <Method Name="DetermineCurrentFeatureValueDonor" Hidden="true" />
-      <Method Name="DetermineDoubleRepresentationOfNextFeature" Hidden="true" />
-      <Method Name="ExtractFeatureRepresentationFromDonor" Hidden="true" />
-      <Method Name="GeneticEngineering" Hidden="true" />
-      <Method Name="GetAttractivenessMeasure" Hidden="true" />
-      <Method Name="GetNextParentCounterIndex" Hidden="true" />
-      <Property Name="IGeneticEngineering.GenomeTransformator" Hidden="true" />
-      <Method Name="InflateCompetitiveParentsToRequiredNumber" Hidden="true" />
-      <Method Name="leafIsFixedForFeature" Hidden="true" />
-      <Method Name="NormalizeDistancesAndApplyInfluenceFactor" Hidden="true" />
-      <Method Name="PerformTargetedSampling" Hidden="true" />
-      <Method Name="RestoreInternalDictionariesWithCorrectComparers" Hidden="true" />
-      <Method Name="SelectColumnIndicesForDistanceComputation" Hidden="true" />
-      <Method Name="SplitMatrixInRows" Hidden="true" />
-      <Method Name="TransformOffspringToGenome" Hidden="true" />
-      <Property Name="Trees" Hidden="true" />
-      <Method Name="TreeWalkToLeaf" Hidden="true" />
-      <Method Name="ValidateAverageDistanceParameters" Hidden="true" />
-    </Members>
-    <TypeIdentifier>
-      <HashCode>SBAggEBCAAEAAAAABgAnCCAACAFIGAEQgoCAAAgBUgA=</HashCode>
-      <FileName>Data\MachineLearning\GeneticEngineering.cs</FileName>
-    </TypeIdentifier>
-    <Lollipop Position="0.2" />
-  </Class>
+<ClassDiagram MajorVersion="1" MinorVersion="1" GroupingSetting="Access" MembersFormat="NameAndType">
   <Class Name="SharpLearning.RandomForest.Learners.GenericRandomizedForestBase&lt;TForestModel, TTreeTypeModel&gt;">
-    <Position X="10.25" Y="4" Width="4" />
+    <Position X="3.25" Y="4" Width="4" />
     <Members>
       <Method Name="CreateTree" Hidden="true" />
       <Method Name="GenericRandomizedForestBase" Hidden="true" />
@@ -110,94 +17,143 @@
       <Method Name="VariableImportance" Hidden="true" />
     </Members>
     <TypeIdentifier />
+    <Lollipop Position="0.2" />
   </Class>
-  <Class Name="Optano.Algorithm.Tuner.Data.Parameters.ParameterConverter.GenomeTransformation&lt;TCategoricalEncoding&gt;">
-    <Position X="2.25" Y="7.25" Width="3.75" />
+  <Class Name="Optano.Algorithm.Tuner.Tuning.AlgorithmTuner&lt;TTargetAlgorithm, TInstance, TResult, TModelLearner, TPredictorModel, TSamplingStrategy&gt;" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="9.5" Y="4" Width="1.5" />
+    <Members>
+      <Field Name="_incumbentGenomeWrapper" Hidden="true" />
+      <Method Name="DumpStatus" Hidden="true" />
+      <Method Name="InitializePopulation" Hidden="true" />
+      <Method Name="UseStatusDump" Hidden="true" />
+      <Method Name="ValidateParameters" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>ACVCgAAACCAQAEABKAIAxAgAAAEAYBAAQCEAkIAARAI=</HashCode>
+      <FileName>Tuning\AlgorithmTuner.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.MachineLearning.GeneticEngineering&lt;TLearnerModel, TPredictorModel, TSamplingStrategy&gt;" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="13" Y="4" Width="1.5" />
+    <Members>
+      <Field Name="_atomicParentCounter" Hidden="true" />
+      <Field Name="_currentGeneration" Hidden="true" />
+      <Method Name="ComputeAverageMinkowskiDistance" Hidden="true" />
+      <Method Name="ComputeDistanceForSinglePotentialOffspring" Hidden="true" />
+      <Method Name="ComputeDistancesForAllPotentialOffspring" Hidden="true" />
+      <Method Name="ComputeHammingDistanceTotalSum" Hidden="true" />
+      <Method Name="ComputeNormalizedDistancesWithInfluenceFactor" Hidden="true" />
+      <Property Name="Configuration" Hidden="true" />
+      <Method Name="ConstructOffspring" Hidden="true" />
+      <Method Name="CountUniqueFeatures" Hidden="true" />
+      <Method Name="CreateSingleTargetSampleOffspring" Hidden="true" />
+      <Method Name="DetermineBestOffspringOverAllLeaves" Hidden="true" />
+      <Method Name="DetermineCurrentFeatureValueDonor" Hidden="true" />
+      <Method Name="DetermineDoubleRepresentationOfNextFeature" Hidden="true" />
+      <Method Name="ExtractFeatureRepresentationFromDonor" Hidden="true" />
+      <Method Name="GeneticEngineering" Hidden="true" />
+      <Method Name="GetNextParentCounterIndex" Hidden="true" />
+      <Property Name="IGeneticEngineering.GenomeTransformator" Hidden="true" />
+      <Method Name="NormalizeDistancesAndApplyInfluenceFactor" Hidden="true" />
+      <Method Name="PerformTargetedSampling" Hidden="true" />
+      <Method Name="RestoreInternalDictionariesWithCorrectComparers" Hidden="true" />
+      <Method Name="SelectColumnIndicesForDistanceComputation" Hidden="true" />
+      <Method Name="SplitMatrixInRows" Hidden="true" />
+      <Method Name="TransformOffspringToGenome" Hidden="true" />
+      <Property Name="Trees" Hidden="true" />
+      <Method Name="ValidateAverageDistanceParameters" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>SAAggEBCAAEBAACABgAnCAIAAAFIGAAQggCAAEgBUiA=</HashCode>
+      <FileName>MachineLearning\GeneticEngineering.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.Parameters.ParameterConverters.GenomeTransformation&lt;TCategoricalEncoding&gt;" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="9.5" Y="5" Width="1.5" />
     <Members>
       <Field Name="_featureLengths" Hidden="true" />
       <Field Name="_transformationAndEncodingLock" Hidden="true" />
       <Property Name="EncodedCategories" Hidden="true" />
       <Method Name="GetFeatureLengths" Hidden="true" />
-      <Method Name="IGenomeTransformationInternal.RestoreInternalDictionariesWithCorrectComparers" Hidden="true" />
-      <Property Name="IGenomeTransformationInternal.Tree" Hidden="true" />
       <Property Name="OrderedTreeNodes" Hidden="true" />
       <Property Name="ParameterTreeNodeOrder" Hidden="true" />
     </Members>
     <TypeIdentifier>
-      <HashCode>AEIEAAAAQCCAAAAQAAAAQAAABAoIAAAAAAAACIAAAAA=</HashCode>
-      <FileName>Data\Parameters\ParameterConverter\GenomeTransformation.cs</FileName>
+      <HashCode>AAIAAAACQCCAAACQAAAAQAAABAoIAAAAAAAACIAAAAA=</HashCode>
+      <FileName>Parameters\ParameterConverters\GenomeTransformation.cs</FileName>
     </TypeIdentifier>
-    <Lollipop Position="0.2" />
+    <Lollipop Position="0.2" Collapsed="true" />
   </Class>
-  <Class Name="Optano.Algorithm.Tuner.AlgorithmTuner&lt;TTargetAlgorithm, TInstance, TResult, TModelLearner, TPredictorModel, TSamplingStrategy&gt;">
-    <Position X="2.25" Y="4" Width="3.25" />
-    <Members>
-      <Field Name="_incumbentGenomeWrapper" Hidden="true" />
-      <Method Name="AddRandomGenomesToGender" Hidden="true" />
-      <Method Name="AddToPopulation" Hidden="true" />
-      <Field Name="configuration" Hidden="true" />
-      <Property Name="ConvergenceBehvaiorInstnaces" Hidden="true" />
-      <Method Name="CountDyingGenomes" Hidden="true" />
-      <Field Name="currGeneration" Hidden="true" />
-      <Method Name="DetermineTournamentWinners" Hidden="true" />
-      <Method Name="DumpStatus" Hidden="true" />
-      <Property Name="FirstRoundAfterRestart" Hidden="true" />
-      <Field Name="genomeBuilder" Hidden="true" />
-      <Method Name="AlgorithmTuner" Hidden="true" />
-      <Method Name="InitializePopulation" Hidden="true" />
-      <Field Name="instanceSelector" Hidden="true" />
-      <Method Name="LogGeneration" Hidden="true" />
-      <Field Name="parameterTree" Hidden="true" />
-      <Method Name="PerformCrossovers" Hidden="true" />
-      <Method Name="PerformMutation" Hidden="true" />
-      <Method Name="PerformSelection" Hidden="true" />
-      <Field Name="population" Hidden="true" />
-      <Method Name="StartConvergenceComputation" Hidden="true" />
-      <Field Name="targetAlgorithmRunActors" Hidden="true" />
-      <Field Name="targetRunResultStorage" Hidden="true" />
-      <Field Name="tournamentSelector" Hidden="true" />
-      <Method Name="TrackStandardDeviation" Hidden="true" />
-      <Method Name="UseStatusDump" Hidden="true" />
-      <Method Name="ValidateParameters" Hidden="true" />
-    </Members>
-    <TypeIdentifier>
-      <HashCode>BClAQgCEAAiQIAAAMAIAQApgAADEIgBAEAAAAIiABQM=</HashCode>
-      <FileName>AlgorithmTuner.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="Optano.Algorithm.Tuner.Data.MachineLearning.GenomePredictionRandomForest&lt;TSamplingStrategy&gt;">
-    <Position X="10.25" Y="7.25" Width="5.25" />
-    <Members>
-      <Method Name="GenomePredictionRandomForest" Hidden="true" />
-    </Members>
-    <InheritanceLine Type="SharpLearning.RandomForest.Learners.GenericRandomizedForestBase&lt;TForestModel, TTreeTypeModel&gt;" FixedFromPoint="true" FixedToPoint="true">
-      <Path>
-        <Point X="12.312" Y="5.68" />
-        <Point X="12.312" Y="7.25" />
-      </Path>
-    </InheritanceLine>
-    <TypeIdentifier>
-      <HashCode>AAIIAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAgAAAAAA=</HashCode>
-      <FileName>Data\MachineLearning\RandomForestTopPerformerFocus\GenomePredictionRandomForest.cs</FileName>
-    </TypeIdentifier>
-    <Lollipop Position="0.2" />
-  </Class>
-  <Class Name="Optano.Algorithm.Tuner.Data.Parameters.ParameterConverter.CategoricalEncodingBase">
-    <Position X="2.25" Y="10.5" Width="3.75" />
+  <Class Name="Optano.Algorithm.Tuner.Parameters.ParameterConverters.CategoricalEncodingBase" Collapsed="true">
+    <Position X="11.25" Y="4" Width="1.5" />
     <Members>
       <Method Name="NumberOfGeneratedColumnsForCategoricalDomain" Hidden="true" />
       <Method Name="ValidateDomain" Hidden="true" />
     </Members>
     <TypeIdentifier>
       <HashCode>AAAAAAABAABAAAAAQBAAAAAAAAAAAAAAAAAAAEAAAAA=</HashCode>
-      <FileName>Data\Parameters\ParameterConverter\CategoricalEncodingBase.cs</FileName>
+      <FileName>Parameters\ParameterConverters\CategoricalEncodingBase.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Interface Name="Optano.Algorithm.Tuner.Data.Parameters.ParameterConverter.IConvertedCategory">
-    <Position X="6.25" Y="7.25" Width="3.75" />
+  <Class Name="Optano.Algorithm.Tuner.MachineLearning.RandomForest.RandomForestTopPerformerFocus.GenomePredictionRandomForest&lt;TSamplingStrategy&gt;">
+    <Position X="2.25" Y="6.75" Width="6.25" />
+    <Members>
+      <Method Name="GenomePredictionRandomForest" Hidden="true" />
+    </Members>
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAgAAQAAAAAAAAAARAAAABAQAAAIAAAAAAA=</HashCode>
-      <FileName>Data\Parameters\ParameterConverter\IConvertedCategory.cs</FileName>
+      <HashCode>AAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAgAAAAAA=</HashCode>
+      <FileName>MachineLearning\RandomForest\RandomForestTopPerformerFocus\GenomePredictionRandomForest.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.MachineLearning.RandomForest.RandomForestTopPerformerFocus.TopPerformerFocusImpurityCalculator" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="11.25" Y="5" Width="1.5" />
+    <Members>
+      <Property Name="AlphaLeft" Hidden="true" />
+      <Property Name="AlphaRight" Hidden="true" />
+      <Property Name="AlphaTotalInterval" Hidden="true" />
+      <Method Name="ChildImpurities" Hidden="true" />
+      <Method Name="ComputeAlpha" Hidden="true" />
+      <Property Name="CurrentPosition" Hidden="true" />
+      <Method Name="Init" Hidden="true" />
+      <Method Name="LeafProbabilities" Hidden="true" />
+      <Property Name="LeftTopCount" Hidden="true" />
+      <Method Name="NodeImpurity" Hidden="true" />
+      <Method Name="Reset" Hidden="true" />
+      <Property Name="RightTopCount" Hidden="true" />
+      <Method Name="SetTopPerformers" Hidden="true" />
+      <Property Name="TargetNames" Hidden="true" />
+      <Property Name="Targets" Hidden="true" />
+      <Property Name="TotalTopCount" Hidden="true" />
+      <Property Name="TotalWeight" Hidden="true" />
+      <Method Name="UpdateIndex" Hidden="true" />
+      <Method Name="UpdateInterval" Hidden="true" />
+      <Property Name="WeightedLeft" Hidden="true" />
+      <Property Name="WeightedRight" Hidden="true" />
+      <Property Name="WeightedSumTotalInterval" Hidden="true" />
+      <Property Name="Weights" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AFEAGBQEgBCABEAAEogAAgAAIhAAAkAAEMACAAAACwQ=</HashCode>
+      <FileName>MachineLearning\RandomForest\RandomForestTopPerformerFocus\TopPerformerFocusImpurityCalculator.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Optano.Algorithm.Tuner.MachineLearning.RandomForest.RandomForestTopPerformerFocus.TopPerformerFocusSplitCriterion" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="13" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAQAAAAAABAAAAAAAAAAAAAAAAEAAAAAAAAA=</HashCode>
+      <FileName>MachineLearning\RandomForest\RandomForestTopPerformerFocus\TopPerformerFocusSplitCriterion.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Interface Name="Optano.Algorithm.Tuner.Parameters.ParameterConverters.IConvertedCategory" Collapsed="true">
+    <Position X="9.5" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAgAAQAAAAAAAAAAQAAAABAQAAAIAAAAAAA=</HashCode>
+      <FileName>Parameters\ParameterConverters\IConvertedCategory.cs</FileName>
     </TypeIdentifier>
   </Interface>
   <Font Name="Segoe UI" Size="9" />

@@ -4,6 +4,16 @@ This page contains some advice on how to choose [parameters](parameters.md) for 
 
 Note that there exist some parameters which change the employed tuning algorithm. These are not discussed here. Hints about selecting the best tuning algorithm for your application can be found on the [page presenting the different algorithms](algorithms.md).
 
+## Introductory Remarks: Overall Tuning Runtime
+
+The overall tuning runtime mainly depends on the number of sequentially started target algorithm evaluations and their runtime. While you can limit the target algorithm runtime by providing a cpu timeout with `--cpuTimeout`, the number of sequential started target algorithm evaluations depends on multiple parameters: A rough upper bound for the number of needed target algorithm evaluations is given by: `numGens` * (`popSize` / 2) * `averageNumberOfInstancesPerGeneration`.
+
+Since already evaluated genome instance pairs will not be evaluated again in subsequent generations, the real number of needed evaluations will be far below this upper bound. Moreover, enabling [racing](parameters.md#racing) will drastically reduce this number.
+
+Finally, *OPTANO Algorithm Tuner* will start `--maxParallelEvaluations` per computing node at the same time and can even make use of multiple computing nodes, if executed in [distributed fashion](distributed.md). Hence, a rough upper bound of the overall tuning runtime is given by:
+
+* `cpuTimeout` * `numGens` * (`popSize` / 2) * `averageNumberOfInstancesPerGeneration` / (`maxParallelEvaluations` * `numberOfNodes`)
+
 ## maxParallelEvaluations
 The parameter `--maxParallelEvaluations` specifies how many instances of your target algorithm may be executed in parallel. To set it, you should be aware of
 
@@ -14,25 +24,17 @@ The parameter `--maxParallelEvaluations` specifies how many instances of your ta
 
 The parameter should be chosen such that sufficent cores and memory are available for the selected number of parallel runs.
 
-##miniTournamentSize
-As a rule, the `--miniTournamentSize` parameter should be a multiple of the `--maxParallelEvaluations` parameter. This will minimalize times at which your computing power is not fully exploited. The default size of a mini tournament is 8, and for best results, your choice should be around the same size.
+## numGens
+The number of generations usually depends on how long you want to spend on tuning. We do not recommend to lower it too drastically from its default value 100. In addition to `--numGens`, you can also set `--evaluationLimit` to directly bound the number of target algorithm runs.
 
 ## popSize
-To fully exploit your computing power, `--popSize` should be a multiple of `2 * miniTournamentSize`.<br/> Ideally, you set `popSize = 2 * miniTournamentSize * (numberWorkers + 1)`, where `numberOfWorkers` is either 0 or the number of additional computing nodes if you execute *OPTANO Algorithm Tuner* in [distributed fashion](distributed.md).<br/>
-If the resulting population size is very small, a multiple of it should be chosen.
+The default population size is 128, and for best results, your choice should be around the same size.
+
+## miniTournamentSize
+The default mini tournament size is 8, and for best results, your choice should be around the same size.
 
 ## instanceNumbers
 The maximum number of instances used for tuning should be sufficiently high, else the found parameter combinations will be 'specialized' to the instances you chose. 
-
-## numGens
-The number of generations usually depends on how long you want to spend on tuning.<br/>
-To compute the maximum runtime, consider the following:
-
-- Each mini tournament has `miniTournamentSize` / `maxParallelEvaluations` phases
-- Each phase takes as long as one target algorithm run on each of the instances in that generation takes
-- Every computing node has to execute `popSize` / (2 * `miniTournamentSize` * `(numberWorkers + 1)`) mini tournaments per generation
-
-In addition to `--numGens`, you can also set `--evaluationLimit` to directly bound the number of target algorithm runs.
 
 ## <a id="model-based-crossover" name="model-based-crossover"></a>Model-Based Crossover
 

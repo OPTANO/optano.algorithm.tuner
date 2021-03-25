@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -31,52 +31,67 @@
 
 namespace Optano.Algorithm.Tuner.Tests.TargetAlgorithm.InterfaceImplementations.ValueConsideration
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
 
+    using Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation;
     using Optano.Algorithm.Tuner.Genomes;
+    using Optano.Algorithm.Tuner.TargetAlgorithm.Instances;
     using Optano.Algorithm.Tuner.TargetAlgorithm.RunEvaluators;
 
     /// <summary>
-    /// An implementation of <see cref="IRunEvaluator{TResult}"/> that sorts genomes by descending average
-    /// integer value.
+    /// An implementation of <see cref="IRunEvaluator{TInstance,TResult}"/> that sorts genomes by descending average integer value.
     /// </summary>
-    public class SortByValue : IMetricRunEvaluator<IntegerResult>
+    /// <typeparam name="TInstance">The instance type.</typeparam>
+    public class SortByValue<TInstance> : IMetricRunEvaluator<TInstance, IntegerResult>
+        where TInstance : InstanceBase
     {
-        #region Public properties
-
-        /// <summary>
-        /// Gets a value indicating whether values will be sorted ascending.
-        /// In this case, values will always be sorted descending.
-        /// </summary>
-        public bool SortAscending => false;
-
-        #endregion
-
         #region Public Methods and Operators
 
-        /// <summary>
-        /// Sorts the genomes by results, best genome first.
-        /// In this case, genomes are sorted by average integer value of target algorithm runs, higher values first.
-        /// </summary>
-        /// <param name="runResults">Results from target algorithm runs, grouped by genome.</param>
-        /// <returns>The given genomes as a list.</returns>
-        public IEnumerable<ImmutableGenome> Sort(Dictionary<ImmutableGenome, IEnumerable<IntegerResult>> runResults)
+        /// <inheritdoc />
+        public IEnumerable<ImmutableGenomeStats<TInstance, IntegerResult>> Sort(
+            IEnumerable<ImmutableGenomeStats<TInstance, IntegerResult>> allGenomeStatsOfMiniTournament)
         {
-            return runResults
-                .OrderByDescending(genomeAndResults => genomeAndResults.Value.Average(result => result.Value))
-                .Select(genomeAndResults => genomeAndResults.Key);
+            return allGenomeStatsOfMiniTournament
+                .OrderByDescending(gs => gs.FinishedInstances.Values.Count(SortByValue<TInstance>.HasValidResultValue))
+                .ThenByDescending(
+                    gs => gs.FinishedInstances.Values.Where(SortByValue<TInstance>.HasValidResultValue).Select(this.GetMetricRepresentation)
+                        .DefaultIfEmpty().Average());
         }
 
-        /// <summary>
-        /// Gets a metric representation of the provided result.
-        /// <para><see cref="IRunEvaluator{TResult}.Sort"/> needs to be based on this.</para>
-        /// </summary>
-        /// <param name="result">The result.</param>
-        /// <returns>A metric representation.</returns>
+        /// <inheritdoc />
+        public IEnumerable<ImmutableGenome> GetGenomesThatCanBeCancelledByRacing(
+            IReadOnlyList<ImmutableGenomeStats<TInstance, IntegerResult>> allGenomeStatsOfMiniTournament,
+            int numberOfMiniTournamentWinners)
+        {
+            return Enumerable.Empty<ImmutableGenome>();
+        }
+
+        /// <inheritdoc />
+        public double ComputeEvaluationPriorityOfGenome(ImmutableGenomeStats<TInstance, IntegerResult> genomeStats, TimeSpan cpuTimeout)
+        {
+            return 42;
+        }
+
+        /// <inheritdoc />
         public double GetMetricRepresentation(IntegerResult result)
         {
             return result.Value;
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Checks, if the result has a valid result value.
+        /// </summary>
+        /// <param name="result">The result.</param>
+        /// <returns>True, if the result has a valid result value.</returns>
+        private static bool HasValidResultValue(IntegerResult result)
+        {
+            return !result.IsCancelled && !double.IsNaN(result.Value) && !double.IsInfinity(result.Value);
         }
 
         #endregion

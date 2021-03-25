@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -44,8 +44,8 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage
     /// <summary>
     /// Responsible for providing already computed results.
     /// </summary>
-    /// <typeparam name="TInstance">Type of instance that can be provided to the target algorithm.</typeparam>
-    /// <typeparam name="TResult">Type of target algorithm run result.</typeparam>
+    /// <typeparam name="TInstance">The instance type.</typeparam>
+    /// <typeparam name="TResult">The result type of a single target algorithm evaluation.</typeparam>
     public class ResultStorageActor<TInstance, TResult> : ReceiveActor
         where TInstance : InstanceBase where TResult : ResultBase<TResult>, new()
     {
@@ -56,7 +56,7 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage
         /// with and instance they were run on.
         /// </summary>
         private readonly Dictionary<ImmutableGenome, IDictionary<TInstance, TResult>> _runResults =
-            new Dictionary<ImmutableGenome, IDictionary<TInstance, TResult>>(new ImmutableGenome.GeneValueComparer());
+            new Dictionary<ImmutableGenome, IDictionary<TInstance, TResult>>(ImmutableGenome.GenomeComparer);
 
         #endregion
 
@@ -68,8 +68,7 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage
         public ResultStorageActor()
         {
             // Definition of message handlers.
-            this.Receive<ResultRequest<TInstance>>(request => this.HandleResultRequest(request, this.Sender));
-            this.Receive<ResultMessage<TInstance, TResult>>(result => this.HandleResult(result));
+            this.Receive<EvaluationResult<TInstance, TResult>>(result => this.HandleResult(result));
             this.Receive<AllResultsRequest>(request => this.HandleAllResultsRequest(this.Sender));
             this.Receive<EvaluationStatisticRequest>(request => this.HandleEvaluationStatisticRequest(this.Sender));
             this.Receive<GenomeResultsRequest>(request => this.HandleGenomeResultsRequest(request.Genome, this.Sender));
@@ -80,62 +79,15 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage
         #region Methods
 
         /// <summary>
-        /// Handles a <see cref="ResultRequest{I}" /> sent by a certain actor.
+        /// Handles a <see cref="EvaluationResult{TInstance,TResult}" /> message.
         /// </summary>
-        /// <param name="request">The <see cref="ResultRequest{I}" /> to handle.</param>
-        /// <param name="sender">The request's sender.</param>
-        private void HandleResultRequest(ResultRequest<TInstance> request, IActorRef sender)
+        /// <param name="evaluationResult">The <see cref="EvaluationResult{TInstance,TResult}" /> message.</param>
+        private void HandleResult(EvaluationResult<TInstance, TResult> evaluationResult)
         {
-            // Check if result is in storage.
-            TResult result = null;
-            if (this.LookUpResult(request.Genome, request.Instance, out result))
-            {
-                var resultMessage = new ResultMessage<TInstance, TResult>(request.Genome, request.Instance, result);
-                sender.Tell(resultMessage);
-            }
-            else
-            {
-                var storageMissMessage = new StorageMiss<TInstance>(request.Genome, request.Instance);
-                sender.Tell(storageMissMessage);
-            }
-        }
-
-        /// <summary>
-        /// Looks up an entry in the storage mapped to the given <see cref="ImmutableGenome" />-instance combination.
-        /// </summary>
-        /// <param name="genome">The <see cref="ImmutableGenome" />.</param>
-        /// <param name="instance">The instance.</param>
-        /// <param name="result">
-        /// If a target algorithm run result is found, it will be stored in this
-        /// parameter. Else, null will be stored.
-        /// </param>
-        /// <returns>Whether or not a result was found.</returns>
-        private bool LookUpResult(ImmutableGenome genome, TInstance instance, out TResult result)
-        {
-            // Check if the result is stored already.
-            IDictionary<TInstance, TResult> allRunResults;
-            if (this._runResults.TryGetValue(genome, out allRunResults))
-            {
-                TResult runResult;
-                if (allRunResults.TryGetValue(instance, out runResult))
-                {
-                    result = runResult;
-                    return true;
-                }
-            }
-
-            // Result not found.
-            result = null;
-            return false;
-        }
-
-        /// <summary>
-        /// Handles a <see cref="ResultMessage{I, R}" /> message.
-        /// </summary>
-        /// <param name="resultMessage">The <see cref="ResultMessage{I, R}" /> message.</param>
-        private void HandleResult(ResultMessage<TInstance, TResult> resultMessage)
-        {
-            this.AddResultToStorageIfUnknown(resultMessage.Genome, resultMessage.Instance, resultMessage.RunResult);
+            this.AddResultToStorageIfUnknown(
+                evaluationResult.GenomeInstancePair.Genome,
+                evaluationResult.GenomeInstancePair.Instance,
+                evaluationResult.RunResult);
         }
 
         /// <summary>
@@ -201,7 +153,7 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage
                 results = new Dictionary<TInstance, TResult>(0);
             }
 
-            sender.Tell(new GenomeResults<TInstance, TResult>(results));
+            sender.Tell(new GenomeResults<TInstance, TResult>(genome, results));
         }
 
         #endregion

@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -33,15 +33,15 @@ namespace Optano.Algorithm.Tuner.Tracking
 {
     using System;
     using System.Collections.Generic;
-    using System.Collections.Immutable;
     using System.Linq;
 
     using Akka.Actor;
 
+    using Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation;
+    using Optano.Algorithm.Tuner.GenomeEvaluation.Messages;
     using Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage;
     using Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage.Messages;
     using Optano.Algorithm.Tuner.GenomeEvaluation.Sorting;
-    using Optano.Algorithm.Tuner.GenomeEvaluation.Sorting.Messages;
     using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.TargetAlgorithm.Instances;
     using Optano.Algorithm.Tuner.TargetAlgorithm.Results;
@@ -50,12 +50,8 @@ namespace Optano.Algorithm.Tuner.Tracking
     /// <summary>
     /// Responsible for completing <see cref="GenerationInformation"/> objects by adding scores to them.
     /// </summary>
-    /// <typeparam name="TInstance">
-    /// The instance type to use.
-    /// </typeparam>
-    /// <typeparam name="TResult">
-    /// The result of an individual evaluation.
-    /// </typeparam>
+    /// <typeparam name="TInstance">The instance type.</typeparam>
+    /// <typeparam name="TResult">The result type of a single target algorithm evaluation.</typeparam>
     public class GenerationInformationScorer<TInstance, TResult>
         where TInstance : InstanceBase
         where TResult : ResultBase<TResult>, new()
@@ -63,10 +59,10 @@ namespace Optano.Algorithm.Tuner.Tracking
         #region Fields
 
         /// <summary>
-        /// A <see cref="IActorRef"/> to a <see cref="GenomeSorter{TInstance,TResult}"/> which can be used to provoke
+        /// A <see cref="IActorRef"/> to a <see cref="GenerationEvaluationActor{TTargetAlgorithm,TInstance,TResult}"/> which can be used to provoke
         /// evaluations.
         /// </summary>
-        private readonly IActorRef _genomeSorter;
+        private readonly IActorRef _generationEvaluationActor;
 
         /// <summary>
         /// A <see cref="IActorRef" /> to a <see cref="ResultStorageActor{TInstance,TResult}" />
@@ -75,9 +71,9 @@ namespace Optano.Algorithm.Tuner.Tracking
         private readonly IActorRef _resultStorageActor;
 
         /// <summary>
-        /// The <see cref="IMetricRunEvaluator{TResult}"/> to score the target algorithm run results.
+        /// The <see cref="IMetricRunEvaluator{TInstance,TResult}"/> to score the target algorithm run results.
         /// </summary>
-        private readonly IMetricRunEvaluator<TResult> _runEvaluator;
+        private readonly IMetricRunEvaluator<TInstance, TResult> _runEvaluator;
 
         #endregion
 
@@ -86,8 +82,8 @@ namespace Optano.Algorithm.Tuner.Tracking
         /// <summary>
         /// Initializes a new instance of the <see cref="GenerationInformationScorer{TInstance, TResult}"/> class.
         /// </summary>
-        /// <param name="genomeSorter">
-        /// A <see cref="IActorRef"/> to a <see cref="GenomeSorter{TInstance, TResult}"/> which can be used to provoke
+        /// <param name="generationEvaluationActor">
+        /// A <see cref="IActorRef"/> to a <see cref="GenerationEvaluationActor{TTargetAlgorithm, TInstance, TResult}"/> which can be used to provoke
         /// evaluations.
         /// </param>
         /// <param name="resultStorageActor">
@@ -95,20 +91,20 @@ namespace Optano.Algorithm.Tuner.Tracking
         /// which knows about all executed target algorithm runs and their results.
         /// </param>
         /// <param name="runEvaluator">
-        /// The <see cref="IMetricRunEvaluator{TResult}"/> to score the target algorithm run results.
+        /// The <see cref="IMetricRunEvaluator{TInstance, TResult}"/> to score the target algorithm run results.
         /// </param>
         /// <exception cref="NullReferenceException">
-        /// Thrown if <paramref name="genomeSorter"/>, <paramref name="resultStorageActor"/> or
+        /// Thrown if <paramref name="generationEvaluationActor"/>, <paramref name="resultStorageActor"/> or
         /// <paramref name="runEvaluator"/> are <c>null</c>.
         /// </exception>
         public GenerationInformationScorer(
-            IActorRef genomeSorter,
+            IActorRef generationEvaluationActor,
             IActorRef resultStorageActor,
-            IMetricRunEvaluator<TResult> runEvaluator)
+            IMetricRunEvaluator<TInstance, TResult> runEvaluator)
         {
-            this._genomeSorter = genomeSorter ?? throw new ArgumentNullException(nameof(genomeSorter));
+            this._generationEvaluationActor = generationEvaluationActor ?? throw new ArgumentNullException(nameof(generationEvaluationActor));
             this._resultStorageActor = resultStorageActor ??
-                                      throw new ArgumentNullException(nameof(resultStorageActor));
+                                       throw new ArgumentNullException(nameof(resultStorageActor));
             this._runEvaluator = runEvaluator ?? throw new ArgumentNullException(nameof(runEvaluator));
         }
 
@@ -180,11 +176,14 @@ namespace Optano.Algorithm.Tuner.Tracking
             IEnumerable<GenerationInformation> informationHistory,
             IEnumerable<TInstance> instances)
         {
-            var incumbents = informationHistory.Select(information => information.Incumbent);
+            var generationEvaluationTask = this._generationEvaluationActor.Ask(
+                new GenerationEvaluation<TInstance, TResult>(
+                    informationHistory.Select(information => information.Incumbent),
+                    instances,
+                    (runEvaluator, participantsOfGeneration, instancesOfGeneration) =>
+                        new SortingGenerationEvaluationStrategy<TInstance, TResult>(runEvaluator, participantsOfGeneration, instancesOfGeneration)));
 
-            var evaluationRequest = this._genomeSorter.Ask(
-                new SortCommand<TInstance>(incumbents.ToImmutableList(), instances.ToImmutableList()));
-            evaluationRequest.Wait();
+            generationEvaluationTask.Wait();
         }
 
         /// <summary>

@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -35,6 +35,7 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage.Messages
     using System.Collections.Generic;
     using System.Collections.Immutable;
 
+    using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.TargetAlgorithm.Instances;
     using Optano.Algorithm.Tuner.TargetAlgorithm.Results;
 
@@ -42,9 +43,8 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage.Messages
     /// A message containing all results a <see cref="ResultStorageActor{I,R}"/> has collected for a certain parameter
     /// configuration up to the message send point.
     /// </summary>
-    /// <typeparam name="TInstance">Instance type the results have been evaluated on.
-    /// Must extend <see cref="InstanceBase"/>.</typeparam>
-    /// <typeparam name="TResult">Type of the results.</typeparam>
+    /// <typeparam name="TInstance">The instance type.</typeparam>
+    /// <typeparam name="TResult">The result type of a single target algorithm evaluation.</typeparam>
     public class GenomeResults<TInstance, TResult>
         where TInstance : InstanceBase where TResult : ResultBase<TResult>, new()
     {
@@ -53,10 +53,13 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage.Messages
         /// <summary>
         /// Initializes a new instance of the <see cref="GenomeResults{I,R}"/> class.
         /// </summary>
+        /// <param name="genome">The genome.</param>
         /// <param name="runResults">The run results.</param>
         /// <exception cref="ArgumentNullException">Thrown if result parameter is null.</exception>
-        public GenomeResults(IDictionary<TInstance, TResult> runResults)
+        public GenomeResults(ImmutableGenome genome, IDictionary<TInstance, TResult> runResults)
         {
+            this.Genome = genome ?? throw new ArgumentNullException(nameof(genome));
+
             if (runResults == null)
             {
                 throw new ArgumentNullException(nameof(runResults));
@@ -69,6 +72,11 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage.Messages
         #endregion
 
         #region Public properties
+
+        /// <summary>
+        /// Gets the genome.
+        /// </summary>
+        public ImmutableGenome Genome { get; }
 
         /// <summary>
         /// Gets the run results.

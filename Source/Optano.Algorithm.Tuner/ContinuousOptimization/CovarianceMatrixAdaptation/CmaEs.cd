@@ -9,9 +9,10 @@
   <Class Name="Optano.Algorithm.Tuner.ContinuousOptimization.CovarianceMatrixAdaptation.CmaEs&lt;TSearchPoint&gt;">
     <Position X="0.5" Y="0.5" Width="2.5" />
     <TypeIdentifier>
-      <HashCode>ACBAkQAAAAICAQFAQAIQACgIAASAAAAAMAAAVQICSAA=</HashCode>
+      <HashCode>ACBQiQEACAIAASFAQAIAACgoIAQACAAAEAEARAASQAA=</HashCode>
       <FileName>ContinuousOptimization\CovarianceMatrixAdaptation\CmaEs.cs</FileName>
     </TypeIdentifier>
+    <Lollipop Position="0.2" />
   </Class>
   <Class Name="Optano.Algorithm.Tuner.ContinuousOptimization.CovarianceMatrixAdaptation.CmaEsElements">
     <Position X="3.25" Y="0.5" Width="2.5" />
@@ -20,7 +21,7 @@
       <Compartment Name="Methods" Collapsed="true" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>AAAAECAAAMAAAAgIAAAACAAQAAAAEAAAoAAAQAAACBA=</HashCode>
+      <HashCode>AAAQACEAAMAAAAgAAAAACIAAAAAAGAAAgAAgAAAQAhA=</HashCode>
       <FileName>ContinuousOptimization\CovarianceMatrixAdaptation\CmaEsElements.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -31,14 +32,14 @@
       <Compartment Name="Methods" Collapsed="true" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>QACAIAQIhAgQIAAAAGEQAAIAAAAEAAAAAkQAAAEAAAQ=</HashCode>
+      <HashCode>QACAIAQIBAgQIAAAAmEQAAIAAAAEAAAAAkQAAAEAAAQ=</HashCode>
       <FileName>ContinuousOptimization\CovarianceMatrixAdaptation\CmaEsConfiguration.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Optano.Algorithm.Tuner.ContinuousOptimization.SearchPoint">
     <Position X="9.75" Y="2.25" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAIAAgAAAAAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAMAAgAAAAAAAAAAAAAAAAgAAAAAAA=</HashCode>
       <FileName>ContinuousOptimization\SearchPoint.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
@@ -51,9 +52,9 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Optano.Algorithm.Tuner.ContinuousOptimization.CovarianceMatrixAdaptation.BoundedSearchPoint">
-    <Position X="9.75" Y="4.25" Width="1.75" />
+    <Position X="9.75" Y="5" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAgAAAAAAAAAABAAAAACBAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAACAAAAAAAEAAAAABAAAAAEBAAAAAAAAA=</HashCode>
       <FileName>ContinuousOptimization\CovarianceMatrixAdaptation\BoundedSearchPoint.cs</FileName>
     </TypeIdentifier>
   </Class>

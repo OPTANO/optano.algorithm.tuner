@@ -3,14 +3,15 @@
   <Class Name="Optano.Algorithm.Tuner.ContinuousOptimization.DifferentialEvolution.DifferentialEvolution&lt;TSearchPoint&gt;">
     <Position X="5" Y="0.5" Width="2.75" />
     <TypeIdentifier>
-      <HashCode>ECFgEAAAAAoAIQBgQAJAAAIEAgCAAAAACAgAAQIAAAA=</HashCode>
+      <HashCode>ECFgEABACAoAISBAQAIAAAAEAqAAAAAACAkAAAAAAAA=</HashCode>
       <FileName>ContinuousOptimization\DifferentialEvolution\DifferentialEvolution.cs</FileName>
     </TypeIdentifier>
+    <Lollipop Position="0.2" />
   </Class>
   <Class Name="Optano.Algorithm.Tuner.ContinuousOptimization.SearchPoint">
-    <Position X="8" Y="1.75" Width="1.5" />
+    <Position X="8" Y="2" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAIAAgAAAAAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAMAAgAAAAAAAAAAAAAAAAgAAAAAAA=</HashCode>
       <FileName>ContinuousOptimization\SearchPoint.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
@@ -33,7 +34,7 @@
       </Class>
     </NestedTypes>
     <TypeIdentifier>
-      <HashCode>AAgAAACgAAAAAAQAAAAAAAAAAgAAAAAAAAAAACAAAAA=</HashCode>
+      <HashCode>AAgAAACgAAAAAAQEAAAAAAAAAgAAAAAAAAAAACAAAAA=</HashCode>
       <FileName>ContinuousOptimization\DifferentialEvolution\DifferentialEvolutionConfiguration.cs</FileName>
     </TypeIdentifier>
   </Class>

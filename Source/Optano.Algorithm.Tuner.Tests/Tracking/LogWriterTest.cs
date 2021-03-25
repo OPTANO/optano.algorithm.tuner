@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -28,6 +28,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 
 #endregion
+
 namespace Optano.Algorithm.Tuner.Tests.Tracking
 {
     using System;
@@ -38,7 +39,6 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
     using System.Threading;
     using System.Threading.Tasks;
 
-    using Optano.Algorithm.Tuner;
     using Optano.Algorithm.Tuner.Configuration;
     using Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage.Messages;
     using Optano.Algorithm.Tuner.Genomes;
@@ -69,7 +69,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
         /// An empty instance of <see cref="GenomeResults{TInstance,TResult}"/>, useful in tests.
         /// </summary>
         private static readonly GenomeResults<InstanceFile, RuntimeResult> EmptyResults =
-            new GenomeResults<InstanceFile, RuntimeResult>(new Dictionary<InstanceFile, RuntimeResult>());
+            new GenomeResults<InstanceFile, RuntimeResult>(new ImmutableGenome(new Genome()), new Dictionary<InstanceFile, RuntimeResult>());
 
         #endregion
 
@@ -256,7 +256,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
         {
             Thread.Sleep(1000);
             this._writer.LogFinishedGeneration(0, 1, this._genomeBuilder.CreateRandomGenome(0), LogWriterTest.EmptyResults);
-            
+
             var passedTime = DateTime.Now.ToUniversalTime() - Process.GetCurrentProcess().StartTime.ToUniversalTime();
             var secondLine = File.ReadLines(LogWriterTest.LogFilePath).Skip(1).First();
             var loggedTime = TimeSpan.Parse(secondLine.Split(' ').Last());
@@ -304,7 +304,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
                                   { new InstanceFile("foo/bar"), ResultBase<RuntimeResult>.CreateCancelledResult(TimeSpan.FromMilliseconds(11)) },
                               };
 
-            var resultMessage = new GenomeResults<InstanceFile, RuntimeResult>(results);
+            var resultMessage = new GenomeResults<InstanceFile, RuntimeResult>(new ImmutableGenome(new Genome()), results);
             this._writer.LogFinishedGeneration(0, 1, this._genomeBuilder.CreateRandomGenome(0), resultMessage);
 
             // Check results were logged correclty.
@@ -396,7 +396,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
                     0,
                     1,
                     this._genomeBuilder.CreateRandomGenome(0),
-                    new GenomeResults<InstanceFile, RuntimeResult>(new Dictionary<InstanceFile, RuntimeResult>()));
+                    new GenomeResults<InstanceFile, RuntimeResult>(new ImmutableGenome(new Genome()), new Dictionary<InstanceFile, RuntimeResult>()));
 
                 /* Wait a while for all events to be handled. */
                 Task.Delay(TimeSpan.FromMilliseconds(100)).Wait();

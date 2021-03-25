@@ -1,0 +1,2 @@
+// https://sequencediagram.org/
+title UML 004: Workflow for PriorityQueue.PopNextGIP

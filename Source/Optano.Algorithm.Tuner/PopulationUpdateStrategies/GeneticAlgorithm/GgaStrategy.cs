@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -40,7 +40,9 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.GeneticAlgorithm
 
     using Optano.Algorithm.Tuner.Configuration;
     using Optano.Algorithm.Tuner.GenomeEvaluation;
-    using Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments.Actors;
+    using Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation;
+    using Optano.Algorithm.Tuner.GenomeEvaluation.Messages;
+    using Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments;
     using Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments.Messages;
     using Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments.Results;
     using Optano.Algorithm.Tuner.Genomes;
@@ -70,12 +72,8 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.GeneticAlgorithm
     /// </para>
     /// </remarks>
     /// </summary>
-    /// <typeparam name="TInstance">
-    /// The instance type to use.
-    /// </typeparam>
-    /// <typeparam name="TResult">
-    /// The result for an individual evaluation.
-    /// </typeparam>
+    /// <typeparam name="TInstance">The instance type.</typeparam>
+    /// <typeparam name="TResult">The result type of a single target algorithm evaluation.</typeparam>
     public class GgaStrategy<TInstance, TResult> : IPopulationUpdateStrategy<TInstance, TResult>
         where TInstance : InstanceBase
         where TResult : ResultBase<TResult>, new()
@@ -98,7 +96,7 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.GeneticAlgorithm
         private readonly GenomeBuilder _genomeBuilder;
 
         /// <summary>
-        /// An <see cref="IActorRef" /> to a <see cref="TournamentSelector{TTargetAlgorithm,TInstance,TResult}" /> which decides
+        /// An <see cref="IActorRef" /> to a <see cref="GenerationEvaluationActor{TTargetAlgorithm,TInstance,TResult}" /> which decides
         /// which competitive genomes are allowed to reproduce.
         /// </summary>
         private readonly IActorRef _tournamentSelector;
@@ -116,7 +114,7 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.GeneticAlgorithm
         /// <summary>
         /// The current generation index.
         /// </summary>
-        private int _currGeneration;
+        private int _currentGeneration;
 
         /// <summary>
         /// The number of times <see cref="PerformIteration(int, IEnumerable{TInstance})"/> has been
@@ -146,7 +144,7 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.GeneticAlgorithm
         /// <param name="genomeBuilder">Responsible for creation, modification and crossover of genomes.
         /// Needs to be compatible with the given parameter tree and configuration.</param>
         /// <param name="tournamentSelector">An <see cref="IActorRef" /> to a
-        /// <see cref="TournamentSelector{TTargetAlgorithm,TInstance,TResult}" /> which decides which competitive
+        /// <see cref="GenerationEvaluationActor{TTargetAlgorithm,TInstance,TResult}" /> which decides which competitive
         /// genomes are allowed to reproduce.</param>
         /// <param name="geneticEngineering">Object which trains a model and enables model-based crossovers.</param>
         public GgaStrategy(
@@ -162,9 +160,9 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.GeneticAlgorithm
             this._tournamentSelector = tournamentSelector ?? throw new ArgumentNullException(nameof(tournamentSelector));
             this._geneticEngineering = geneticEngineering ?? throw new ArgumentNullException(nameof(geneticEngineering));
 
-            this.AllKnownRanks = new Dictionary<Genome, List<GenomeTournamentResult>>(
+            this.AllKnownRanks = new Dictionary<Genome, List<GenomeTournamentRank>>(
                 3 * this._configuration.PopulationSize,
-                new Genome.GeneValueComparator());
+                Genome.GenomeComparer);
         }
 
         #endregion
@@ -174,7 +172,7 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.GeneticAlgorithm
         /// <summary>
         /// Gets or sets all observed tournament results.
         /// </summary>
-        private Dictionary<Genome, List<GenomeTournamentResult>> AllKnownRanks { get; set; }
+        private Dictionary<Genome, List<GenomeTournamentRank>> AllKnownRanks { get; set; }
 
         /// <summary>
         /// Gets the path to use when working with <see cref="GgaStatus"/>.
@@ -204,26 +202,26 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.GeneticAlgorithm
         /// <summary>
         /// Updates the current population.
         /// </summary>
-        /// <param name="generationIndex">The current generation index.</param>
+        /// <param name="currentGeneration">The current generation index.</param>
         /// <param name="instancesForEvaluation">Instances to use for evaluation.</param>
-        public void PerformIteration(int generationIndex, IEnumerable<TInstance> instancesForEvaluation)
+        public void PerformIteration(int currentGeneration, IEnumerable<TInstance> instancesForEvaluation)
         {
             this._iterationCounter++;
-            this._currGeneration = generationIndex;
+            this._currentGeneration = currentGeneration;
 
-            var tournamentResults = this.PerformSelection(this._currGeneration, instancesForEvaluation);
+            var tournamentResults = this.PerformSelection(instancesForEvaluation);
 
             this.UpdateIncumbentKeptCounter(
                 previousIncumbent: this._mostRecentBest?.IncumbentGenome,
                 newIncumbent: tournamentResults.GenerationBest);
             this._mostRecentBest = new IncumbentGenomeWrapper<TResult>
-                                      {
-                                          IncumbentGeneration = generationIndex,
-                                          IncumbentGenome = tournamentResults.GenerationBest,
-                                          IncumbentInstanceResults = tournamentResults.GenerationBestResult,
-                                      };
+                                       {
+                                           IncumbentGeneration = currentGeneration,
+                                           IncumbentGenome = tournamentResults.GenerationBest,
+                                           IncumbentInstanceResults = tournamentResults.GenerationBestResult,
+                                       };
 
-            bool isLastGeneration = generationIndex >= this._configuration.Generations - 1;
+            bool isLastGeneration = currentGeneration >= this._configuration.Generations - 1;
             if (!isLastGeneration)
             {
                 // only perform expensive population update until penultimate generation.
@@ -331,7 +329,7 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.GeneticAlgorithm
             RunStatisticTracker.ComputeAndExportNumericalFeatureCoefficientOfVariation(
                 this._parameterTree,
                 this._population.GetCompetitiveIndividuals(),
-                this._currGeneration);
+                this._currentGeneration);
         }
 
         /// <summary>
@@ -365,10 +363,10 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.GeneticAlgorithm
 
             // somehow, the equality comparer is not restored properly.
             // fix this.
-            var restoredRanks = this.AllKnownRanks.GroupBy(kr => kr.Key, new Genome.GeneValueComparator()).ToDictionary(
+            var restoredRanks = this.AllKnownRanks.GroupBy(kr => kr.Key, Genome.GenomeComparer).ToDictionary(
                 grp => grp.Key,
                 grp => grp.SelectMany(ranks => ranks.Value).ToList(),
-                new Genome.GeneValueComparator());
+                Genome.GenomeComparer);
             this.AllKnownRanks = restoredRanks;
         }
 
@@ -383,7 +381,7 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.GeneticAlgorithm
         /// <param name="newIncumbent">The new incumbent.</param>
         private void UpdateIncumbentKeptCounter(Genome previousIncumbent, Genome newIncumbent)
         {
-            if (new Genome.GeneValueComparator().Equals(previousIncumbent, newIncumbent))
+            if (Genome.GenomeComparer.Equals(previousIncumbent, newIncumbent))
             {
                 this._incumbentKeptCounter++;
             }
@@ -416,7 +414,7 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.GeneticAlgorithm
             {
                 if (!this.AllKnownRanks.ContainsKey(genome))
                 {
-                    this.AllKnownRanks.Add(genome, new List<GenomeTournamentResult>());
+                    this.AllKnownRanks.Add(genome, new List<GenomeTournamentRank>());
                 }
 
                 this.AllKnownRanks[genome].AddRange(tournamentResults.GenomeToTournamentRank[genome]);
@@ -426,42 +424,46 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.GeneticAlgorithm
         /// <summary>
         /// Selects those genomes from the competitive part of the population that are allowed to reproduce.
         /// </summary>
-        /// <param name="generation">
-        /// The generation.
-        /// </param>
         /// <param name="instancesForEvaluation">
         /// The <typeparamref name="TInstance"/>s to use for evaluation.
         /// </param>
         /// <returns>
         /// Competitive genomes allowed to reproduce.
         /// </returns>
-        private TournamentWinnersWithRank<TResult> PerformSelection(int generation, IEnumerable<TInstance> instancesForEvaluation)
+        private TournamentWinnersWithRank<TResult> PerformSelection(IEnumerable<TInstance> instancesForEvaluation)
         {
-            var selectCommandMessage = new SelectCommand<TInstance>(
-                this._population.GetCompetitiveIndividuals().Select(genome => new ImmutableGenome(genome)),
+            var participants = this._population.GetCompetitiveIndividuals().Select(genome => new ImmutableGenome(genome)).ToList();
+            var generationEvaluationMessage = new GenerationEvaluation<TInstance, TResult>(
+                participants,
                 instancesForEvaluation,
-                generation);
+                (runEvaluator, participantsOfGeneration, instancesOfGeneration) => new MiniTournamentGenerationEvaluationStrategy<TInstance, TResult>(
+                    runEvaluator,
+                    participantsOfGeneration,
+                    instancesOfGeneration,
+                    this._configuration,
+                    this._currentGeneration));
 
-            var selectGenomeCommand = this._tournamentSelector.Ask<SelectionResultMessage<TResult>>(selectCommandMessage).ContinueWith(
+            var generationEvaluationTask = this._tournamentSelector.Ask<GgaResult<TResult>>(generationEvaluationMessage).ContinueWith(
                 tr =>
                     {
                         if (tr.IsFaulted)
                         {
                             // It was impossible to determine the best genomes, i.e. something really bad happened.
                             // In this case, we throw an exception for the caller to handle.
-                            throw new InvalidOperationException("Selection command resulted in an exception.");
+                            throw new InvalidOperationException(
+                                $"The generation evaluation with GGA in generation {this._currentGeneration} resulted in an exception!");
                         }
 
                         var result = new TournamentWinnersWithRank<TResult>(
                             tr.Result.CompetitiveParents,
                             tr.Result.GenerationBest,
                             tr.Result.GenerationBestResult,
-                            tr.Result.GenomeToRank);
+                            tr.Result.GenomeToTournamentRank);
                         return result;
                     });
 
-            selectGenomeCommand.Wait();
-            return selectGenomeCommand.Result;
+            generationEvaluationTask.Wait();
+            return generationEvaluationTask.Result;
         }
 
         /// <summary>
@@ -495,9 +497,9 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.GeneticAlgorithm
         }
 
         /// <summary>
-        /// Counts the number of competitive individuals that have reached their 
-        /// maximum age and will die at the end of the generation. 
-        /// If the <see cref="IncumbentGenomeWrapper{TResult}.IncumbentGenome"/> has exceeded the <see cref="AlgorithmTunerConfiguration.MaxGenomeAge"/>, 
+        /// Counts the number of competitive individuals that have reached their
+        /// maximum age and will die at the end of the generation.
+        /// If the <see cref="IncumbentGenomeWrapper{TResult}.IncumbentGenome"/> has exceeded the <see cref="AlgorithmTunerConfiguration.MaxGenomeAge"/>,
         /// the number will be reduced by 1, as the <see cref="IncumbentGenomeWrapper{TResult}.IncumbentGenome"/> musn't die.
         /// <c>Make sure to exclude it from the set of dying genomes in <see cref="Population.Age"/>!</c>.
         /// </summary>
@@ -521,7 +523,7 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.GeneticAlgorithm
         }
 
         /// <summary>
-        /// Counts the number of non-competitive individuals that have reached their 
+        /// Counts the number of non-competitive individuals that have reached their
         /// maximum age and will die at the end of the generation.
         /// </summary>
         /// <returns>The number of non-competitive individuals that will die at the end of the generation.</returns>
@@ -574,7 +576,7 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.GeneticAlgorithm
         /// </returns>
         private int ComputeNumberOfNaturallyReproducedGenomes(int totalDying)
         {
-            var effectiveEngineeredPopProportion = this._configuration.StartEngineeringAtIteration <= this._currGeneration
+            var effectiveEngineeredPopProportion = this._configuration.StartEngineeringAtIteration <= this._currentGeneration
                                                        ? this._configuration.EngineeredPopulationRatio
                                                        : 0d;
 
@@ -643,7 +645,7 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.GeneticAlgorithm
             // also required, if sexual selection is enabled
             if (this._configuration.TrainModel || this._configuration.EngineeredPopulationRatio > 0 || this._configuration.EnableSexualSelection)
             {
-                var trainSet = new TrainingDataWrapper(this.AllKnownRanks, this._currGeneration);
+                var trainSet = new TrainingDataWrapper(this.AllKnownRanks, this._currentGeneration);
                 this._geneticEngineering.TrainForest(trainSet);
             }
 

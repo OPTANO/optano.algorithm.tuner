@@ -1,30 +1,30 @@
 ﻿#region Copyright (c) OPTANO GmbH
 
 // ////////////////////////////////////////////////////////////////////////////////
-//
+// 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
-//
+// 
 //    The entire contents of this file is protected by German and
 //    International Copyright Laws. Unauthorized reproduction,
 //    reverse-engineering, and distribution of all or any portion of
 //    the code contained in this file is strictly prohibited and may
 //    result in severe civil and criminal penalties and will be
 //    prosecuted to the maximum extent possible under the law.
-//
+// 
 //    RESTRICTIONS
-//
+// 
 //    THIS SOURCE CODE AND ALL RESULTING INTERMEDIATE FILES
 //    ARE CONFIDENTIAL AND PROPRIETARY TRADE SECRETS OF
 //    OPTANO GMBH.
-//
+// 
 //    THE SOURCE CODE CONTAINED WITHIN THIS FILE AND ALL RELATED
 //    FILES OR ANY PORTION OF ITS CONTENTS SHALL AT NO TIME BE
 //    COPIED, TRANSFERRED, SOLD, DISTRIBUTED, OR OTHERWISE MADE
 //    AVAILABLE TO OTHER INDIVIDUALS WITHOUT WRITTEN CONSENT
 //    AND PERMISSION FROM OPTANO GMBH.
-//
+// 
 // ////////////////////////////////////////////////////////////////////////////////
 
 #endregion
@@ -42,9 +42,9 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies
     using Optano.Algorithm.Tuner.Configuration;
     using Optano.Algorithm.Tuner.ContinuousOptimization;
     using Optano.Algorithm.Tuner.GenomeEvaluation;
+    using Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation;
     using Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage;
     using Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage.Messages;
-    using Optano.Algorithm.Tuner.GenomeEvaluation.Sorting;
     using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.Logging;
     using Optano.Algorithm.Tuner.MachineLearning;
@@ -62,12 +62,8 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies
     /// <typeparam name="TSearchPoint">
     /// The type of <see cref="SearchPoint"/>s handled by this strategy instance.
     /// </typeparam>
-    /// <typeparam name="TInstance">
-    /// The instance type to use.
-    /// </typeparam>
-    /// <typeparam name="TResult">
-    /// The result for an individual evaluation.
-    /// </typeparam>
+    /// <typeparam name="TInstance">The instance type.</typeparam>
+    /// <typeparam name="TResult">The result type of a single target algorithm evaluation.</typeparam>
     public abstract class ContinuousOptimizationStrategyBase<TSearchPoint, TInstance, TResult> : IPopulationUpdateStrategy<TInstance, TResult>
         where TSearchPoint : SearchPoint, IGenomeRepresentation, IDeserializationRestorer<TSearchPoint>
         where TInstance : InstanceBase
@@ -95,7 +91,7 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies
         /// </param>
         /// <param name="searchPointSorter">
         /// A <see cref="ISearchPointSorter{TSearchPoint}"/> which evaluates
-        /// <typeparamref name="TSearchPoint"/>s via a <see cref="GenomeSorter{TInstance,TResult}"/>.
+        /// <typeparamref name="TSearchPoint"/>s via a <see cref="GenerationEvaluationActor{TTargetAlgorithm,TInstance,TResult}"/>.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// configuration
@@ -110,7 +106,7 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies
             AlgorithmTunerConfiguration configuration,
             ParameterTree parameterTree,
             IActorRef targetRunResultStorage,
-            GenomeAssistedSorterBase<TSearchPoint, TInstance> searchPointSorter)
+            GenomeAssistedSorterBase<TSearchPoint, TInstance, TResult> searchPointSorter)
         {
             this.Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             this.ParameterTree = parameterTree ?? throw new ArgumentNullException(nameof(parameterTree));
@@ -135,9 +131,9 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies
 
         /// <summary>
         /// Gets the <see cref="ISearchPointSorter{TSearchPoint}"/> which evaluates
-        /// <typeparamref name="TSearchPoint"/>s via a <see cref="GenomeSorter{TInstance,TResult}"/>.
+        /// <typeparamref name="TSearchPoint"/>s via a <see cref="GenerationEvaluationActor{TTargetAlgorithm,TInstance,TResult}"/>.
         /// </summary>
-        protected GenomeAssistedSorterBase<TSearchPoint, TInstance> SearchPointSorter { get; }
+        protected GenomeAssistedSorterBase<TSearchPoint, TInstance, TResult> SearchPointSorter { get; }
 
         /// <summary>
         /// Gets an <see cref="IActorRef" /> to a <see cref="ResultStorageActor{TInstance,TResult}" />
@@ -194,18 +190,18 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies
         /// <summary>
         /// Updates the current population.
         /// </summary>
-        /// <param name="generationIndex">The current generation index.</param>
+        /// <param name="currentGeneration">The current generation.</param>
         /// <param name="instancesForEvaluation">Instances to use for evaluation.</param>
-        public void PerformIteration(int generationIndex, IEnumerable<TInstance> instancesForEvaluation)
+        public void PerformIteration(int currentGeneration, IEnumerable<TInstance> instancesForEvaluation)
         {
-            if (generationIndex < 0)
+            if (currentGeneration < 0)
             {
                 throw new ArgumentOutOfRangeException(
-                    nameof(generationIndex),
-                    $"Generation index may not be negative, but was {generationIndex}.");
+                    nameof(currentGeneration),
+                    $"Generation index may not be negative, but was {currentGeneration}.");
             }
 
-            this._currentGeneration = generationIndex;
+            this._currentGeneration = currentGeneration;
             if (!this.HasFixedInstances())
             {
                 this.CurrentEvaluationInstances = instancesForEvaluation.ToList();
@@ -232,6 +228,7 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies
             var resultRequest = this.TargetRunResultStorage
                 .Ask<GenomeResults<TInstance, TResult>>(new GenomeResultsRequest(incumbentGenome));
             resultRequest.Wait();
+
             var currentGenerationResults = resultRequest.Result.RunResults
                 .Where(result => this.CurrentEvaluationInstances.Contains(result.Key))
                 .Select(result => result.Value);

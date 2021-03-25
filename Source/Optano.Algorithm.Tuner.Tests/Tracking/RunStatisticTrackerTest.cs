@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -56,8 +56,8 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
         #region Public Methods and Operators
 
         /// <summary>
-        /// Checks that <see cref="RunStatisticTracker.TrackConvergenceBehavior"/> throws a
-        /// <see cref="ArgumentNullException"/> if called without a <see cref="IRunEvaluator{TResult}"/>.
+        /// Checks that <see cref="RunStatisticTracker.TrackConvergenceBehavior{TInstance, TResult}"/> throws a
+        /// <see cref="ArgumentNullException"/> if called without a <see cref="IRunEvaluator{TInstance,TResult}"/>.
         /// </summary>
         [Fact]
         public void TrackConvergenceBehaviorThrowsForMissingRunEvaluator()
@@ -68,7 +68,8 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
                                            IncumbentGenome = new Genome(),
                                            IncumbentInstanceResults = new List<TestResult>().ToImmutableList(),
                                        };
-            Assert.Throws<ArgumentNullException>(() => RunStatisticTracker.TrackConvergenceBehavior(incumbentWrapper, runEvaluator: null));
+            Assert.Throws<ArgumentNullException>(
+                () => RunStatisticTracker.TrackConvergenceBehavior<TestInstance, TestResult>(incumbentWrapper, runEvaluator: null));
         }
 
         /// <summary>
@@ -80,7 +81,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
         {
             var firstGeneration = new GenerationInformation(
                 0,
-                TimeSpan.FromSeconds(30), 
+                TimeSpan.FromSeconds(30),
                 34,
                 typeof(GgaStrategy<TestInstance, TestResult>),
                 new ImmutableGenome(new Genome()));

@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -41,7 +41,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
 
     using Optano.Algorithm.Tuner.ContinuousOptimization;
     using Optano.Algorithm.Tuner.ContinuousOptimization.CovarianceMatrixAdaptation;
-    using Optano.Algorithm.Tuner.GenomeEvaluation.Sorting;
+    using Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation;
     using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.Parameters;
     using Optano.Algorithm.Tuner.Parameters.Domains;
@@ -49,11 +49,12 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
     using Optano.Algorithm.Tuner.PopulationUpdateStrategies.CovarianceMatrixAdaptation;
     using Optano.Algorithm.Tuner.PopulationUpdateStrategies.CovarianceMatrixAdaptation.InformationFlow.Global;
     using Optano.Algorithm.Tuner.Tests.TargetAlgorithm.InterfaceImplementations;
+    using Optano.Algorithm.Tuner.Tests.TargetAlgorithm.InterfaceImplementations.ValueConsideration;
 
     using Xunit;
 
     /// <summary>
-    /// Contains tests for the <see cref="RepairedGenomeSearchPointSorter{TSearchPoint,TInstance}"/> class.
+    /// Contains tests for the <see cref="RepairedGenomeSearchPointSorter{TSearchPoint,TInstance,TResult}"/> class.
     /// </summary>
     [Collection(TestUtils.NonParallelCollectionGroupOneName)]
     public class RepairedGenomeSearchPointSorterTest : GenomeAssistedSorterBaseTest<ContinuizedGenomeSearchPoint>
@@ -61,37 +62,37 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
         #region Fields
 
         /// <summary>
-        /// The <see cref="RepairedGenomeSearchPointSorter{TSearchPoint,TInstance}"/> to test.
+        /// The <see cref="RepairedGenomeSearchPointSorter{TSearchPoint,TInstance,TResult}"/> to test.
         /// </summary>
-        private RepairedGenomeSearchPointSorter<ContinuizedGenomeSearchPoint, TestInstance> _sorter;
+        private RepairedGenomeSearchPointSorter<ContinuizedGenomeSearchPoint, TestInstance, IntegerResult> _sorter;
 
         #endregion
 
         #region Properties
 
         /// <summary>
-        /// Gets the <see cref="GenomeAssistedSorterBase{TSearchPoint,TInstance}"/> used in tests.
+        /// Gets the <see cref="GenomeAssistedSorterBase{TSearchPoint,TInstance,TResult}"/> used in tests.
         /// </summary>
-        protected override GenomeAssistedSorterBase<ContinuizedGenomeSearchPoint, TestInstance> GenomeAssistedSorter => this._sorter;
+        protected override GenomeAssistedSorterBase<ContinuizedGenomeSearchPoint, TestInstance, IntegerResult> GenomeAssistedSorter => this._sorter;
 
         #endregion
 
         #region Public Methods and Operators
 
         /// <summary>
-        /// Checks that <see cref="RepairedGenomeSearchPointSorter{TSearchPoint,TInstance}"/>'s constructor throws a
-        /// <see cref="ArgumentNullException"/> if called without a <see cref="GenomeSorter{TInstance,TResult}"/>.
+        /// Checks that <see cref="RepairedGenomeSearchPointSorter{TSearchPoint,TInstance,TResult}"/>'s constructor throws a
+        /// <see cref="ArgumentNullException"/> if called without a <see cref="GenerationEvaluationActor{TTargetAlgorithm,TInstance,TResult}"/>.
         /// </summary>
         [Fact]
-        public override void ConstructorThrowsForMissingGenomeSorter()
+        public override void ConstructorThrowsForMissingGenerationEvaluationActor()
         {
             Assert.Throws<ArgumentNullException>(
                 () =>
-                    new RepairedGenomeSearchPointSorter<ContinuizedGenomeSearchPoint, TestInstance>(genomeSorter: null));
+                    new RepairedGenomeSearchPointSorter<ContinuizedGenomeSearchPoint, TestInstance, IntegerResult>(null));
         }
 
         /// <summary>
-        /// Checks that <see cref="RepairedGenomeSearchPointSorter{TSearchPoint,TInstance}.Sort"/> sorts by validity as first criterion.
+        /// Checks that <see cref="RepairedGenomeSearchPointSorter{TSearchPoint,TInstance,TResult}.Sort"/> sorts by validity as first criterion.
         /// </summary>
         [Fact]
         public void ValidGenomeIsBetterThanInvalidOne()
@@ -107,7 +108,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
         }
 
         /// <summary>
-        /// Checks that <see cref="RepairedGenomeSearchPointSorter{TSearchPoint,TInstance}.Sort"/> sorts both valid and invalid
+        /// Checks that <see cref="RepairedGenomeSearchPointSorter{TSearchPoint,TInstance,TResult}.Sort"/> sorts both valid and invalid
         /// <see cref="Genome"/>s by performance.
         /// </summary>
         [Fact]
@@ -146,7 +147,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
         }
 
         /// <summary>
-        /// Checks that <see cref="RepairedGenomeSearchPointSorter{TSearchPoint,TInstance}.Sort"/> can handle duplicates.
+        /// Checks that <see cref="RepairedGenomeSearchPointSorter{TSearchPoint,TInstance,TResult}.Sort"/> can handle duplicates.
         /// </summary>
         [Fact]
         public override void SortingCanHandleDuplicates()
@@ -180,12 +181,12 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
         /// <summary>
         /// Initializes <see cref="GenomeAssistedSorterBaseTest{TSearchPoint}.GenomeAssistedSorter"/>.
         /// </summary>
-        /// <param name="genomeSorter">
-        /// An <see cref="IActorRef" /> to a <see cref="GenomeSorter{TInstance, TResult}" />.
+        /// <param name="generationEvaluationActor">
+        /// An <see cref="IActorRef" /> to a <see cref="GenerationEvaluationActor{TTargetAlgorithm, TInstance, TResult}" />.
         /// </param>
-        protected override void InitializeSorter(IActorRef genomeSorter)
+        protected override void InitializeSorter(IActorRef generationEvaluationActor)
         {
-            this._sorter = new RepairedGenomeSearchPointSorter<ContinuizedGenomeSearchPoint, TestInstance>(genomeSorter);
+            this._sorter = new RepairedGenomeSearchPointSorter<ContinuizedGenomeSearchPoint, TestInstance, IntegerResult>(generationEvaluationActor);
         }
 
         /// <summary>

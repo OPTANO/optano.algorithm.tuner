@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -84,14 +84,14 @@ namespace Optano.Algorithm.Tuner.ContinuousOptimization.DifferentialEvolution
         private List<TSearchPoint> _sortedPopulation;
 
         /// <summary>
-        /// The current generation, often denoted g in literature.
+        /// The current differential evolution generation, often denoted g in literature.
         /// </summary>
-        private int _currentGeneration;
+        private int _currentJadeGeneration;
 
         /// <summary>
-        /// The maximum number of generations to run.
+        /// The maximum number of differential evolution generations to run.
         /// </summary>
-        private int _maxGenerations;
+        private int _maxJadeGenerations;
 
         #endregion
 
@@ -155,8 +155,8 @@ namespace Optano.Algorithm.Tuner.ContinuousOptimization.DifferentialEvolution
                     $"Maximum number of generations must be nonnegative, but was {maxGenerations}.");
             }
 
-            this._currentGeneration = 0;
-            this._maxGenerations = maxGenerations;
+            this._currentJadeGeneration = 0;
+            this._maxJadeGenerations = maxGenerations;
 
             if (initialPositions == null)
             {
@@ -182,7 +182,7 @@ namespace Optano.Algorithm.Tuner.ContinuousOptimization.DifferentialEvolution
         {
             this.CheckIsInitialized();
 
-            this._currentGeneration++;
+            this._currentJadeGeneration++;
 
             Logger.Debug($"Mean mutation factor, crossover rate: {this.MeanMutationFactor}; {this.MeanCrossoverRate}");
 
@@ -230,7 +230,7 @@ namespace Optano.Algorithm.Tuner.ContinuousOptimization.DifferentialEvolution
         {
             this.CheckIsInitialized();
 
-            bool metMaxGenerations = this._currentGeneration >= this._maxGenerations;
+            bool metMaxGenerations = this._currentJadeGeneration >= this._maxJadeGenerations;
             if (metMaxGenerations)
             {
                 Logger.Info("JADE: Termination criterion met.");
@@ -257,8 +257,8 @@ namespace Optano.Algorithm.Tuner.ContinuousOptimization.DifferentialEvolution
         {
             var status = new DifferentialEvolutionStatus<TSearchPoint>(
                 this._sortedPopulation,
-                this._currentGeneration,
-                this._maxGenerations,
+                this._currentJadeGeneration,
+                this._maxJadeGenerations,
                 this.MeanMutationFactor,
                 this.MeanCrossoverRate);
             status.WriteToFile(pathToStatusFile);
@@ -273,8 +273,8 @@ namespace Optano.Algorithm.Tuner.ContinuousOptimization.DifferentialEvolution
             var status = StatusBase.ReadFromFile<DifferentialEvolutionStatus<TSearchPoint>>(pathToStatusFile);
 
             this._sortedPopulation = status.SortedPopulation?.Select(point => point.Restore()).ToList();
-            this._currentGeneration = status.CurrentGeneration;
-            this._maxGenerations = status.MaxGenerations;
+            this._currentJadeGeneration = status.CurrentGeneration;
+            this._maxJadeGenerations = status.MaxGenerations;
             this.MeanMutationFactor = status.MeanMutationFactor;
             this.MeanCrossoverRate = status.MeanCrossoverRate;
         }

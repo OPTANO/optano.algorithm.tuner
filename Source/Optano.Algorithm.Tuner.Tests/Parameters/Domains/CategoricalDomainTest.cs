@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -237,7 +237,8 @@ namespace Optano.Algorithm.Tuner.Tests.Parameters.Domains
         public override void MutateGeneValueThrowsExceptionForWrongType()
         {
             IDomain domain = new CategoricalDomain<int>(new List<int> { 1 });
-            Assert.Throws<ArgumentOutOfRangeException>(() => domain.MutateGeneValue(new Allele<double>(1.0), CategoricalDomainTest.dummyVariancePercentage));
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => domain.MutateGeneValue(new Allele<double>(1.0), CategoricalDomainTest.dummyVariancePercentage));
         }
 
         /// <summary>
@@ -250,7 +251,8 @@ namespace Optano.Algorithm.Tuner.Tests.Parameters.Domains
             IAllele geneValue = new Allele<int>(-42);
             Assert.False(this._categoricalDomain.ContainsGeneValue(geneValue));
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => this._categoricalDomain.MutateGeneValue(geneValue, CategoricalDomainTest.dummyVariancePercentage));
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => this._categoricalDomain.MutateGeneValue(geneValue, CategoricalDomainTest.dummyVariancePercentage));
         }
 
         /// <summary>

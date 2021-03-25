@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -40,11 +40,14 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.ResultStorage
     using Akka.TestKit.Xunit2;
 
     using Optano.Algorithm.Tuner.AkkaConfiguration;
+    using Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation;
     using Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage;
     using Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage.Messages;
     using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.Genomes.Values;
     using Optano.Algorithm.Tuner.Tests.TargetAlgorithm.InterfaceImplementations;
+
+    using Shouldly;
 
     using Xunit;
 
@@ -105,26 +108,34 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.ResultStorage
         #region Public Methods and Operators
 
         /// <summary>
-        /// Checks that sending a <see cref="ResultMessage{TInstance,TResult}"/> message containing a run result leads to that result
-        /// being stored in the <see cref="ResultStorageActor{TInstance, TResult}"/> s.t. subsequent <see cref="ResultRequest{TInstance}"/>s
+        /// Checks that sending a <see cref="EvaluationResult{TInstance,TResult}"/> message containing a run result leads to that result
+        /// being stored in the <see cref="ResultStorageActor{TInstance, TResult}"/> s.t. subsequent <see cref="GenomeResultsRequest"/>s
         /// can find it.
         /// </summary>
         [Fact]
         public void RunResultGetsStored()
         {
             // Send result message containing a target algorithm run result.
-            this._resultStorageActorRef.Tell(new ResultMessage<TestInstance, TestResult>(ResultStorageActorTest.Genome, ResultStorageActorTest.TestInstance, ResultStorageActorTest.TestResult));
-            
+            ActorRefImplicitSenderExtensions.Tell(
+                this._resultStorageActorRef,
+                new EvaluationResult<TestInstance, TestResult>(
+                    new GenomeInstancePair<TestInstance>(
+                        ResultStorageActorTest.Genome,
+                        ResultStorageActorTest.TestInstance),
+                    ResultStorageActorTest.TestResult));
+
             // Check if that one is returned if the genome - instance combination gets requested.
-            this._resultStorageActorRef.Tell(new ResultRequest<TestInstance>(ResultStorageActorTest.Genome, ResultStorageActorTest.TestInstance));
-            var storedRuntime = this.ExpectMsg<ResultMessage<TestInstance, TestResult>>().RunResult.Runtime;
+            this._resultStorageActorRef.Tell(new GenomeResultsRequest(ResultStorageActorTest.Genome));
+            var isStored = this.ExpectMsg<GenomeResults<TestInstance, TestResult>>().RunResults
+                .TryGetValue(ResultStorageActorTest.TestInstance, out var storedResult);
+            isStored.ShouldBeTrue();
             Assert.Equal(
                 ResultStorageActorTest.TestResultRuntime,
-                storedRuntime);
+                storedResult.Runtime);
         }
 
         /// <summary>
-        /// Checks that sending a <see cref="ResultMessage{TInstance, TResult}"/> message containing a run result leads to that result
+        /// Checks that sending a <see cref="EvaluationResult{TInstance,TResult}"/> message containing a run result leads to that result
         /// being stored in the <see cref="ResultStorageActor{TInstance, TResult}"/> even if a result for the same genome, but different
         /// instance is already stored.
         /// </summary>
@@ -137,21 +148,33 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.ResultStorage
             var secondResult = new TestResult(secondResultRuntime);
 
             // Send two result messages containing run results.
-            this._resultStorageActorRef.Tell(new ResultMessage<TestInstance, TestResult>(ResultStorageActorTest.Genome, ResultStorageActorTest.TestInstance, ResultStorageActorTest.TestResult));
-            this._resultStorageActorRef.Tell(
-                new ResultMessage<TestInstance, TestResult>(ResultStorageActorTest.Genome, secondInstance, secondResult));
+            ActorRefImplicitSenderExtensions.Tell(
+                this._resultStorageActorRef,
+                new EvaluationResult<TestInstance, TestResult>(
+                    new GenomeInstancePair<TestInstance>(
+                        ResultStorageActorTest.Genome,
+                        ResultStorageActorTest.TestInstance),
+                    ResultStorageActorTest.TestResult));
+            ActorRefImplicitSenderExtensions.Tell(
+                this._resultStorageActorRef,
+                new EvaluationResult<TestInstance, TestResult>(
+                    new GenomeInstancePair<TestInstance>(
+                        ResultStorageActorTest.Genome,
+                        secondInstance),
+                    secondResult));
 
             // Check if the runtime of the second result is returned if the genome - instance combination gets
             // requested.
-            this._resultStorageActorRef.Tell(new ResultRequest<TestInstance>(ResultStorageActorTest.Genome, secondInstance));
-            var result = this.ExpectMsg<ResultMessage<TestInstance, TestResult>>().RunResult;
-            Assert.Equal(
-                secondResultRuntime,
-                result.Runtime);
+            this._resultStorageActorRef.Tell(new GenomeResultsRequest(ResultStorageActorTest.Genome));
+            var genomeResults = this.ExpectMsg<GenomeResults<TestInstance, TestResult>>().RunResults;
+            genomeResults.ShouldNotBeNull();
+            genomeResults.Count.ShouldBe(2);
+            genomeResults.ShouldContainKey(ResultStorageActorTest.TestInstance);
+            genomeResults.ShouldContainKey(secondInstance);
         }
 
         /// <summary>
-        /// Checks that when sending two different <see cref="ResultMessage{TInstance, TResult}"/>s containing the same genome - instance
+        /// Checks that when sending two different <see cref="EvaluationResult{TInstance,TResult}"/>s containing the same genome - instance
         /// combination, but different run results, the second result is not stored.
         /// </summary>
         [Fact]
@@ -162,32 +185,44 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.ResultStorage
             var secondResult = new TestResult(secondRuntime);
 
             // Send two result messages containing two different results.
-            this._resultStorageActorRef.Tell(new ResultMessage<TestInstance, TestResult>(ResultStorageActorTest.Genome, ResultStorageActorTest.TestInstance, ResultStorageActorTest.TestResult));
-            this._resultStorageActorRef.Tell(new ResultMessage<TestInstance, TestResult>(ResultStorageActorTest.Genome, ResultStorageActorTest.TestInstance, secondResult));
+            ActorRefImplicitSenderExtensions.Tell(
+                this._resultStorageActorRef,
+                new EvaluationResult<TestInstance, TestResult>(
+                    new GenomeInstancePair<TestInstance>(
+                        ResultStorageActorTest.Genome,
+                        ResultStorageActorTest.TestInstance),
+                    ResultStorageActorTest.TestResult));
+            ActorRefImplicitSenderExtensions.Tell(
+                this._resultStorageActorRef,
+                new EvaluationResult<TestInstance, TestResult>(
+                    new GenomeInstancePair<TestInstance>(
+                        ResultStorageActorTest.Genome,
+                        ResultStorageActorTest.TestInstance),
+                    secondResult));
 
             // Check that the first result's runtime is returned if the genome - instance combination gets requested.
-            this._resultStorageActorRef.Tell(new ResultRequest<TestInstance>(ResultStorageActorTest.Genome, ResultStorageActorTest.TestInstance));
-            var result = this.ExpectMsg<ResultMessage<TestInstance, TestResult>>().RunResult;
+            this._resultStorageActorRef.Tell(new GenomeResultsRequest(ResultStorageActorTest.Genome));
+            var isStored = this.ExpectMsg<GenomeResults<TestInstance, TestResult>>().RunResults
+                .TryGetValue(ResultStorageActorTest.TestInstance, out var result);
+            isStored.ShouldBeTrue();
             Assert.Equal(
                 ResultStorageActorTest.TestResultRuntime,
                 result.Runtime);
         }
 
         /// <summary>
-        /// Checks that a <see cref="ResultRequest{TInstance}"/> on empty storage results in an answering
-        /// <see cref="StorageMiss{TInstance}"/>.
+        /// Checks that a <see cref="GenomeResultsRequest"/> on empty storage results in an answering
+        /// <see cref="GenomeResults{TGenome, TInstance}"/>.
         /// </summary>
         [Fact]
-        public void ResultRequestOnEmptyStorageProducesStorageMiss()
+        public void ResultRequestOnEmptyStorageProducesEmptyResultMessage()
         {
-            this._resultStorageActorRef.Tell(new ResultRequest<TestInstance>(ResultStorageActorTest.Genome, ResultStorageActorTest.TestInstance));
-            this.ExpectMsg<StorageMiss<TestInstance>>();
+            this._resultStorageActorRef.Tell(new GenomeResultsRequest(ResultStorageActorTest.Genome));
+            this.ExpectMsg<GenomeResults<TestInstance, TestResult>>().RunResults.ShouldBeEmpty();
         }
 
         /// <summary>
-        /// Checks that a <see cref="ResultRequest{TInstance}"/> results in an answering
-        /// <see cref="StorageMiss{TInstance}"/> if there
-        /// is a result stored for the genome, but it was done on another instance.
+        /// Checks that only results for observed instances are returned.
         /// </summary>
         [Fact]
         public void ResultRequestProducesStorageMissEvenIfGenomeIsKnown()
@@ -196,34 +231,46 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.ResultStorage
             TestInstance secondInstance = new TestInstance("2");
 
             // Add result for it.
-            this._resultStorageActorRef.Tell(new ResultMessage<TestInstance, TestResult>(ResultStorageActorTest.Genome, secondInstance, ResultStorageActorTest.TestResult));
+            ActorRefImplicitSenderExtensions.Tell(
+                this._resultStorageActorRef,
+                new EvaluationResult<TestInstance, TestResult>(
+                    new GenomeInstancePair<TestInstance>(ResultStorageActorTest.Genome, secondInstance),
+                    ResultStorageActorTest.TestResult));
 
-            // Message result request and check that a storage miss is returned.
-            this._resultStorageActorRef.Tell(new ResultRequest<TestInstance>(ResultStorageActorTest.Genome, ResultStorageActorTest.TestInstance));
-            this.ExpectMsg<StorageMiss<TestInstance>>();
+            // Send result request and check that a storage miss is returned.
+            this._resultStorageActorRef.Tell(new GenomeResultsRequest(ResultStorageActorTest.Genome));
+            this.ExpectMsg<GenomeResults<TestInstance, TestResult>>().RunResults.ShouldNotContainKey(ResultStorageActorTest.TestInstance);
         }
 
         /// <summary>
-        /// Checks that a <see cref="ResultRequest{TInstance}"/> on a known genome - instance combination with a run
-        /// result yields that run result as a <see cref="ResultMessage{TInstance, TResult}"/> message.
+        /// Checks that a <see cref="GenomeResultsRequest"/> on a known genome - instance combination with a run
+        /// result yields that run result as a <see cref="EvaluationResult{TInstance,TResult}"/> message.
         /// </summary>
         [Fact]
         public void ResultRequestReturnsCorrectResultForStoredRun()
         {
             // Store the result.
-            this._resultStorageActorRef.Tell(new ResultMessage<TestInstance, TestResult>(ResultStorageActorTest.Genome, ResultStorageActorTest.TestInstance, ResultStorageActorTest.TestResult));
+            ActorRefImplicitSenderExtensions.Tell(
+                this._resultStorageActorRef,
+                new EvaluationResult<TestInstance, TestResult>(
+                    new GenomeInstancePair<TestInstance>(
+                        ResultStorageActorTest.Genome,
+                        ResultStorageActorTest.TestInstance),
+                    ResultStorageActorTest.TestResult));
 
             // Request it again and compare the runtime to the stored one.
-            this._resultStorageActorRef.Tell(new ResultRequest<TestInstance>(ResultStorageActorTest.Genome, ResultStorageActorTest.TestInstance));
-            var result = this.ExpectMsg<ResultMessage<TestInstance, TestResult>>().RunResult;
+            this._resultStorageActorRef.Tell(new GenomeResultsRequest(ResultStorageActorTest.Genome));
+            var isStored = this.ExpectMsg<GenomeResults<TestInstance, TestResult>>().RunResults
+                .TryGetValue(ResultStorageActorTest.TestInstance, out var result);
+            isStored.ShouldBeTrue();
             Assert.Equal(
                 ResultStorageActorTest.TestResultRuntime,
                 result.Runtime);
         }
 
         /// <summary>
-        /// Checks that a <see cref="ResultRequest{TInstance}"/> is not comparing a genome's age or the genes' order,
-        /// but only the gene values, i.e. it will not return a <see cref="StorageMiss{TInstance}"/> if there is a run result
+        /// Checks that a <see cref="GenomeResultsRequest"/> is not comparing a genome's age or the genes' order,
+        /// but only the gene values, i.e. it will not return an empty result if there is a run result
         /// for a genome - instance combination with a younger genome that has a different gene order, but overall
         /// contains the same genes.
         /// </summary>
@@ -241,13 +288,20 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.ResultStorage
             genome2.SetGene("a", new Allele<int>(1));
 
             // Store result for first one.
-            this._resultStorageActorRef.Tell(
-                new ResultMessage<TestInstance, TestResult>(new ImmutableGenome(genome1), ResultStorageActorTest.TestInstance, ResultStorageActorTest.TestResult));
+            ActorRefImplicitSenderExtensions.Tell(
+                this._resultStorageActorRef,
+                new EvaluationResult<TestInstance, TestResult>(
+                    new GenomeInstancePair<TestInstance>(
+                        new ImmutableGenome(genome1),
+                        ResultStorageActorTest.TestInstance),
+                    ResultStorageActorTest.TestResult));
 
             // But request it for the second one.
-            this._resultStorageActorRef.Tell(
-                new ResultRequest<TestInstance>(new ImmutableGenome(genome2), ResultStorageActorTest.TestInstance));
-            this.ExpectMsg<ResultMessage<TestInstance, TestResult>>();
+            this._resultStorageActorRef.Tell(new GenomeResultsRequest(new ImmutableGenome(genome2)));
+            var isStored = this.ExpectMsg<GenomeResults<TestInstance, TestResult>>().RunResults
+                .TryGetValue(ResultStorageActorTest.TestInstance, out var result);
+            isStored.ShouldBeTrue();
+            result.Runtime.ShouldBe(ResultStorageActorTest.TestResult.Runtime);
         }
 
         /// <summary>
@@ -273,36 +327,45 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.ResultStorage
             var result3 = new TestResult(TimeSpan.FromMilliseconds(3));
 
             // Store some results.
-            this._resultStorageActorRef.Tell(
-                new ResultMessage<TestInstance, TestResult>(new ImmutableGenome(genome1), instance1, result1));
-            this._resultStorageActorRef.Tell(
-                new ResultMessage<TestInstance, TestResult>(new ImmutableGenome(genome1), instance2, result2));
-            this._resultStorageActorRef.Tell(
-                new ResultMessage<TestInstance, TestResult>(new ImmutableGenome(genome2), instance1, result3));
+            ActorRefImplicitSenderExtensions.Tell(
+                this._resultStorageActorRef,
+                new EvaluationResult<TestInstance, TestResult>(
+                    new GenomeInstancePair<TestInstance>(new ImmutableGenome(genome1), instance1),
+                    result1));
+            ActorRefImplicitSenderExtensions.Tell(
+                this._resultStorageActorRef,
+                new EvaluationResult<TestInstance, TestResult>(
+                    new GenomeInstancePair<TestInstance>(new ImmutableGenome(genome1), instance2),
+                    result2));
+            ActorRefImplicitSenderExtensions.Tell(
+                this._resultStorageActorRef,
+                new EvaluationResult<TestInstance, TestResult>(
+                    new GenomeInstancePair<TestInstance>(new ImmutableGenome(genome2), instance1),
+                    result3));
 
             // Ask for all results.
-            this._resultStorageActorRef.Tell(new AllResultsRequest());
+            ActorRefImplicitSenderExtensions.Tell(this._resultStorageActorRef, new AllResultsRequest());
             var results = this.ExpectMsg<AllResults<TestInstance, TestResult>>();
 
             // Check returned results are associated with correct genomes.
             Assert.Equal(2, results.RunResults.Count);
             Assert.True(
-                results.RunResults.Keys.Select(g => g.CreateMutableGenome()).Any(g => new Genome.GeneValueComparator().Equals(g, genome1)),
+                results.RunResults.Keys.Select(g => g.CreateMutableGenome()).Any(g => Tuner.Genomes.Genome.GenomeComparer.Equals(g, genome1)),
                 "Expected different genome.");
             Assert.True(
-                results.RunResults.Keys.Select(g => g.CreateMutableGenome()).Any(g => new Genome.GeneValueComparator().Equals(g, genome2)),
+                results.RunResults.Keys.Select(g => g.CreateMutableGenome()).Any(g => Tuner.Genomes.Genome.GenomeComparer.Equals(g, genome2)),
                 "Expected different genome.");
 
             // Check all results have been returned.
             var resultsFirstGenome = new Dictionary<TestInstance, TestResult>(
                 results.RunResults.Single(
-                    kvp => new Genome.GeneValueComparator().Equals(kvp.Key.CreateMutableGenome(), genome1)).Value);
+                    kvp => Tuner.Genomes.Genome.GenomeComparer.Equals(kvp.Key.CreateMutableGenome(), genome1)).Value);
             Assert.Equal(2, resultsFirstGenome.Count);
             Assert.Equal(result1.Runtime, resultsFirstGenome[instance1].Runtime);
             Assert.Equal(result2.Runtime, resultsFirstGenome[instance2].Runtime);
             var resultsSecondGenome = new Dictionary<TestInstance, TestResult>(
                 results.RunResults.Single(
-                    kvp => new Genome.GeneValueComparator().Equals(kvp.Key.CreateMutableGenome(), genome2)).Value);
+                    kvp => Tuner.Genomes.Genome.GenomeComparer.Equals(kvp.Key.CreateMutableGenome(), genome2)).Value);
             Assert.Single(resultsSecondGenome);
             Assert.Equal(result3.Runtime, resultsSecondGenome[instance1].Runtime);
         }
@@ -328,15 +391,24 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.ResultStorage
 
             // Store some results.
             var result = new TestResult(TimeSpan.FromMilliseconds(1));
-            this._resultStorageActorRef.Tell(
-                new ResultMessage<TestInstance, TestResult>(new ImmutableGenome(genome1), instance1, result));
-            this._resultStorageActorRef.Tell(
-                new ResultMessage<TestInstance, TestResult>(new ImmutableGenome(genome2), instance1, result));
-            this._resultStorageActorRef.Tell(
-                new ResultMessage<TestInstance, TestResult>(new ImmutableGenome(genome3), instance2, result));
+            ActorRefImplicitSenderExtensions.Tell(
+                this._resultStorageActorRef,
+                new EvaluationResult<TestInstance, TestResult>(
+                    new GenomeInstancePair<TestInstance>(new ImmutableGenome(genome1), instance1),
+                    result));
+            ActorRefImplicitSenderExtensions.Tell(
+                this._resultStorageActorRef,
+                new EvaluationResult<TestInstance, TestResult>(
+                    new GenomeInstancePair<TestInstance>(new ImmutableGenome(genome2), instance1),
+                    result));
+            ActorRefImplicitSenderExtensions.Tell(
+                this._resultStorageActorRef,
+                new EvaluationResult<TestInstance, TestResult>(
+                    new GenomeInstancePair<TestInstance>(new ImmutableGenome(genome3), instance2),
+                    result));
 
             // Ask for statistic.
-            this._resultStorageActorRef.Tell(new EvaluationStatisticRequest());
+            ActorRefImplicitSenderExtensions.Tell(this._resultStorageActorRef, new EvaluationStatisticRequest());
             var results = this.ExpectMsg<EvaluationStatistic>();
 
             // Check the two identical genome values have been recognized.
@@ -369,15 +441,24 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.ResultStorage
             var result3 = new TestResult(3);
 
             // Store some results.
-            this._resultStorageActorRef.Tell(
-                new ResultMessage<TestInstance, TestResult>(new ImmutableGenome(genome1), instance1, result1));
-            this._resultStorageActorRef.Tell(
-                new ResultMessage<TestInstance, TestResult>(new ImmutableGenome(genome1), instance2, result2));
-            this._resultStorageActorRef.Tell(
-                new ResultMessage<TestInstance, TestResult>(new ImmutableGenome(genome2), instance1, result3));
+            ActorRefImplicitSenderExtensions.Tell(
+                this._resultStorageActorRef,
+                new EvaluationResult<TestInstance, TestResult>(
+                    new GenomeInstancePair<TestInstance>(new ImmutableGenome(genome1), instance1),
+                    result1));
+            ActorRefImplicitSenderExtensions.Tell(
+                this._resultStorageActorRef,
+                new EvaluationResult<TestInstance, TestResult>(
+                    new GenomeInstancePair<TestInstance>(new ImmutableGenome(genome1), instance2),
+                    result2));
+            ActorRefImplicitSenderExtensions.Tell(
+                this._resultStorageActorRef,
+                new EvaluationResult<TestInstance, TestResult>(
+                    new GenomeInstancePair<TestInstance>(new ImmutableGenome(genome2), instance1),
+                    result3));
 
             // Ask for all results of one of the genomes.
-            this._resultStorageActorRef.Tell(new GenomeResultsRequest(new ImmutableGenome(genome1)));
+            ActorRefImplicitSenderExtensions.Tell(this._resultStorageActorRef, new GenomeResultsRequest(new ImmutableGenome(genome1)));
             var results = this.ExpectMsg<GenomeResults<TestInstance, TestResult>>();
 
             // Check all results for that genome have been returned.
@@ -398,7 +479,7 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.ResultStorage
             var genome = new ImmutableGenome(new Genome(age: 1));
 
             // Ask for all results for that genome.
-            this._resultStorageActorRef.Tell(new GenomeResultsRequest(genome));
+            ActorRefImplicitSenderExtensions.Tell(this._resultStorageActorRef, new GenomeResultsRequest(genome));
             var results = this.ExpectMsg<GenomeResults<TestInstance, TestResult>>();
 
             // Check no results for that genome have been returned.

@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -34,6 +34,8 @@ namespace Optano.Algorithm.Tuner
     using System;
     using System.ComponentModel;
     using System.Diagnostics;
+    using System.Globalization;
+    using System.Threading;
 
     /// <summary>
     /// Utility functions for process handling.
@@ -94,6 +96,18 @@ namespace Optano.Algorithm.Tuner
             {
                 return 0;
             }
+        }
+
+        /// <summary>
+        /// Sets the default <see cref="CultureInfo"/>.
+        /// </summary>
+        /// <param name="cultureInfo">The culture info.</param>
+        public static void SetDefaultCultureInfo(CultureInfo cultureInfo)
+        {
+            CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+            CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
+            Thread.CurrentThread.CurrentCulture = cultureInfo;
+            Thread.CurrentThread.CurrentUICulture = cultureInfo;
         }
 
         #endregion

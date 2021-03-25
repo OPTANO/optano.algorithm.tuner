@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -28,6 +28,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 
 #endregion
+
 namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.ResultStorage.Messages
 {
     using System;
@@ -35,6 +36,7 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.ResultStorage.Messages
     using System.Linq;
 
     using Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage.Messages;
+    using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.Tests.TargetAlgorithm.InterfaceImplementations;
 
     using Xunit;
@@ -48,12 +50,22 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.ResultStorage.Messages
 
         /// <summary>
         /// Verifies that calling <see cref="GenomeResults{I, R}"/>'s constructor without providing a
+        /// genome throws an <see cref="ArgumentNullException"/>.
+        /// </summary>
+        [Fact]
+        public void ConstructorThrowsExceptionOnMissingGenome()
+        {
+            Assert.Throws<ArgumentNullException>(() => new GenomeResults<TestInstance, TestResult>(null, new Dictionary<TestInstance, TestResult>()));
+        }
+
+        /// <summary>
+        /// Verifies that calling <see cref="GenomeResults{I, R}"/>'s constructor without providing a
         /// results dictionary throws an <see cref="ArgumentNullException"/>.
         /// </summary>
         [Fact]
         public void ConstructorThrowsExceptionOnMissingResultsDictionary()
         {
-            Assert.Throws<ArgumentNullException>(() => new GenomeResults<TestInstance, TestResult>(runResults: null));
+            Assert.Throws<ArgumentNullException>(() => new GenomeResults<TestInstance, TestResult>(new ImmutableGenome(new Genome()), null));
         }
 
         /// <summary>
@@ -72,7 +84,7 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.ResultStorage.Messages
             runResults.Add(instance2, result2);
 
             // Create results message.
-            var resultMessage = new GenomeResults<TestInstance, TestResult>(runResults);
+            var resultMessage = new GenomeResults<TestInstance, TestResult>(new ImmutableGenome(new Genome()), runResults);
 
             // Check it has copied over the dictionary correctly.
             Assert.Equal(2, resultMessage.RunResults.Count);
@@ -98,7 +110,7 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.ResultStorage.Messages
             runResults.Add(instance, result);
 
             // Create message out of them.
-            var resultMessage = new GenomeResults<TestInstance, TestResult>(runResults);
+            var resultMessage = new GenomeResults<TestInstance, TestResult>(new ImmutableGenome(new Genome()), runResults);
             Assert.True(runResults.Keys.SequenceEqual(resultMessage.RunResults.Keys));
             Assert.Equal(result, resultMessage.RunResults[instance]);
 

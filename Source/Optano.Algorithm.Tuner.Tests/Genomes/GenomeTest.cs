@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -55,15 +55,6 @@ namespace Optano.Algorithm.Tuner.Tests.Genomes
     [Collection(TestUtils.NonParallelCollectionGroupOneName)]
     public class GenomeTest
     {
-        #region Static Fields
-
-        /// <summary>
-        /// An <see cref="IEqualityComparer{T}"/> that only checks for gene values regardless of genome age.
-        /// </summary>
-        private static readonly IEqualityComparer<Genome> geneValueComparator = new Genome.GeneValueComparator();
-
-        #endregion
-
         #region Fields
 
         /// <summary>
@@ -129,7 +120,7 @@ namespace Optano.Algorithm.Tuner.Tests.Genomes
             var sameValues = new Genome(this._genome, age: this._genome.Age + 5);
             Assert.Equal(this._genome.IsEngineered, sameValues.IsEngineered);
             Assert.True(
-                GenomeTest.geneValueComparator.Equals(this._genome, sameValues),
+                Genome.GenomeComparer.Equals(this._genome, sameValues),
                 "Gene values should have been copied.");
             Assert.Equal(this._genome.Age + 5, sameValues.Age);
         }
@@ -159,12 +150,12 @@ namespace Optano.Algorithm.Tuner.Tests.Genomes
 
             var sameValues = new Genome(this._genome, age: this._genome.Age + 5);
             Assert.True(
-                GenomeTest.geneValueComparator.Equals(this._genome, sameValues),
+                Genome.GenomeComparer.Equals(this._genome, sameValues),
                 "Gene values should have been copied.");
 
             this._genome.SetGene("b", new Allele<double>(0.5));
             Assert.False(
-                GenomeTest.geneValueComparator.Equals(this._genome, sameValues),
+                Genome.GenomeComparer.Equals(this._genome, sameValues),
                 "Changing the original's values should not affect the copy.");
         }
 
@@ -407,11 +398,11 @@ namespace Optano.Algorithm.Tuner.Tests.Genomes
         }
 
         /// <summary>
-        /// Checks that <see cref="Genome.GeneValueComparator.Equals(Genome, Genome)"/> returns true even if the order
+        /// Checks that <see cref="Genome.GeneValueComparer.Equals(Genome, Genome)"/> returns true even if the order
         /// of genes is different.
         /// </summary>
         [Fact]
-        public void GeneValueComparatorIgnoresOrder()
+        public void GeneValueComparerIgnoresOrder()
         {
             this._genome.SetGene("a", new Allele<int>(3));
             this._genome.SetGene("b", new Allele<int>(2));
@@ -420,16 +411,16 @@ namespace Optano.Algorithm.Tuner.Tests.Genomes
             other.SetGene("a", new Allele<int>(3));
 
             Assert.True(
-                GenomeTest.geneValueComparator.Equals(this._genome, other),
+                Genome.GenomeComparer.Equals(this._genome, other),
                 $"Genome {this._genome} has supposedly different gene values than {other}.");
         }
 
         /// <summary>
-        /// Checks that <see cref="Genome.GeneValueComparator.Equals(Genome, Genome)"/> returns false if one of the
+        /// Checks that <see cref="Genome.GeneValueComparer.Equals(Genome, Genome)"/> returns false if one of the
         /// genomes is missing a gene.
         /// </summary>
         [Fact]
-        public void GeneValueComparatorReturnsFalseForMissingGenes()
+        public void GeneValueComparerReturnsFalseForMissingGenes()
         {
             this._genome.SetGene("a", new Allele<int>(3));
             this._genome.SetGene("b", new Allele<int>(2));
@@ -437,69 +428,69 @@ namespace Optano.Algorithm.Tuner.Tests.Genomes
             other.SetGene("b", new Allele<int>(2));
 
             Assert.False(
-                GenomeTest.geneValueComparator.Equals(this._genome, other),
+                Genome.GenomeComparer.Equals(this._genome, other),
                 $"Genome {this._genome} has supposedly the same gene values as {other}.");
             Assert.False(
-                GenomeTest.geneValueComparator.Equals(this._genome, other),
+                Genome.GenomeComparer.Equals(this._genome, other),
                 $"Genome {this._genome} has supposedly the same gene values as {other}.");
         }
 
         /// <summary>
-        /// Checks that <see cref="Genome.GeneValueComparator.Equals(Genome, Genome)"/> returns false if one of the
+        /// Checks that <see cref="Genome.GeneValueComparer.Equals(Genome, Genome)"/> returns false if one of the
         /// values is different.
         /// </summary>
         [Fact]
-        public void GeneValueComparatorReturnsFalseForDifferentValue()
+        public void GeneValueComparerReturnsFalseForDifferentValue()
         {
             this._genome.SetGene("b", new Allele<int>(2));
             var other = new Genome();
             other.SetGene("b", new Allele<int>(3));
 
             Assert.False(
-                GenomeTest.geneValueComparator.Equals(this._genome, other),
+                Genome.GenomeComparer.Equals(this._genome, other),
                 $"Genome {this._genome} has supposedly the same gene values as {other}.");
         }
 
         /// <summary>
-        /// Checks that <see cref="Genome.GeneValueComparator.Equals(Genome, Genome)"/> returns false if the first
+        /// Checks that <see cref="Genome.GeneValueComparer.Equals(Genome, Genome)"/> returns false if the first
         /// parameter is null and the second one isn't.
         /// </summary>
         [Fact]
-        public void GeneValueComparatorReturnsFalseForFirstGenomeNull()
+        public void GeneValueComparerReturnsFalseForFirstGenomeNull()
         {
             Assert.False(
-                GenomeTest.geneValueComparator.Equals(null, this._genome),
+                Genome.GenomeComparer.Equals(null, this._genome),
                 $"Genome {this._genome} was identified to be equal to null.");
         }
 
         /// <summary>
-        /// Checks that <see cref="Genome.GeneValueComparator.Equals(Genome, Genome)"/> returns false if the second
+        /// Checks that <see cref="Genome.GeneValueComparer.Equals(Genome, Genome)"/> returns false if the second
         /// parameter is null and the first one isn't.
         /// </summary>
         [Fact]
-        public void GeneValueComparatorReturnsFalseForSecondGenomeNull()
+        public void GeneValueComparerReturnsFalseForSecondGenomeNull()
         {
             Assert.False(
-                GenomeTest.geneValueComparator.Equals(this._genome, null),
+                Genome.GenomeComparer.Equals(this._genome, null),
                 $"Genome {this._genome} was identified to be equal to null.");
         }
 
         /// <summary>
-        /// Checks that <see cref="Genome.GeneValueComparator.Equals(Genome, Genome)"/> returns true if both parameters
+        /// Checks that <see cref="Genome.GeneValueComparer.Equals(Genome, Genome)"/> returns true if both parameters
         /// are null.
         /// </summary>
         [Fact]
-        public void GeneValueComparatorReturnsNullForBothGenomesNull()
+        public void GeneValueComparerReturnsNullForBothGenomesNull()
         {
-            Assert.True(GenomeTest.geneValueComparator.Equals(null, null), "null and null were identified as being different.");
+            Assert.True(Genome.GenomeComparer.Equals(null, null), "null and null were identified as being different.");
         }
 
         /// <summary>
-        /// Checks that <see cref="Genome.GeneValueComparator.GetHashCode(Genome)"/> is equal for two genes if they
+        /// Checks that <see cref="Genome.GeneValueComparer.GetHashCode(Genome)"/> is equal for two genes if they
         /// contain the same gene values, but picked them up in a different order and are of a different age.
         /// </summary>
         [Fact]
-        public void GeneValueComparatorReturnsSameHashCodesForDifferentAgeAndOrder()
+        public void GeneValueComparerReturnsSameHashCodesForDifferentAgeAndOrder()
         {
             this._genome.SetGene("a", new Allele<int>(3));
             this._genome.SetGene("b", new Allele<int>(2));
@@ -507,49 +498,49 @@ namespace Optano.Algorithm.Tuner.Tests.Genomes
             other.SetGene("b", new Allele<int>(2));
             other.SetGene("a", new Allele<int>(3));
 
-            var firstGenomeHash = GenomeTest.geneValueComparator.GetHashCode(this._genome);
-            var secondGenomeHash = GenomeTest.geneValueComparator.GetHashCode(other);
+            var firstGenomeHash = Genome.GenomeComparer.GetHashCode(this._genome);
+            var secondGenomeHash = Genome.GenomeComparer.GetHashCode(other);
             Assert.Equal(
                 firstGenomeHash,
                 secondGenomeHash);
         }
 
         /// <summary>
-        /// Checks that <see cref="Genome.GeneValueComparator.GetHashCode(Genome)"/> is different for two genomes with
+        /// Checks that <see cref="Genome.GeneValueComparer.GetHashCode(Genome)"/> is different for two genomes with
         /// the same genes, but different gene values.
         /// Of course, this does not have to be the case necessarily, but it's still a nice property that should be
         /// true in most cases.
         /// </summary>
         [Fact]
-        public void GeneValueComparatorReturnsDifferentHashCodesForDifferentValues()
+        public void GeneValueComparerReturnsDifferentHashCodesForDifferentValues()
         {
             this._genome.SetGene("b", new Allele<int>(2));
             var other = new Genome();
             other.SetGene("b", new Allele<int>(3));
 
-            var firstGenomeHash = GenomeTest.geneValueComparator.GetHashCode(this._genome);
-            var secondGenomeHash = GenomeTest.geneValueComparator.GetHashCode(other);
+            var firstGenomeHash = Genome.GenomeComparer.GetHashCode(this._genome);
+            var secondGenomeHash = Genome.GenomeComparer.GetHashCode(other);
             Assert.NotEqual(
                 firstGenomeHash,
                 secondGenomeHash);
         }
 
         /// <summary>
-        /// Checks that <see cref="Genome.GeneValueComparator.GetHashCode(Genome)"/> is different for two genomes with
+        /// Checks that <see cref="Genome.GeneValueComparer.GetHashCode(Genome)"/> is different for two genomes with
         /// the same gene values where one of the genomes is missing one gene.
         /// Of course, this does not have to be the case necessarily, but it's still a nice property that should be
         /// true in most cases.
         /// </summary>
         [Fact]
-        public void GeneValueComparatorReturnsDifferentHashCodesForMissingValues()
+        public void GeneValueComparerReturnsDifferentHashCodesForMissingValues()
         {
             this._genome.SetGene("a", new Allele<int>(3));
             this._genome.SetGene("b", new Allele<int>(2));
             var other = new Genome();
             other.SetGene("b", new Allele<int>(2));
 
-            var firstGenomeHash = GenomeTest.geneValueComparator.GetHashCode(this._genome);
-            var secondGenomeHash = GenomeTest.geneValueComparator.GetHashCode(other);
+            var firstGenomeHash = Genome.GenomeComparer.GetHashCode(this._genome);
+            var secondGenomeHash = Genome.GenomeComparer.GetHashCode(other);
             Assert.False(
                 object.Equals(firstGenomeHash, secondGenomeHash),
                 $"Genomes {this._genome} and {other} are not equal, but have equal hashes {firstGenomeHash} and {secondGenomeHash}.");

@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -35,7 +35,6 @@ namespace Optano.Algorithm.Tuner.Tests.Genomes
     using System.Collections.Generic;
     using System.Linq;
 
-    using Optano.Algorithm.Tuner;
     using Optano.Algorithm.Tuner.Configuration;
     using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.Genomes.Values;
@@ -360,7 +359,7 @@ namespace Optano.Algorithm.Tuner.Tests.Genomes
             // Check the population and replace individuals.
             var originalNonCompetitive = new List<Genome> { genome1, genome2, genome3 };
 
-            Assert.True(originalNonCompetitive.SequenceEqual(this._population.GetNonCompetitiveMates(), new Genome.GeneValueComparator()));
+            Assert.True(originalNonCompetitive.SequenceEqual(this._population.GetNonCompetitiveMates(), Genome.GenomeComparer));
             this._population.ReplaceIndividualsWithMutants(this._genomeBuilder);
 
             // Check number of changed individuals.

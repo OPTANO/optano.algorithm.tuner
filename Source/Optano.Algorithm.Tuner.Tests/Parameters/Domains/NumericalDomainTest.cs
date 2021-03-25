@@ -3,7 +3,7 @@
 // ////////////////////////////////////////////////////////////////////////////////
 // 
 //        OPTANO GmbH Source Code
-//        Copyright (c) 2010-2020 OPTANO GmbH
+//        Copyright (c) 2010-2021 OPTANO GmbH
 //        ALL RIGHTS RESERVED.
 // 
 //    The entire contents of this file is protected by German and
@@ -103,7 +103,8 @@ namespace Optano.Algorithm.Tuner.Tests.Parameters.Domains
         [Fact]
         public void EmptyDomainThrowsException()
         {
-            Assert.Throws<ArgumentException>(() => this.CreateNumericalDomain(minimum: NumericalDomainTest.maximum, maximum: NumericalDomainTest.minimum));
+            Assert.Throws<ArgumentException>(
+                () => this.CreateNumericalDomain(minimum: NumericalDomainTest.maximum, maximum: NumericalDomainTest.minimum));
         }
 
         /// <summary>
@@ -118,7 +119,8 @@ namespace Optano.Algorithm.Tuner.Tests.Parameters.Domains
         [Fact]
         public override void MutateGeneValueThrowsExceptionForWrongType()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => this._domain.MutateGeneValue(new Allele<string>("type"), NumericalDomainTest.irrelevantVariance));
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => this._domain.MutateGeneValue(new Allele<string>("type"), NumericalDomainTest.irrelevantVariance));
         }
 
         /// <summary>

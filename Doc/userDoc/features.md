@@ -11,5 +11,5 @@
 - [Possibility to pause and continue](statusdump.md) the tuning at a later point
 - Automatic logging of intermediate results
 - Full user control by offering a rich interface of [optional configuration parameters](parameters.md)
-- [Full customization](advanced.md) in form of arbitrary optimization functions, target algorithms, and input values
-- Tolerance for [forbidden parameter combinations](advanced.md#genomeBuilder)
+- [Full customization](../developerDoc/advanced.md) in form of arbitrary optimization functions, target algorithms, and input values
+- Tolerance for [forbidden parameter combinations](../developerDoc/advanced.md#genomeBuilder)
