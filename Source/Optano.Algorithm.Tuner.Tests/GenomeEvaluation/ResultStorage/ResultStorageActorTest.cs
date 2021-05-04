@@ -54,7 +54,6 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.ResultStorage
     /// <summary>
     /// Contains tests for <see cref="ResultStorageActor{TInstance,TResult}"/>.
     /// </summary>
-    [Collection(TestUtils.NonParallelCollectionGroupOneName)]
     public class ResultStorageActorTest : TestKit
     {
         #region Static Fields

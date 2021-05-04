@@ -49,7 +49,6 @@ namespace Optano.Algorithm.Tuner.Tests.Genomes
     /// <summary>
     /// Contains tests for <see cref="GenomeBuilder"/>.
     /// </summary>
-    [Collection(TestUtils.NonParallelCollectionGroupOneName)]
     public class GenomeBuilderTest : IDisposable
     {
         #region Constants

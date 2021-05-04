@@ -48,7 +48,6 @@ namespace Optano.Algorithm.Tuner.Tests.ContinuousOptimization.CovarianceMatrixAd
     /// <summary>
     /// Contains tests for the <see cref="CmaEs{TSearchPoint}"/> class.
     /// </summary>
-    [Collection(TestUtils.NonParallelCollectionGroupOneName)]
     public class CmaEsTest : IDisposable
     {
         #region Fields
@@ -98,6 +97,7 @@ namespace Optano.Algorithm.Tuner.Tests.ContinuousOptimization.CovarianceMatrixAd
             this._configuration = new CmaEsConfiguration(7, Vector<double>.Build.Dense(3), 0.1);
             this._terminationCriteria = new List<ITerminationCriterion> { new MaxIterations(3) };
 
+            Randomizer.Reset();
             Randomizer.Configure(0);
         }
 

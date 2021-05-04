@@ -53,7 +53,6 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.DifferentialEv
     /// <summary>
     /// Contains tests for the <see cref="GenomeSearchPointSorter{TInstance,TResult}"/> class.
     /// </summary>
-    [Collection(TestUtils.NonParallelCollectionGroupOneName)]
     public class GenomeSearchPointSorterTest : GenomeAssistedSorterBaseTest<GenomeSearchPoint>
     {
         #region Fields

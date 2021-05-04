@@ -75,7 +75,6 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.GeneticAlgorit
     /// <summary>
     /// Contains tests for <see cref="GgaStrategy{TInstance,TResult}"/>.
     /// </summary>
-    [Collection(TestUtils.NonParallelCollectionGroupOneName)]
     public class GgaStrategyTest : TestBase
     {
         #region Fields
@@ -228,8 +227,8 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.GeneticAlgorit
             population.AddGenome(this._genomeBuilder.CreateRandomGenome(age: 0), isCompetitive: false);
 
             var strategy = this.CreateTestStrategy();
-            strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), null);
-            strategy.PerformIteration(0, this._singleTestInstance);
+            strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), null, 0, false);
+            strategy.PerformIteration(0, this._singleTestInstance, false);
             population = strategy.FinishPhase(null);
 
             // Old genomes should die if they are not the best genome.
@@ -255,8 +254,8 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.GeneticAlgorit
             population.AddGenome(nonCompetitive, false);
 
             var strategy = this.CreateTestStrategy();
-            strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), null);
-            strategy.PerformIteration(0, this._singleTestInstance);
+            strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), null, 0, false);
+            strategy.PerformIteration(0, this._singleTestInstance, false);
             population = strategy.FinishPhase(null);
 
             competitive = population.GetCompetitiveIndividuals().Single();
@@ -284,8 +283,8 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.GeneticAlgorit
             population.AddGenome(this._genomeBuilder.CreateRandomGenome(this._configuration.MaxGenomeAge), false);
 
             var strategy = this.CreateTestStrategy();
-            strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), null);
-            strategy.PerformIteration(0, this._singleTestInstance);
+            strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), null, 0, false);
+            strategy.PerformIteration(0, this._singleTestInstance, false);
             population = strategy.FinishPhase(null);
 
             var competitive = population.GetCompetitiveIndividuals().ToList();
@@ -392,25 +391,25 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.GeneticAlgorit
             population.AddGenome(this._genomeBuilder.CreateRandomGenome(age: 1), true);
 
             var strategy = this.CreateTestStrategy();
-            strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), null);
+            strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), null, 0, false);
 
             // First phase: One generation less than needed.
             for (int generation = 0; generation < this._configuration.MaximumNumberGgaGenerations - 1; generation++)
             {
-                strategy.PerformIteration(generation, this._singleTestInstance);
+                strategy.PerformIteration(generation, this._singleTestInstance, false);
             }
 
             Assert.False(strategy.HasTerminated(), "Should not have terminated yet.");
 
             // Start a new phase.
-            strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), null);
+            strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), null, 0, false);
             for (int generation = 0; generation < this._configuration.MaximumNumberGgaGenerations - 1; generation++)
             {
-                strategy.PerformIteration(generation, this._singleTestInstance);
+                strategy.PerformIteration(generation, this._singleTestInstance, false);
             }
 
             Assert.False(strategy.HasTerminated(), "Should not have terminated yet.");
-            strategy.PerformIteration(this._configuration.MaximumNumberGgaGenerations - 1, this._singleTestInstance);
+            strategy.PerformIteration(this._configuration.MaximumNumberGgaGenerations - 1, this._singleTestInstance, false);
             Assert.True(strategy.HasTerminated(), "Should have terminated.");
         }
 
@@ -437,8 +436,8 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.GeneticAlgorit
             population.AddGenome(this._genomeBuilder.CreateRandomGenome(age: 1), true);
 
             var strategy = this.CreateTestStrategy();
-            strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), null);
-            strategy.PerformIteration(0, this._singleTestInstance);
+            strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), null, 0, false);
+            strategy.PerformIteration(0, this._singleTestInstance, false);
             strategy.DumpStatus();
 
             // Check last status dump
@@ -465,7 +464,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.GeneticAlgorit
             population.AddGenome(nonCompetitive, false);
 
             var strategy = this.CreateTestStrategy();
-            strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), null);
+            strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), null, 0, false);
             strategy.DumpStatus();
 
             // Create new strategy to read the status dump.
@@ -493,9 +492,9 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.GeneticAlgorit
             population.AddGenome(this._genomeBuilder.CreateRandomGenome(age: 1), true);
 
             var strategy = this.CreateTestStrategy();
-            strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), null);
-            strategy.PerformIteration(0, this._singleTestInstance);
-            strategy.PerformIteration(0, this._singleTestInstance);
+            strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), null, 0, false);
+            strategy.PerformIteration(0, this._singleTestInstance, false);
+            strategy.PerformIteration(0, this._singleTestInstance, false);
             strategy.DumpStatus();
 
             // Create new strategy to read the status dump.
@@ -528,12 +527,13 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.GeneticAlgorit
 
             this.ActorSystem = ActorSystem.Create(TestBase.ActorSystemName, this._configuration.AkkaConfiguration);
             this._resultStorageActor = this.ActorSystem.ActorOf(
-                Props.Create(() => new ResultStorageActor<TestInstance, IntegerResult>()),
+                Props.Create(
+                    () => new ResultStorageActor<TestInstance, IntegerResult>()),
                 AkkaNames.ResultStorageActor);
             this._generationEvaluationActor = this.CreateTournamentSelector(
                 this.ActorSystem,
                 new ExtractIntegerValueCreator(),
-                new TargetAlgorithm.InterfaceImplementations.ValueConsideration.SortByValue<TestInstance>());
+                new TargetAlgorithm.InterfaceImplementations.ValueConsideration.SortByDescendingIntegerValue<TestInstance>());
         }
 
         /// <summary>
@@ -573,7 +573,8 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.GeneticAlgorit
                         runEvaluator,
                         this._configuration,
                         this._resultStorageActor,
-                        this._parameterTree)),
+                        this._parameterTree,
+                        null)),
                 AkkaNames.GenerationEvaluationActor);
         }
 

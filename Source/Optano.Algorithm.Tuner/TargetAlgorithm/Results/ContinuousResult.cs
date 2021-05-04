@@ -32,6 +32,7 @@
 namespace Optano.Algorithm.Tuner.TargetAlgorithm.Results
 {
     using System;
+    using System.Linq;
 
     /// <summary>
     /// An implementation of <see cref="ResultBase{TResultType}" /> that holds a single continuous value.
@@ -45,8 +46,9 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm.Results
         /// </summary>
         /// <param name="value">The value it should hold.</param>
         /// <param name="runtime">The runtime.</param>
-        public ContinuousResult(double value, TimeSpan runtime)
-            : base(runtime)
+        /// <param name="targetAlgorithmStatus">The <see cref="TargetAlgorithmStatus"/>.</param>
+        public ContinuousResult(double value, TimeSpan runtime, TargetAlgorithmStatus targetAlgorithmStatus = TargetAlgorithmStatus.Finished)
+            : base(runtime, targetAlgorithmStatus)
         {
             this.Value = value;
         }
@@ -56,7 +58,7 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm.Results
         /// Empty ctor required for <see cref="ResultBase{TResultType}.CreateCancelledResult"/>.
         /// </summary>
         public ContinuousResult()
-            : this(double.NaN, TimeSpan.MaxValue)
+            : this(double.NaN, TimeSpan.MaxValue, TargetAlgorithmStatus.CancelledByTimeout)
         {
         }
 
@@ -73,15 +75,24 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm.Results
 
         #region Public Methods and Operators
 
-        /// <summary>
-        /// Returns the string representation of the object.
-        /// </summary>
-        /// <returns>String representation of the object.</returns>
+        /// <inheritdoc />
         public override string ToString()
         {
             return this.IsCancelled
                        ? FormattableString.Invariant($"Cancelled after {this.Runtime:G} with value set to {this.Value}")
                        : FormattableString.Invariant($"Runtime: {this.Runtime:G}, Value: {this.Value}");
+        }
+
+        /// <inheritdoc />
+        public override string[] GetHeader()
+        {
+            return base.GetHeader().Concat(new[] { $"Value" }).ToArray();
+        }
+
+        /// <inheritdoc />
+        public override string[] ToStringArray()
+        {
+            return base.ToStringArray().Concat(new[] { $"{this.Value:0.######}" }).ToArray();
         }
 
         #endregion

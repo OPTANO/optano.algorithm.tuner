@@ -44,7 +44,6 @@ namespace Optano.Algorithm.Tuner.Tests.Logging
     /// <summary>
     /// Contains tests for the <see cref="LoggingHelper"/> class.
     /// </summary>
-    [Collection(TestUtils.NonParallelCollectionGroupOneName)]
     public class LoggingHelperTest : IDisposable
     {
         #region Static Fields

@@ -143,25 +143,29 @@ namespace Optano.Algorithm.Tuner.DistributedExecution
                 Directory.CreateDirectory(configuration.ZippedStatusFileDirectory);
             }
 
-            Dictionary<string, IAllele> bestParameters = null;
-            // Run algorithm tuner.
-            using (var runner = algorithmTunerBuilder.Invoke(
+            using var runner = algorithmTunerBuilder.Invoke(
                 configuration,
                 argsParser.PathToTrainingInstanceFolder,
-                argsParser.PathToTestInstanceFolder))
-            {
-                if (argsParser.StartFromExistingStatus)
-                {
-                    runner.UseStatusDump(Path.Combine(configuration.StatusFileDirectory, AlgorithmTunerConfiguration.FileName));
-                }
+                argsParser.PathToTestInstanceFolder);
 
-                bestParameters = runner.Run();
-                runner.CompleteAndExportGenerationHistory();
+            if (argsParser.StartFromExistingStatus)
+            {
+                runner.UseStatusDump(Path.Combine(configuration.StatusFileDirectory, AlgorithmTunerConfiguration.FileName));
             }
+
+            if (configuration.EnableDataRecording)
+            {
+                runner.PrepareDataRecordDirectory(argsParser.StartFromExistingStatus);
+            }
+
+            // Run algorithm tuner.
+            var bestParameters = runner.Run();
 
             LoggingHelper.WriteLine(
                 VerbosityLevel.Info,
-                $"Best Configuration:{Environment.NewLine}{string.Join("Environment.NewLine", bestParameters.Select(keyValuePair => $"{keyValuePair.Key}: {keyValuePair.Value}"))}");
+                $"Best Configuration:{Environment.NewLine}{string.Join(Environment.NewLine, bestParameters.Select(keyValuePair => $"{keyValuePair.Key}: {keyValuePair.Value}"))}");
+
+            runner.CompleteAndExportGenerationHistory();
 
             return bestParameters;
         }
@@ -186,7 +190,8 @@ namespace Optano.Algorithm.Tuner.DistributedExecution
                 argsParser.OwnHostName,
                 argsParser.Port,
                 argsParser.ConfigurationBuilder.Verbosity >= VerbosityLevel.Trace,
-                argsParser.MaximumNumberParallelEvaluations);
+                argsParser.MaximumNumberParallelEvaluations,
+                argsParser.AllowLocalEvaluations);
             var builderForParsedConfiguration =
                 argsParser.ConfigurationBuilder.SetAkkaConfiguration(akkaConfiguration);
 
@@ -216,10 +221,16 @@ namespace Optano.Algorithm.Tuner.DistributedExecution
         /// Whether logging should be done on debug level.
         /// </param>
         /// <param name="maximumNumberParallelEvaluations">The maximum number of parallel evaluations per node.</param>
+        /// <param name="allowLocalEvaluations">Whether target algorithm evaluations on the master node are allowed.</param>
         /// <returns>
         /// The adapted Akka.NET configuration.
         /// </returns>
-        private static Config CustomizeAkkaConfiguration(string ownHostName, int port, bool logOnDebugLevel, int maximumNumberParallelEvaluations)
+        private static Config CustomizeAkkaConfiguration(
+            string ownHostName,
+            int port,
+            bool logOnDebugLevel,
+            int maximumNumberParallelEvaluations,
+            bool allowLocalEvaluations)
         {
             if (string.IsNullOrWhiteSpace(ownHostName))
             {
@@ -229,6 +240,7 @@ namespace Optano.Algorithm.Tuner.DistributedExecution
             LoggingHelper.WriteLine(VerbosityLevel.Debug, $"Master's own HostName: {ownHostName}");
 
             var logClusterEvents = logOnDebugLevel ? "on" : "off";
+            var allowLocalRoutees = allowLocalEvaluations ? "on" : "off";
 
             var commonBaseConfig = ConfigurationFactory.FromResource(AkkaNames.CommonAkkaConfigFileName, Assembly.GetCallingAssembly());
             var config = ConfigurationFactory.ParseString(
@@ -249,7 +261,7 @@ namespace Optano.Algorithm.Tuner.DistributedExecution
                             cluster {{
                                 max-nr-of-instances-per-node = {maximumNumberParallelEvaluations}
                                 enabled = on
-                                allow-local-routees = on
+                                allow-local-routees = {allowLocalRoutees}
                             }}
                         }}
                     }}

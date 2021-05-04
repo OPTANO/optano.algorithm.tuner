@@ -32,7 +32,9 @@
 namespace Optano.Algorithm.Tuner.Tests.TargetAlgorithm.InterfaceImplementations.ValueConsideration
 {
     using System;
+    using System.Linq;
 
+    using Optano.Algorithm.Tuner.TargetAlgorithm;
     using Optano.Algorithm.Tuner.TargetAlgorithm.Results;
 
     /// <summary>
@@ -48,13 +50,14 @@ namespace Optano.Algorithm.Tuner.Tests.TargetAlgorithm.InterfaceImplementations.
         /// </summary>
         /// <param name="value">The value to store.</param>
         public IntegerResult(int value)
-            : base(TimeSpan.Zero)
+            : base(TimeSpan.Zero, TargetAlgorithmStatus.Finished)
         {
             this.Value = value;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IntegerResult"/> class.
+        /// Empty ctor required for <see cref="ResultBase{TResultType}.CreateCancelledResult"/>.
         /// </summary>
         public IntegerResult()
             : this(0)
@@ -74,13 +77,22 @@ namespace Optano.Algorithm.Tuner.Tests.TargetAlgorithm.InterfaceImplementations.
 
         #region Public Methods and Operators
 
-        /// <summary>
-        /// Returns the string representation of the object.
-        /// </summary>
-        /// <returns>The stored value as string.</returns>
+        /// <inheritdoc />
         public override string ToString()
         {
             return this.Value.ToString();
+        }
+
+        /// <inheritdoc />
+        public override string[] GetHeader()
+        {
+            return base.GetHeader().Concat(new[] { "Value" }).ToArray();
+        }
+
+        /// <inheritdoc />
+        public override string[] ToStringArray()
+        {
+            return base.ToStringArray().Concat(new[] { this.Value.ToString() }).ToArray();
         }
 
         #endregion

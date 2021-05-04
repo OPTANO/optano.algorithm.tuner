@@ -46,7 +46,6 @@ namespace Optano.Algorithm.Tuner.Tests.Genomes
     /// <summary>
     /// Contains tests for class <see cref="Population"/>.
     /// </summary>
-    [Collection(TestUtils.NonParallelCollectionGroupOneName)]
     public class PopulationTest
     {
         #region Fields

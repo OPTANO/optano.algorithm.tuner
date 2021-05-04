@@ -8,7 +8,7 @@ The implementation we tune in this example is the one shipped with UBCSAT versio
 
 However, [customizing <i>OPTANO Algorithm Tuner</i>](advanced.md) reduces overhead and comes with increased precision. For applications dealing with small SAT instances solvable in milliseconds, this can make a noticeable difference.
 
-Please consider the [technical preparations](technical_preparation.md) before using *OPTANO Algorithm SAPS Tuner*.
+Please consider the [technical preparations](unittests.md) before using *OPTANO Algorithm SAPS Tuner*.
 
 Moreover note, that you may use [FuzzSAT](http://fmv.jku.at/fuzzsat/) as a generator for your SAT instances.
 
@@ -60,12 +60,12 @@ The `Main` method shows how to call the tuner code from your customized applicat
 <dd>RandomForestAverageRank</dd>
 <dd>StandardRandomForest (same as Default)</dd>
  </dd>
- <dt>--factorParK={VALUE}</dt>
- <dd>The factor for the penalization of the average runtime. Needs to be greater than 0. Default is 10.</dd>
- <dt>--rngSeed={VALUE}</dt>
- <dd>The random number generator seed, which generates #numberOfSeeds seeds for every instance of the SAPS algorithm. Default is 42.</dd>
- <dt>--numberOfSeeds={VALUE}</dt>
- <dd>Specifies the number of seeds, which are used for every instance of the SAPS algorithm. Needs to be greater than 0. Default is 1.</dd>
+ <dt>--factorParK={VALUE} [0]</dt>
+ <dd>The factor for the penalization of the average runtime. Needs to be greater or equal to 0. If 0, OAT sorts first by highest number of uncancelled runs and then by unpenalized average runtime.</dd>
+ <dt>--rngSeed={VALUE} [42]</dt>
+ <dd>The random number generator seed, which generates #numberOfSeeds seeds for every instance of the SAPS algorithm.</dd>
+ <dt>--numberOfSeeds={VALUE} [1]</dt>
+ <dd>Specifies the number of seeds, which are used for every instance of the SAPS algorithm. Needs to be greater than 0.</dd>
 </dl>
 
 ### The `SapsRunnerConfigurationParser`

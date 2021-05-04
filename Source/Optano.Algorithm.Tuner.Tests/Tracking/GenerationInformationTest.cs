@@ -104,7 +104,8 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
                     totalElapsedTime: TimeSpan.Zero,
                     totalNumberOfEvaluations: GenerationInformationTest.TotalNumberOfEvaluations,
                     strategy: this._strategy,
-                    incumbent: this._incumbent));
+                    incumbent: this._incumbent,
+                    "id"));
         }
 
         /// <summary>
@@ -120,7 +121,8 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
                     totalElapsedTime: TimeSpan.Zero - TimeSpan.MaxValue,
                     totalNumberOfEvaluations: GenerationInformationTest.TotalNumberOfEvaluations,
                     strategy: this._strategy,
-                    incumbent: this._incumbent));
+                    incumbent: this._incumbent,
+                    "id"));
         }
 
         /// <summary>
@@ -136,7 +138,8 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
                     totalElapsedTime: TimeSpan.Zero,
                     totalNumberOfEvaluations: -1,
                     strategy: this._strategy,
-                    incumbent: this._incumbent));
+                    incumbent: this._incumbent,
+                    "id"));
         }
 
         /// <summary>
@@ -152,7 +155,8 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
                     totalElapsedTime: TimeSpan.Zero,
                     GenerationInformationTest.TotalNumberOfEvaluations,
                     strategy: null,
-                    incumbent: this._incumbent));
+                    incumbent: this._incumbent,
+                    "id"));
         }
 
         /// <summary>
@@ -168,7 +172,8 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
                     totalElapsedTime: TimeSpan.Zero,
                     GenerationInformationTest.TotalNumberOfEvaluations,
                     this._strategy,
-                    incumbent: null));
+                    incumbent: null,
+                    "id"));
         }
 
         /// <summary>
@@ -182,11 +187,12 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
                 totalElapsedTime: TimeSpan.FromSeconds(30),
                 GenerationInformationTest.TotalNumberOfEvaluations,
                 this._strategy,
-                this._incumbent);
+                this._incumbent,
+                "id");
             information.IncumbentTrainingScore = -3.4;
             information.IncumbentTestScore = 1234.8;
             Assert.Equal(
-                "12;0:00:00:30.0000000;3468;-3.4;1234.8;DifferentialEvolutionStrategy`2;[a: -23](Age: 2)[Engineered: yes]",
+                "12;0:00:00:30.0000000;3468;-3.4;1234.8;DifferentialEvolutionStrategy`2;[a: -23](Age: 2)[Engineered: yes];id",
                 information.ToString());
         }
 
@@ -201,9 +207,10 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
                 totalElapsedTime: TimeSpan.FromSeconds(30),
                 GenerationInformationTest.TotalNumberOfEvaluations,
                 this._strategy,
-                this._incumbent);
+                this._incumbent,
+                "id");
             Assert.Equal(
-                "12;0:00:00:30.0000000;3468;;;DifferentialEvolutionStrategy`2;[a: -23](Age: 2)[Engineered: yes]",
+                "12;0:00:00:30.0000000;3468;;;DifferentialEvolutionStrategy`2;[a: -23](Age: 2)[Engineered: yes];id",
                 information.ToString());
         }
 

@@ -33,6 +33,7 @@ namespace Optano.Algorithm.Tuner.Tests.Configuration
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
 
     using Akka.Configuration;
@@ -50,25 +51,14 @@ namespace Optano.Algorithm.Tuner.Tests.Configuration
     /// <summary>
     /// Contains tests for <see cref="AlgorithmTunerConfiguration"/> and <see cref="AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder"/>.
     /// </summary>
-    [Collection(TestUtils.NonParallelCollectionGroupOneName)]
     public class AlgorithmTunerConfigurationTest : ConfigurationBaseTest
     {
-        #region Fields
-
-        /// <summary>
-        /// Builder used for tests.
-        /// </summary>
-        private readonly AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder _builder;
-
-        /// <summary>
-        /// <see cref="GenomePredictionRandomForestConfig.GenomePredictionRandomForestConfigBuilder"/> used for tests.
-        /// </summary>
-        private readonly GenomePredictionRandomForestConfig.GenomePredictionRandomForestConfigBuilder _randomForestConfigBuilder;
+        #region Constants
 
         /// <summary>
         /// Copy of the HOCON config text.
         /// </summary>
-        private string _defaultTestingHoconConfig = @"akka
+        private const string _defaultTestingHoconConfig = @"akka
 {
 	stdout-loglevel = DEBUG
 	loglevel = DEBUG
@@ -115,6 +105,20 @@ log-sent-messages = on
 log-received-messages = on
 	}
 }";
+
+        #endregion
+
+        #region Fields
+
+        /// <summary>
+        /// Builder used for tests.
+        /// </summary>
+        private readonly AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder _builder;
+
+        /// <summary>
+        /// <see cref="GenomePredictionRandomForestConfig.GenomePredictionRandomForestConfigBuilder"/> used for tests.
+        /// </summary>
+        private readonly GenomePredictionRandomForestConfig.GenomePredictionRandomForestConfigBuilder _randomForestConfigBuilder;
 
         #endregion
 
@@ -189,6 +193,16 @@ log-received-messages = on
                 .SetMaximumNumberConsecutiveFailuresPerEvaluation(1)
                 .SetStatusFileDirectory("foo/bar")
                 .SetLogFilePath("foo")
+                .SetContinuousOptimizationMethod(ContinuousOptimizationMethod.CmaEs)
+                .SetEnableDataRecording(true)
+                .SetDataRecordDirectoryPath("test")
+                .SetDataRecordUpdateInterval(TimeSpan.FromMilliseconds(200))
+                .SetEnableGrayBox(true)
+                .SetGrayBoxStartGeneration(15)
+                .SetGrayBoxStartTimePoint(TimeSpan.FromMilliseconds(300))
+                .SetGrayBoxConfidenceThreshold(0.5)
+                .SetRemoveDataRecordsFromMemoryAfterTraining(true)
+                .SetTuningRandomSeed(42)
                 .SetTrainModel(true)
                 .SetEngineeredProportion(0.26)
                 .SetPopulationMutantRatio(0.27)
@@ -205,7 +219,6 @@ log-received-messages = on
                 .SetStrictCompatibilityCheck(false)
                 .SetMaximumNumberParallelEvaluations(3)
                 .SetMaximumNumberParallelThreads(5)
-                .SetContinuousOptimizationMethod(ContinuousOptimizationMethod.Jade)
                 .SetMaximumNumberGgaGenerations(245)
                 .SetMaximumNumberGgaGenerationsWithSameIncumbent(16)
                 .AddDetailedConfigurationBuilder("a", this._randomForestConfigBuilder)
@@ -259,6 +272,16 @@ log-received-messages = on
                 "foo/bar",
                 config.StatusFileDirectory);
             Assert.Equal("foo", config.LogFilePath);
+            Assert.Equal(ContinuousOptimizationMethod.CmaEs, config.ContinuousOptimizationMethod);
+            Assert.True(config.EnableDataRecording);
+            Assert.Equal("test", config.DataRecordDirectoryPath);
+            Assert.Equal(200, config.DataRecordUpdateInterval.TotalMilliseconds);
+            Assert.True(config.EnableGrayBox);
+            Assert.Equal(15, config.GrayBoxStartGeneration);
+            Assert.Equal(300, config.GrayBoxStartTimePoint.TotalMilliseconds);
+            Assert.Equal(0.5, config.GrayBoxConfidenceThreshold);
+            Assert.True(config.RemoveDataRecordsFromMemoryAfterTraining);
+            Assert.Equal(42, config.TuningRandomSeed);
             Assert.True(config.TrainModel);
             Assert.Equal(
                 0.26,
@@ -295,9 +318,6 @@ log-received-messages = on
                 "a",
                 config.DetailedConfigurations.Keys.Single());
             Assert.Equal(13, config.EvaluationLimit);
-            Assert.Equal(
-                ContinuousOptimizationMethod.Jade,
-                config.ContinuousOptimizationMethod);
             Assert.Equal(
                 245,
                 config.MaximumNumberGgaGenerations);
@@ -347,7 +367,7 @@ log-received-messages = on
 
             // ConfigurationFactory.Load() does no longer provide a proper equals implementation.
             // check individual properties instead of assert config.AkkaConfiguration equals ConfigurationFactory.Load().
-            var expectedConfig = ConfigurationFactory.ParseString(this._defaultTestingHoconConfig);
+            var expectedConfig = ConfigurationFactory.ParseString(AlgorithmTunerConfigurationTest._defaultTestingHoconConfig);
             config.AkkaConfiguration.ShouldNotBeNull();
             config.AkkaConfiguration.Fallback.ShouldBeNull();
             config.AkkaConfiguration.IsEmpty.ShouldBe(expectedConfig.IsEmpty);
@@ -363,6 +383,17 @@ log-received-messages = on
             Assert.Equal(
                 PathUtils.GetAbsolutePathFromCurrentDirectory("tunerLog.txt"),
                 config.LogFilePath);
+            Assert.False(config.EnableDataRecording);
+            Assert.Equal(PathUtils.GetAbsolutePathFromCurrentDirectory("DataLogFiles"), config.DataRecordDirectoryPath);
+            Assert.Equal(
+                TimeSpan.FromMilliseconds(TimeSpan.FromMilliseconds(int.MaxValue).TotalMilliseconds * 0.05),
+                config.DataRecordUpdateInterval);
+            Assert.False(config.EnableGrayBox);
+            Assert.Equal(5, config.GrayBoxStartGeneration);
+            Assert.Equal(TimeSpan.FromMilliseconds(TimeSpan.FromMilliseconds(int.MaxValue).TotalMilliseconds * 0.05), config.GrayBoxStartTimePoint);
+            Assert.Equal(0.75, config.GrayBoxConfidenceThreshold);
+            Assert.False(config.RemoveDataRecordsFromMemoryAfterTraining);
+            Assert.Null(config.TuningRandomSeed);
             Assert.False(config.TrainModel);
             Assert.Equal(
                 0,
@@ -411,6 +442,30 @@ log-received-messages = on
         }
 
         /// <summary>
+        /// Checks, that the <see cref="AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder"/> updates the data record directory files correctly.
+        /// </summary>
+        [Fact]
+        public void AlgorithmTunerConfigurationBuilderUpdatesDataRecordDirectoryFilesCorrectly()
+        {
+            const string DataRecordDirectoryPath = "TestDirectory";
+            var config = this._builder.SetDataRecordDirectoryPath(DataRecordDirectoryPath).Build(1);
+
+            var expectedInstanceCompositionFile =
+                PathUtils.GetAbsolutePathFromCurrentDirectory(Path.Combine(DataRecordDirectoryPath, "generationInstanceComposition.csv"));
+            var expectedGenomeCompositionFile =
+                PathUtils.GetAbsolutePathFromCurrentDirectory(Path.Combine(DataRecordDirectoryPath, "generationGenomeComposition.csv"));
+            var expectedRandomForestFile =
+                PathUtils.GetAbsolutePathFromCurrentDirectory(Path.Combine(DataRecordDirectoryPath, "grayBoxRandomForest.rdf"));
+            var expectedFeatureImportanceFile =
+                PathUtils.GetAbsolutePathFromCurrentDirectory(Path.Combine(DataRecordDirectoryPath, "featureImportance.csv"));
+
+            Assert.Equal(expectedInstanceCompositionFile, config.GenerationInstanceCompositionFile.FullName);
+            Assert.Equal(expectedGenomeCompositionFile, config.GenerationGenomeCompositionFile.FullName);
+            Assert.Equal(expectedRandomForestFile, config.GrayBoxRandomForestFile.FullName);
+            Assert.Equal(expectedFeatureImportanceFile, config.GrayBoxRandomForestFeatureImportanceFile.FullName);
+        }
+
+        /// <summary>
         /// Checks that all values are copied if
         /// <see cref="AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder.BuildWithFallback"/>
         /// is called on a builder without anything set.
@@ -440,6 +495,16 @@ log-received-messages = on
                 .SetMaximumNumberConsecutiveFailuresPerEvaluation(1)
                 .SetStatusFileDirectory("foo/bar")
                 .SetLogFilePath("foo")
+                .SetContinuousOptimizationMethod(ContinuousOptimizationMethod.CmaEs)
+                .SetEnableDataRecording(true)
+                .SetDataRecordDirectoryPath("test")
+                .SetDataRecordUpdateInterval(TimeSpan.FromMilliseconds(200))
+                .SetEnableGrayBox(true)
+                .SetGrayBoxStartGeneration(15)
+                .SetGrayBoxStartTimePoint(TimeSpan.FromMilliseconds(300))
+                .SetGrayBoxConfidenceThreshold(0.5)
+                .SetRemoveDataRecordsFromMemoryAfterTraining(true)
+                .SetTuningRandomSeed(42)
                 .SetTrainModel(true)
                 .SetEngineeredProportion(0.26)
                 .SetPopulationMutantRatio(0.27)
@@ -458,7 +523,6 @@ log-received-messages = on
                 .SetMaximumNumberParallelThreads(5)
                 .AddDetailedConfigurationBuilder("a", randomForestFallback)
                 .SetEvaluationLimit(13)
-                .SetContinuousOptimizationMethod(ContinuousOptimizationMethod.Jade)
                 .SetMaximumNumberGgaGenerations(245)
                 .SetMaximumNumberGgaGenerationsWithSameIncumbent(16)
                 .SetScoreGenerationHistory(true)
@@ -510,6 +574,16 @@ log-received-messages = on
                 fallback.StatusFileDirectory,
                 config.StatusFileDirectory);
             Assert.Equal(fallback.LogFilePath, config.LogFilePath);
+            Assert.Equal(fallback.ContinuousOptimizationMethod, config.ContinuousOptimizationMethod);
+            Assert.Equal(fallback.EnableDataRecording, config.EnableDataRecording);
+            Assert.Equal(fallback.DataRecordDirectoryPath, config.DataRecordDirectoryPath);
+            Assert.Equal(fallback.DataRecordUpdateInterval, config.DataRecordUpdateInterval);
+            Assert.Equal(fallback.EnableGrayBox, config.EnableGrayBox);
+            Assert.Equal(fallback.GrayBoxStartGeneration, config.GrayBoxStartGeneration);
+            Assert.Equal(fallback.GrayBoxStartTimePoint, config.GrayBoxStartTimePoint);
+            Assert.Equal(fallback.GrayBoxConfidenceThreshold, config.GrayBoxConfidenceThreshold);
+            Assert.Equal(fallback.RemoveDataRecordsFromMemoryAfterTraining, config.RemoveDataRecordsFromMemoryAfterTraining);
+            Assert.Equal(fallback.TuningRandomSeed, config.TuningRandomSeed);
             Assert.True(config.TrainModel);
             Assert.Equal(0.26, config.EngineeredPopulationRatio);
             Assert.Equal(0.27, config.PopulationMutantRatio);
@@ -540,9 +614,6 @@ log-received-messages = on
                 "a",
                 config.DetailedConfigurations.Keys.Single());
             Assert.Equal(13, config.EvaluationLimit);
-            Assert.Equal(
-                fallback.ContinuousOptimizationMethod,
-                config.ContinuousOptimizationMethod);
             Assert.Equal(
                 fallback.MaximumNumberGgaGenerations,
                 config.MaximumNumberGgaGenerations);
@@ -830,6 +901,112 @@ log-received-messages = on
             var defaultConfig = this._builder.Build(maximumNumberParallelEvaluations: 1);
             var otherConfig = new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder()
                 .SetTournamentWinnerPercentage(defaultConfig.TournamentWinnerPercentage + 0.1)
+                .SetMaximumNumberParallelEvaluations(1)
+                .BuildWithFallback(defaultConfig);
+            ConfigurationBaseTest.CheckIncompatibility(defaultConfig, otherConfig);
+        }
+
+        /// <summary>
+        /// Checks that <see cref="AlgorithmTunerConfiguration.IsCompatible"/> returns false if enable data recording is
+        /// different.
+        /// </summary>
+        [Fact]
+        public void IsCompatibleReturnsFalseForDifferentEnableDataRecording()
+        {
+            var defaultConfig = this._builder.Build(maximumNumberParallelEvaluations: 1);
+            var otherConfig = new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder()
+                .SetEnableDataRecording(true)
+                .SetMaximumNumberParallelEvaluations(1)
+                .BuildWithFallback(defaultConfig);
+            ConfigurationBaseTest.CheckIncompatibility(defaultConfig, otherConfig);
+        }
+
+        /// <summary>
+        /// Checks that <see cref="AlgorithmTunerConfiguration.IsCompatible"/> returns false if the data record directory path is
+        /// different.
+        /// </summary>
+        [Fact]
+        public void IsCompatibleReturnsFalseForDifferentDataRecordDirectoryPath()
+        {
+            var defaultConfig = this._builder.Build(maximumNumberParallelEvaluations: 1);
+            var otherConfig = new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder()
+                .SetDataRecordDirectoryPath("dummy")
+                .SetMaximumNumberParallelEvaluations(1)
+                .BuildWithFallback(defaultConfig);
+            ConfigurationBaseTest.CheckIncompatibility(defaultConfig, otherConfig);
+        }
+
+        /// <summary>
+        /// Checks that <see cref="AlgorithmTunerConfiguration.IsCompatible"/> returns false if the data record update interval is
+        /// different.
+        /// </summary>
+        [Fact]
+        public void IsCompatibleReturnsFalseForDifferentDataRecordUpdateInterval()
+        {
+            var defaultConfig = this._builder.Build(maximumNumberParallelEvaluations: 1);
+            var otherConfig = new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder()
+                .SetDataRecordUpdateInterval(TimeSpan.FromSeconds(10))
+                .SetMaximumNumberParallelEvaluations(1)
+                .BuildWithFallback(defaultConfig);
+            ConfigurationBaseTest.CheckIncompatibility(defaultConfig, otherConfig);
+        }
+
+        /// <summary>
+        /// Checks that <see cref="AlgorithmTunerConfiguration.IsCompatible"/> returns false if enable gray box is
+        /// different.
+        /// </summary>
+        [Fact]
+        public void IsCompatibleReturnsFalseForDifferentEnableGrayBox()
+        {
+            var defaultConfig = this._builder.SetEnableDataRecording(true).Build(maximumNumberParallelEvaluations: 1);
+            var otherConfig = new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder()
+                .SetEnableGrayBox(true)
+                .SetEnableDataRecording(true)
+                .SetMaximumNumberParallelEvaluations(1)
+                .BuildWithFallback(defaultConfig);
+            ConfigurationBaseTest.CheckIncompatibility(defaultConfig, otherConfig);
+        }
+
+        /// <summary>
+        /// Checks that <see cref="AlgorithmTunerConfiguration.IsCompatible"/> returns false if the gray box start generation is
+        /// different.
+        /// </summary>
+        [Fact]
+        public void IsCompatibleReturnsFalseForDifferentGrayBoxStartGeneration()
+        {
+            var defaultConfig = this._builder.Build(maximumNumberParallelEvaluations: 1);
+            var otherConfig = new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder()
+                .SetGrayBoxStartGeneration(20)
+                .SetMaximumNumberParallelEvaluations(1)
+                .BuildWithFallback(defaultConfig);
+            ConfigurationBaseTest.CheckIncompatibility(defaultConfig, otherConfig);
+        }
+
+        /// <summary>
+        /// Checks that <see cref="AlgorithmTunerConfiguration.IsCompatible"/> returns false if the gray box start time point is
+        /// different.
+        /// </summary>
+        [Fact]
+        public void IsCompatibleReturnsFalseForDifferentGrayBoxStartTimePoint()
+        {
+            var defaultConfig = this._builder.Build(maximumNumberParallelEvaluations: 1);
+            var otherConfig = new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder()
+                .SetGrayBoxStartTimePoint(TimeSpan.FromSeconds(10))
+                .SetMaximumNumberParallelEvaluations(1)
+                .BuildWithFallback(defaultConfig);
+            ConfigurationBaseTest.CheckIncompatibility(defaultConfig, otherConfig);
+        }
+
+        /// <summary>
+        /// Checks that <see cref="AlgorithmTunerConfiguration.IsCompatible"/> returns false if the gray box confidence threshold is
+        /// different.
+        /// </summary>
+        [Fact]
+        public void IsCompatibleReturnsFalseForDifferentGrayBoxConfidenceThreshold()
+        {
+            var defaultConfig = this._builder.Build(maximumNumberParallelEvaluations: 1);
+            var otherConfig = new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder()
+                .SetGrayBoxConfidenceThreshold(0.5)
                 .SetMaximumNumberParallelEvaluations(1)
                 .BuildWithFallback(defaultConfig);
             ConfigurationBaseTest.CheckIncompatibility(defaultConfig, otherConfig);
@@ -1714,6 +1891,59 @@ log-received-messages = on
         public void GoalGenerationLastGenerationDoesNotThrowError()
         {
             this._builder.SetGenerations(30).SetGoalGeneration(29).Build(maximumNumberParallelEvaluations: 1);
+        }
+
+        /// <summary>
+        /// Checks that DataRecordUpdateInterval >= CpuTimeout results in an <see cref="ArgumentException"/>.
+        /// </summary>
+        /// <param name="dataRecordUpdateInterval">The data record update interval in seconds.</param>
+        /// <param name="cpuTimeout">The cpu timeout in seconds.</param>
+        [Theory]
+        [InlineData(5, 5)]
+        [InlineData(10, 5)]
+        public void DataRecordUpdateIntervalGreaterOrEqualThanCpuTimeoutThrowsError(int dataRecordUpdateInterval, int cpuTimeout)
+        {
+            Assert.Throws<ArgumentException>(
+                () => this._builder.SetEnableDataRecording(true).SetDataRecordUpdateInterval(TimeSpan.FromSeconds(dataRecordUpdateInterval))
+                    .SetCpuTimeout(TimeSpan.FromSeconds(cpuTimeout)).Build(1));
+        }
+
+        /// <summary>
+        /// Checks that enable gray box without enable data recording results in an <see cref="ArgumentException"/>.
+        /// </summary>
+        [Fact]
+        public void EnableGrayBoxWithoutEnableDataRecordingThrowsError()
+        {
+            Assert.Throws<ArgumentException>(() => this._builder.SetEnableDataRecording(false).SetEnableGrayBox(true).Build(1));
+        }
+
+        /// <summary>
+        /// Checks that gray box start generation >= number of generations results in an <see cref="ArgumentException"/>.
+        /// </summary>
+        /// <param name="grayBoxStartGeneration">The gray box start generation.</param>
+        [Theory]
+        [InlineData(100)]
+        [InlineData(101)]
+        public void GrayBoxStartGenerationGreaterOrEqualThanNumberOfGenerationsThrowsError(int grayBoxStartGeneration)
+        {
+            Assert.Throws<ArgumentException>(
+                () => this._builder.SetEnableDataRecording(true).SetEnableGrayBox(true).SetGrayBoxStartGeneration(grayBoxStartGeneration)
+                    .SetGenerations(100).Build(1));
+        }
+
+        /// <summary>
+        /// Checks that GrayBoxStartTimePoint >= CpuTimeout results in an <see cref="ArgumentException"/>.
+        /// </summary>
+        /// <param name="grayBoxStartTimePoint">The gray box start time point in seconds.</param>
+        /// <param name="cpuTimeout">The cpu timeout in seconds.</param>
+        [Theory]
+        [InlineData(5, 5)]
+        [InlineData(10, 5)]
+        public void GrayBoxStartTimePointGreaterOrEqualThanCpuTimeoutThrowsError(int grayBoxStartTimePoint, int cpuTimeout)
+        {
+            Assert.Throws<ArgumentException>(
+                () => this._builder.SetEnableGrayBox(true).SetGrayBoxStartTimePoint(TimeSpan.FromSeconds(grayBoxStartTimePoint))
+                    .SetCpuTimeout(TimeSpan.FromSeconds(cpuTimeout)).Build(1));
         }
 
         /// <summary>

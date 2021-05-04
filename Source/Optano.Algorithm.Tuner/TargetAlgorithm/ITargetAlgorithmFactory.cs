@@ -31,7 +31,9 @@
 
 namespace Optano.Algorithm.Tuner.TargetAlgorithm
 {
+    using System;
     using System.Collections.Generic;
+    using System.Globalization;
 
     using Optano.Algorithm.Tuner.Genomes.Values;
     using Optano.Algorithm.Tuner.TargetAlgorithm.Instances;
@@ -56,6 +58,104 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm
         /// <param name="parameters">The parameters to configure the target algorithm with.</param>
         /// <returns>The configured target algorithm.</returns>
         TTargetAlgorithm ConfigureTargetAlgorithm(Dictionary<string, IAllele> parameters);
+
+        /// <summary>
+        /// Tries to get the result from the given string array. This method is the counterpart to <see cref="ResultBase{TResultType}.ToStringArray"/>.
+        /// </summary>
+        /// <param name="stringArray">The string array.</param>
+        /// <param name="result">The result.</param>
+        /// <returns>True, if successful.</returns>
+        bool TryToGetResultFromStringArray(string[] stringArray, out TResult result)
+        {
+            result = null;
+
+            if (typeof(TResult) == typeof(RuntimeResult))
+            {
+                if (stringArray.Length != 2)
+                {
+                    return false;
+                }
+
+                if (!Enum.TryParse(stringArray[0], true, out TargetAlgorithmStatus targetAlgorithmStatus))
+                {
+                    return false;
+                }
+
+                if (!double.TryParse(stringArray[1], NumberStyles.Any, CultureInfo.InvariantCulture, out var runtime))
+                {
+                    return false;
+                }
+
+                result = new RuntimeResult(TimeSpan.FromMilliseconds(runtime), targetAlgorithmStatus) as TResult;
+                return true;
+            }
+
+            if (typeof(TResult) == typeof(ContinuousResult))
+            {
+                if (stringArray.Length != 3)
+                {
+                    return false;
+                }
+
+                if (!Enum.TryParse(stringArray[0], true, out TargetAlgorithmStatus targetAlgorithmStatus))
+                {
+                    return false;
+                }
+
+                if (!double.TryParse(stringArray[1], NumberStyles.Any, CultureInfo.InvariantCulture, out var runtime))
+                {
+                    return false;
+                }
+
+                if (!double.TryParse(stringArray[2], NumberStyles.Any, CultureInfo.InvariantCulture, out var value))
+                {
+                    return false;
+                }
+
+                result = new ContinuousResult(value, TimeSpan.FromMilliseconds(runtime), targetAlgorithmStatus) as TResult;
+                return true;
+            }
+
+            throw new NotImplementedException("You cannot use this method without implementing it for your result type.");
+        }
+
+        /// <summary>
+        /// Tries to get the instance from the given instance id. This method is the counterpart to <see cref="InstanceBase.ToId"/>.
+        /// </summary>
+        /// <param name="instanceId">The instance id.</param>
+        /// <param name="instance">The instance.</param>
+        /// <returns>True, if successful.</returns>
+        bool TryToGetInstanceFromInstanceId(string instanceId, out TInstance instance)
+        {
+            instance = null;
+
+            if (typeof(TInstance) == typeof(InstanceFile))
+            {
+                instance = new InstanceFile(instanceId) as TInstance;
+                return true;
+            }
+
+            if (typeof(TInstance) == typeof(InstanceSeedFile))
+            {
+                var indexOfDelimiter = instanceId.LastIndexOf("_", StringComparison.Ordinal);
+                if (indexOfDelimiter <= 0)
+                {
+                    return false;
+                }
+
+                var path = instanceId.Substring(0, indexOfDelimiter);
+
+                if (!int.TryParse(instanceId.Substring(indexOfDelimiter + 1), out var seed))
+                {
+                    return false;
+                }
+
+                instance = new InstanceSeedFile(path, seed) as TInstance;
+                return true;
+            }
+
+            throw new NotImplementedException("You cannot use this method without implementing it for your instance type.");
+        }
 
         #endregion
     }

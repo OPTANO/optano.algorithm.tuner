@@ -44,7 +44,6 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.InstanceSelection
     /// <summary>
     /// Contains tests for <see cref="InstanceSelector{TInstance}"/>.
     /// </summary>
-    [Collection(TestUtils.NonParallelCollectionGroupOneName)]
     public class InstanceSelectorTest : IDisposable
     {
         #region Fields

@@ -39,6 +39,7 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments
 
     using Optano.Algorithm.Tuner.Configuration;
     using Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation;
+    using Optano.Algorithm.Tuner.GenomeEvaluation.Messages;
     using Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments.Messages;
     using Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments.Results;
     using Optano.Algorithm.Tuner.Genomes;
@@ -72,14 +73,14 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments
         private readonly List<ImmutableGenome> _genomes;
 
         /// <summary>
-        /// The configuration.
-        /// </summary>
-        private readonly AlgorithmTunerConfiguration _configuration;
-
-        /// <summary>
         /// The generation number.
         /// </summary>
         private readonly int _generation;
+
+        /// <summary>
+        /// A boolean indicating whether to use gray box tuning in current generation.
+        /// </summary>
+        private readonly bool _useGrayBoxInGeneration;
 
         /// <summary>
         /// The <see cref="MiniTournamentManager{TInstance,TResult}"/>s.
@@ -101,14 +102,16 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments
         /// <param name="runEvaluator">The <see cref="IRunEvaluator{TInstance,TResult}"/> for sorting genomes.</param>
         /// <param name="genomes">The genomes for evaluation.</param>
         /// <param name="instances">The instances for evaluation.</param>
-        /// <param name="configuration">The configuration.</param>
         /// <param name="generation">The generation number.</param>
+        /// <param name="configuration">The algorithm tuner configuration.</param>
+        /// <param name="useGrayBoxInGeneration">Boolean indicating whether to use gray box tuning in current generation.</param>
         public MiniTournamentGenerationEvaluationStrategy(
             IRunEvaluator<TInstance, TResult> runEvaluator,
             IEnumerable<ImmutableGenome> genomes,
             IEnumerable<TInstance> instances,
+            int generation,
             AlgorithmTunerConfiguration configuration,
-            int generation)
+            bool useGrayBoxInGeneration)
         {
             this._runEvaluator = runEvaluator ?? throw new ArgumentNullException(nameof(runEvaluator));
 
@@ -124,14 +127,20 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments
                 throw new ArgumentNullException(nameof(instances));
             }
 
-            this._configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             this._generation = generation;
 
-            var nextTournamentId = (int)Math.Ceiling((this._configuration.PopulationSize / 2.0) / this._configuration.MaximumMiniTournamentSize)
+            if (configuration == null)
+            {
+                throw new ArgumentNullException(nameof(configuration));
+            }
+
+            this._useGrayBoxInGeneration = useGrayBoxInGeneration;
+
+            var nextTournamentId = (int)Math.Ceiling((configuration.PopulationSize / 2.0) / configuration.MaximumMiniTournamentSize)
                                    * generation;
 
             this._tournamentManagers
-                = Randomizer.Instance.SplitIntoRandomBalancedSubsets(this._genomes, this._configuration.MaximumMiniTournamentSize)
+                = Randomizer.Instance.SplitIntoRandomBalancedSubsets(this._genomes, configuration.MaximumMiniTournamentSize)
                     .Select(
                         p => new MiniTournamentManager<TInstance, TResult>(
                             p,
@@ -139,7 +148,7 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments
                             nextTournamentId++,
                             this._generation,
                             this._runEvaluator,
-                            this._configuration)).ToList();
+                            configuration)).ToList();
 
             // The generation evaluation actor requeues all required evaluations.
             this._priorityQueue = new SimplePriorityQueue<GenomeTournamentKey, double>();
@@ -168,7 +177,7 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments
         }
 
         /// <inheritdoc />
-        public bool TryPopEvaluation(out GenomeInstancePair<TInstance> nextEvaluation)
+        public bool TryPopEvaluation(out GenomeInstancePairEvaluation<TInstance> nextEvaluation)
         {
             if (this._priorityQueue.Count <= 0)
             {
@@ -180,7 +189,11 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments
             var associatedTournamentManager = this._tournamentManagers.FirstOrDefault(tm => tm.MiniTournamentId == nextGenomeKey.TournamentId);
             if (associatedTournamentManager == null)
             {
-                throw new InvalidOperationException($"Cannot find a MiniTournamentManager with ID {nextGenomeKey.TournamentId}!");
+                var exception = new InvalidOperationException($"Cannot find a MiniTournamentManager with ID {nextGenomeKey.TournamentId}!");
+                LoggingHelper.WriteLine(
+                    VerbosityLevel.Warn,
+                    $"Error: {exception.Message}");
+                throw exception;
             }
 
             if (!associatedTournamentManager.TryGetNextInstanceAndUpdateGenomePriority(nextGenomeKey, out var nextInstance))
@@ -189,13 +202,18 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments
                 return false;
             }
 
-            nextEvaluation = new GenomeInstancePair<TInstance>(nextGenomeKey.Genome, nextInstance);
+            var nextGenomeInstancePair = new GenomeInstancePair<TInstance>(nextGenomeKey.Genome, nextInstance);
 
             foreach (var manager in this._tournamentManagers.Where(tm => tm.MiniTournamentId != associatedTournamentManager.MiniTournamentId))
             {
-                manager.NotifyEvaluationStarted(nextEvaluation);
+                manager.NotifyEvaluationStarted(nextGenomeInstancePair);
             }
 
+            nextEvaluation = new GenomeInstancePairEvaluation<TInstance>(
+                nextGenomeInstancePair,
+                this._generation,
+                associatedTournamentManager.MiniTournamentId,
+                this._useGrayBoxInGeneration);
             return true;
         }
 
@@ -222,11 +240,12 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments
         {
             if (!this.IsGenerationFinished)
             {
+                var exception = new InvalidOperationException(
+                    $"You cannot create the gga result of the generation {this._generation}, before finishing it.");
                 LoggingHelper.WriteLine(
                     VerbosityLevel.Warn,
-                    $"You cannot create the gga result of the generation {this._generation}, before finishing it.");
-                throw new InvalidOperationException(
-                    $"You cannot create the gga result of the generation {this._generation}, before finishing it.");
+                    $"Error: {exception.Message}");
+                throw exception;
             }
 
             var genomeToTournamentRank = this._genomes.Distinct(ImmutableGenome.GenomeComparer)

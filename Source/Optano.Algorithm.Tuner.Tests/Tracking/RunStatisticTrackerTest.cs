@@ -84,7 +84,8 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
                 TimeSpan.FromSeconds(30),
                 34,
                 typeof(GgaStrategy<TestInstance, TestResult>),
-                new ImmutableGenome(new Genome()));
+                new ImmutableGenome(new Genome()),
+                "id");
             firstGeneration.IncumbentTrainingScore = -34.5;
             firstGeneration.IncumbentTestScore = -20;
             var secondGeneration = new GenerationInformation(
@@ -92,7 +93,8 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
                 TimeSpan.FromSeconds(60),
                 2587,
                 typeof(DifferentialEvolutionStrategy<TestInstance, TestResult>),
-                new ImmutableGenome(new Genome()));
+                new ImmutableGenome(new Genome()),
+                "id");
             secondGeneration.IncumbentTrainingScore = -104;
             secondGeneration.IncumbentTestScore = -100;
 
@@ -101,12 +103,13 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
             var exported = File.ReadAllLines("generationHistory.csv");
             Assert.True(3 == exported.Length, "Expected three lines: One legend and two generations.");
             Assert.True(
-                "Generation;Elapsed(d:hh:mm:ss);Total # Evaluations;Average Train Incumbent;Average Test Incumbent;Strategy;Incumbent" == exported[0],
+                "Generation;Elapsed(d:hh:mm:ss);Total # Evaluations;Average Train Incumbent;Average Test Incumbent;Strategy;Incumbent;IncumbentID"
+                == exported[0],
                 "Legend is not as expected.");
             exported[1].ShouldBe(
-                "0;0:00:00:30.0000000;34;-34.5;-20;GgaStrategy`2;[](Age: 0)[Engineered: no]");
+                "0;0:00:00:30.0000000;34;-34.5;-20;GgaStrategy`2;[](Age: 0)[Engineered: no];id");
             exported[2].ShouldBe(
-                "1;0:00:01:00.0000000;2587;-104;-100;DifferentialEvolutionStrategy`2;[](Age: 0)[Engineered: no]");
+                "1;0:00:01:00.0000000;2587;-104;-100;DifferentialEvolutionStrategy`2;[](Age: 0)[Engineered: no];id");
         }
 
         /// <summary>
@@ -130,22 +133,22 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
             var strategy = typeof(GgaStrategy<TestInstance, TestResult>);
 
             // Check what happens if the first generation takes more than 100 evaluations.
-            var generation0 = new GenerationInformation(0, TimeSpan.Zero, 150, strategy, incumbent);
+            var generation0 = new GenerationInformation(0, TimeSpan.Zero, 150, strategy, incumbent, "id");
             generation0.IncumbentTrainingScore = -34.5;
             generation0.IncumbentTestScore = -20;
 
             // Check what happens for multiple information objects within one evaluation level.
-            var generation1 = new GenerationInformation(1, TimeSpan.Zero, 199, strategy, incumbent);
+            var generation1 = new GenerationInformation(1, TimeSpan.Zero, 199, strategy, incumbent, "id");
             generation1.IncumbentTrainingScore = 12.34;
             generation1.IncumbentTestScore = 28.6;
 
             // Check what happens for an evaluation number equal to a bound.
-            var generation2 = new GenerationInformation(2, TimeSpan.Zero, 300, strategy, incumbent);
+            var generation2 = new GenerationInformation(2, TimeSpan.Zero, 300, strategy, incumbent, "id");
             generation2.IncumbentTrainingScore = 12.01;
             generation2.IncumbentTestScore = 29;
 
             // Check what happens if there is no information object in a certain level (301-400).
-            var generation3 = new GenerationInformation(2, TimeSpan.Zero, 401, strategy, incumbent);
+            var generation3 = new GenerationInformation(2, TimeSpan.Zero, 401, strategy, incumbent, "id");
             generation3.IncumbentTrainingScore = 14;
             generation3.IncumbentTestScore = 286;
 

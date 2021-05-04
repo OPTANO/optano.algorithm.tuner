@@ -88,14 +88,14 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
         {
             var population = this.CreatePopulation();
 
-            this.Strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance);
-            this.Strategy.PerformIteration(0, this.SingleTestInstance);
-            this.Strategy.PerformIteration(0, this.SingleTestInstance);
+            this.Strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance, 0, false);
+            this.Strategy.PerformIteration(0, this.SingleTestInstance, false);
+            this.Strategy.PerformIteration(0, this.SingleTestInstance, false);
             this.Strategy.DumpStatus();
 
             var originalStatus = StatusBase.ReadFromFile<CmaEsStatus>(this.CmaEsStatusFilePath);
 
-            this.Strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance);
+            this.Strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance, 0, false);
             this.Strategy.DumpStatus();
 
             var newlyInitializedStatus = StatusBase.ReadFromFile<CmaEsStatus>(this.CmaEsStatusFilePath);
@@ -135,8 +135,8 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
             var population = this.CreatePopulation();
 
             // Start first phase, but update with different instances.
-            this.Strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance);
-            this.Strategy.PerformIteration(0, severalInstances);
+            this.Strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance, 0, false);
+            this.Strategy.PerformIteration(0, severalInstances, false);
             this.Strategy.DumpStatus();
 
             // Instances should have been updated now.
@@ -156,13 +156,15 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
         public void FindIncumbentGenomeReturnsGenomeFoundByCmaEs()
         {
             // Update with different instances to check we return the correct results later on.
-            this.Strategy.Initialize(this.CreatePopulation(), this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance);
+            this.Strategy.Initialize(this.CreatePopulation(), this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance, 0, false);
             this.Strategy.PerformIteration(
                 0,
-                new List<TestInstance> { new TestInstance("a"), new TestInstance("b"), new TestInstance("c") });
+                new List<TestInstance> { new TestInstance("a"), new TestInstance("b"), new TestInstance("c") },
+                false);
             this.Strategy.PerformIteration(
                 12,
-                new List<TestInstance> { new TestInstance("c"), new TestInstance("d") });
+                new List<TestInstance> { new TestInstance("c"), new TestInstance("d") },
+                false);
             this.Strategy.DumpStatus();
 
             var incumbent = this.Strategy.FindIncumbentGenome();
@@ -202,8 +204,8 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
                 1,
                 originalPopulation.GetCompetitiveIndividuals().Count(genome => genome.Age == this.Configuration.MaxGenomeAge + 1));
 
-            this.Strategy.Initialize(originalPopulation, incumbent, this.SingleTestInstance);
-            this.Strategy.PerformIteration(0, this.SingleTestInstance);
+            this.Strategy.Initialize(originalPopulation, incumbent, this.SingleTestInstance, 0, false);
+            this.Strategy.PerformIteration(0, this.SingleTestInstance, false);
             var updatedPopulation = this.Strategy.FinishPhase(originalPopulation);
 
             for (int age = 0; age < this.Configuration.MaxGenomeAge; age++)
@@ -224,10 +226,10 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
         public void HasTerminatedReturnsTrueAfterCorrectNumberGenerations()
         {
             int generation = 0;
-            this.Strategy.Initialize(this.CreatePopulation(), this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance);
+            this.Strategy.Initialize(this.CreatePopulation(), this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance, 0, false);
             while (!this.Strategy.HasTerminated())
             {
-                this.Strategy.PerformIteration(generation, this.SingleTestInstance);
+                this.Strategy.PerformIteration(generation, this.SingleTestInstance, false);
                 generation++;
             }
 
@@ -259,8 +261,8 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
         public override void DumpedStatusHasNoEmptyProperties()
         {
             var incumbent = this.CreateIncumbentGenomeWrapper();
-            this.Strategy.Initialize(this.CreatePopulation(), incumbent, this.SingleTestInstance);
-            this.Strategy.PerformIteration(0, this.SingleTestInstance);
+            this.Strategy.Initialize(this.CreatePopulation(), incumbent, this.SingleTestInstance, 0, false);
+            this.Strategy.PerformIteration(0, this.SingleTestInstance, false);
             this.Strategy.DumpStatus();
 
             // Check last status dump
@@ -293,8 +295,8 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
             var basePopulation = this.CreatePopulation();
             var incumbent = this.CreateIncumbentGenomeWrapper();
 
-            this.Strategy.Initialize(basePopulation, incumbent, this.SingleTestInstance);
-            this.Strategy.PerformIteration(0, this.SingleTestInstance);
+            this.Strategy.Initialize(basePopulation, incumbent, this.SingleTestInstance, 0, false);
+            this.Strategy.PerformIteration(0, this.SingleTestInstance, false);
             this.Strategy.DumpStatus();
             var originalPoints = StatusBase.ReadFromFile<CovarianceMatrixAdaptationStrategyStatus<TSearchPoint, TestInstance>>(this.StatusFilePath)
                 .MostRecentSorting;

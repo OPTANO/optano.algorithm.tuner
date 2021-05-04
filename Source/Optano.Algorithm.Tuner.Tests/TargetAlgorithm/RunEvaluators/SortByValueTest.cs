@@ -50,26 +50,12 @@ namespace Optano.Algorithm.Tuner.Tests.TargetAlgorithm.RunEvaluators
     /// </summary>
     public class SortByValueTest
     {
-        #region Static Fields
-
-        /// <summary>
-        /// The ascending <see cref="SortByValue{TInstance}"/> sorter used in tests.
-        /// </summary>
-        private static readonly SortByValue<TestInstance> ascendingSorter = new SortByValue<TestInstance>(@ascending: true);
-
-        /// <summary>
-        /// The descending <see cref="SortByValue{TInstance}"/> sorter used in tests.
-        /// </summary>
-        private static readonly SortByValue<TestInstance> descendingSorter = new SortByValue<TestInstance>(@ascending: false);
-
-        #endregion
-
         #region Fields
 
         /// <summary>
         /// A set of 10 test instances.
         /// </summary>
-        private List<TestInstance> _instances = Enumerable.Range(0, 10).Select(i => new TestInstance($"{i}")).ToList();
+        private readonly List<TestInstance> _instances = Enumerable.Range(0, 10).Select(i => new TestInstance($"{i}")).ToList();
 
         #endregion
 
@@ -78,13 +64,18 @@ namespace Optano.Algorithm.Tuner.Tests.TargetAlgorithm.RunEvaluators
         /// <summary>
         /// Checks that <see cref="SortByValue{TInstance}.GetMetricRepresentation"/> returns <see cref="ContinuousResult.Value"/>.
         /// </summary>
-        [Fact]
-        public void GetMetricRepresentationReturnsValue()
+        /// <param name="sortAscending">Indicates whether to sort ascending or descending.</param>
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void GetMetricRepresentationReturnsValue(bool sortAscending)
         {
+            var sorter = new SortByValue<TestInstance>(sortAscending);
+
             var result = new ContinuousResult(100, TimeSpan.Zero);
             Assert.Equal(
                 100,
-                SortByValueTest.ascendingSorter.GetMetricRepresentation(result));
+                sorter.GetMetricRepresentation(result));
         }
 
         /// <summary>

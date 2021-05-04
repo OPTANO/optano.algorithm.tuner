@@ -56,7 +56,6 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
     /// <summary>
     /// Contains tests for the <see cref="RepairedGenomeSearchPointSorter{TSearchPoint,TInstance,TResult}"/> class.
     /// </summary>
-    [Collection(TestUtils.NonParallelCollectionGroupOneName)]
     public class RepairedGenomeSearchPointSorterTest : GenomeAssistedSorterBaseTest<ContinuizedGenomeSearchPoint>
     {
         #region Fields

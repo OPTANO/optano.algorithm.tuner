@@ -46,16 +46,16 @@ namespace Optano.Algorithm.Tuner.Tests.TargetAlgorithm.RunEvaluators
     using Xunit;
 
     /// <summary>
-    /// Contains tests for the <see cref="SortByRuntime{TInstance}"/> class.
+    /// Contains tests for the <see cref="SortByUnpenalizedRuntime{TInstance}"/> class.
     /// </summary>
-    public class SortByRuntimeTest
+    public class SortByUnpenalizedRuntimeTest
     {
         #region Static Fields
 
         /// <summary>
-        /// The <see cref="SortByRuntime{TestInstance}"/> sorter used in tests.
+        /// The <see cref="SortByUnpenalizedRuntime{TInstance}"/> sorter used in tests.
         /// </summary>
-        private static readonly SortByRuntime<TestInstance> sorter = new SortByRuntime<TestInstance>(1);
+        private static readonly SortByUnpenalizedRuntime<TestInstance> Sorter = new SortByUnpenalizedRuntime<TestInstance>(TimeSpan.FromSeconds(30));
 
         /// <summary>
         /// A set of test instances.
@@ -67,7 +67,7 @@ namespace Optano.Algorithm.Tuner.Tests.TargetAlgorithm.RunEvaluators
         #region Public Methods and Operators
 
         /// <summary>
-        /// Checks that <see cref="SortByRuntime{TestInstance}.Sort"/>
+        /// Checks that <see cref="SortByUnpenalizedRuntime{TInstance}.Sort"/>
         /// returns the genome with lower average runtime first if the number of provided results is the same for both
         /// genomes.
         /// </summary>
@@ -77,11 +77,11 @@ namespace Optano.Algorithm.Tuner.Tests.TargetAlgorithm.RunEvaluators
             var worseGenome = new ImmutableGenome(new Genome(1));
             var betterGenome = new ImmutableGenome(new Genome(2));
 
-            var worseStats = this.CreateStats(worseGenome, SortByRuntimeTest.Instances, i => TimeSpan.FromSeconds(i + 1));
-            var betterStats = this.CreateStats(betterGenome, SortByRuntimeTest.Instances, i => TimeSpan.FromSeconds(i));
+            var worseStats = this.CreateStats(worseGenome, SortByUnpenalizedRuntimeTest.Instances, i => TimeSpan.FromSeconds(i + 1));
+            var betterStats = this.CreateStats(betterGenome, SortByUnpenalizedRuntimeTest.Instances, i => TimeSpan.FromSeconds(i));
 
             var runResults = new[] { worseStats.ToImmutable(), betterStats.ToImmutable() };
-            var sortedGenomes = SortByRuntimeTest.sorter.Sort(runResults).ToList();
+            var sortedGenomes = SortByUnpenalizedRuntimeTest.Sorter.Sort(runResults).ToList();
 
             sortedGenomes.Count.ShouldBe(2);
             Assert.Equal(betterGenome, sortedGenomes.First().Genome);
@@ -89,7 +89,7 @@ namespace Optano.Algorithm.Tuner.Tests.TargetAlgorithm.RunEvaluators
         }
 
         /// <summary>
-        /// Checks that <see cref="SortByRuntime{TestInstance}.Sort"/>
+        /// Checks that <see cref="SortByUnpenalizedRuntime{TInstance}.Sort"/>
         /// returns the genome with lower average runtime first even if the number of provided results is different
         /// for the genomes and the one with lower average runtime has a higher runtime sum.
         /// </summary>
@@ -99,11 +99,11 @@ namespace Optano.Algorithm.Tuner.Tests.TargetAlgorithm.RunEvaluators
             var worseGenome = new ImmutableGenome(new Genome(1));
             var betterGenome = new ImmutableGenome(new Genome(2));
 
-            var worseStats = this.CreateStats(worseGenome, SortByRuntimeTest.Instances, i => TimeSpan.FromMilliseconds(100), 1);
-            var betterStats = this.CreateStats(betterGenome, SortByRuntimeTest.Instances, i => TimeSpan.FromMilliseconds(20));
+            var worseStats = this.CreateStats(worseGenome, SortByUnpenalizedRuntimeTest.Instances, i => TimeSpan.FromMilliseconds(100), 1);
+            var betterStats = this.CreateStats(betterGenome, SortByUnpenalizedRuntimeTest.Instances, i => TimeSpan.FromMilliseconds(20));
 
             var runResults = new[] { worseStats.ToImmutable(), betterStats.ToImmutable() };
-            var sortedGenomes = SortByRuntimeTest.sorter.Sort(runResults).ToList();
+            var sortedGenomes = SortByUnpenalizedRuntimeTest.Sorter.Sort(runResults).ToList();
 
             sortedGenomes.Count.ShouldBe(2);
             Assert.Equal(betterGenome, sortedGenomes.First().Genome);
@@ -111,7 +111,7 @@ namespace Optano.Algorithm.Tuner.Tests.TargetAlgorithm.RunEvaluators
         }
 
         /// <summary>
-        /// Checks that <see cref="SortByRuntime{TestInstance}.Sort"/>
+        /// Checks that <see cref="SortByUnpenalizedRuntime{TInstance}.Sort"/>
         /// returns the genome with more solved instances first, even if they are on average slower than the results of a genome with less solved instances.
         /// </summary>
         [Fact]
@@ -120,44 +120,15 @@ namespace Optano.Algorithm.Tuner.Tests.TargetAlgorithm.RunEvaluators
             var worseGenome = new ImmutableGenome(new Genome(1));
             var betterGenome = new ImmutableGenome(new Genome(2));
 
-            var worseStats = this.CreateStats(worseGenome, SortByRuntimeTest.Instances, i => TimeSpan.FromMilliseconds(100), 1);
-            var betterStats = this.CreateStats(betterGenome, SortByRuntimeTest.Instances, i => TimeSpan.FromMilliseconds(200));
+            var worseStats = this.CreateStats(worseGenome, SortByUnpenalizedRuntimeTest.Instances, i => TimeSpan.FromMilliseconds(100), 1);
+            var betterStats = this.CreateStats(betterGenome, SortByUnpenalizedRuntimeTest.Instances, i => TimeSpan.FromMilliseconds(200));
 
             var runResults = new[] { worseStats.ToImmutable(), betterStats.ToImmutable() };
-            var sortedGenomes = SortByRuntimeTest.sorter.Sort(runResults).ToList();
+            var sortedGenomes = SortByUnpenalizedRuntimeTest.Sorter.Sort(runResults).ToList();
 
             sortedGenomes.Count.ShouldBe(2);
             Assert.Equal(betterGenome, sortedGenomes.First().Genome);
             Assert.Equal(worseGenome, sortedGenomes.Last().Genome);
-        }
-
-        /// <summary>
-        /// Checks that <see cref="SortByRuntime{TestInstance}.GetMetricRepresentation"/> returns the total number of seconds for a
-        /// successful <see cref="RuntimeResult"/>.
-        /// </summary>
-        [Fact]
-        public void GetMetricRepresentationReturnsSecondsForSuccessfulRun()
-        {
-            var parSorter = new SortByRuntime<TestInstance>(factorPar: 7);
-            var result = new RuntimeResult(TimeSpan.FromSeconds(1234.78));
-            Assert.Equal(
-                1234.78,
-                parSorter.GetMetricRepresentation(result));
-        }
-
-        /// <summary>
-        /// Checks that <see cref="SortByRuntime{TestInstance}.GetMetricRepresentation"/> returns the total number of seconds
-        /// penalized with the corresponding penalization factor for a cancelled <see cref="RuntimeResult"/>.
-        /// </summary>
-        [Fact]
-        public void GetMetricRepresentationAddsPenalizationForCancelledRun()
-        {
-            var parSorter = new SortByRuntime<TestInstance>(factorPar: 7);
-            var result = ResultBase<RuntimeResult>.CreateCancelledResult(TimeSpan.FromSeconds(3.1));
-            Assert.Equal(
-                21.7,
-                parSorter.GetMetricRepresentation(result),
-                8);
         }
 
         #endregion

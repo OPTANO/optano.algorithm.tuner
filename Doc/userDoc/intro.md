@@ -4,12 +4,12 @@
 
 ## Preparation
 
-Please consider the [technical preparations](../developerDoc/technical_preparation.md), before using *OAT*. Moreover note, that you will have the best experience with *OAT* if you heed our [detailed preparation tips](preparation.md).
+Note that you will have the best experience with *OAT*, if you heed our [detailed preparation tips](preparation.md).
 
 ### [Basic Usage](basic_usage.md)
 Tune your algorithm either optimizing (penalized) run time or its output value. Can be used if the tuneable algorithm accepts instance files as input and its parameters are contained in defined ranges.
 
-*Side-Note:* Even though the *OAT* Application is provided as a stand-alone executable, technically it also is a *custom* adapter, similar to the implementations of our [examples](../developerDoc/examples.md) in the [advanced](../developerDoc/advanced.md) section.
+*Side-Note:* Even though the *OAT* Application is provided as a stand-alone executable, technically it also is a *custom* adapter, similar to the implementations of our [examples](../developerDoc/examples.md) in the [advanced usage](../developerDoc/advanced.md) section.
 
 ### [Advanced Usage](../developerDoc/advanced.md)
 You want to optimize using a more complex or even multicriterial function? There are some forbidden parameter combinations? Your algorithm does not accept instance files as input? You can still use *OAT* in these cases, but you will need to specify your algorithm's special characteristics by code.

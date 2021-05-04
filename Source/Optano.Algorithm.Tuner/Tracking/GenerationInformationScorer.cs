@@ -176,12 +176,30 @@ namespace Optano.Algorithm.Tuner.Tracking
             IEnumerable<GenerationInformation> informationHistory,
             IEnumerable<TInstance> instances)
         {
-            var generationEvaluationTask = this._generationEvaluationActor.Ask(
-                new GenerationEvaluation<TInstance, TResult>(
-                    informationHistory.Select(information => information.Incumbent),
-                    instances,
-                    (runEvaluator, participantsOfGeneration, instancesOfGeneration) =>
-                        new SortingGenerationEvaluationStrategy<TInstance, TResult>(runEvaluator, participantsOfGeneration, instancesOfGeneration)));
+            // Set generationId to -1, since this is a post tuning "generation".
+            // Set useGrayBoxInGeneration to false, since we do not want to use gray box tuning here.
+            var generationEvaluationMessage = new GenerationEvaluation<TInstance, TResult>(
+                informationHistory.Select(information => information.Incumbent),
+                instances,
+                (runEvaluator, participantsOfGeneration, instancesOfGeneration) =>
+                    new SortingGenerationEvaluationStrategy<TInstance, TResult>(
+                        runEvaluator,
+                        participantsOfGeneration,
+                        instancesOfGeneration,
+                        -1,
+                        false));
+
+            var generationEvaluationTask = this._generationEvaluationActor.Ask(generationEvaluationMessage).ContinueWith(
+                task =>
+                    {
+                        if (task.IsFaulted)
+                        {
+                            throw new InvalidOperationException(
+                                $"The evaluation of all incumbent genomes resulted in an exception!{Environment.NewLine}Message: {task.Exception?.Message}");
+                        }
+
+                        return task.Result;
+                    });
 
             generationEvaluationTask.Wait();
         }

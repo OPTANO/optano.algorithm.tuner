@@ -33,6 +33,7 @@ namespace Optano.Algorithm.Tuner.Tests.TargetAlgorithm.Results
 {
     using System;
 
+    using Optano.Algorithm.Tuner.TargetAlgorithm;
     using Optano.Algorithm.Tuner.TargetAlgorithm.Results;
     using Optano.Algorithm.Tuner.Tests.TargetAlgorithm.InterfaceImplementations;
 
@@ -46,18 +47,18 @@ namespace Optano.Algorithm.Tuner.Tests.TargetAlgorithm.Results
         #region Public Methods and Operators
 
         /// <summary>
-        /// Checks that the result yielded by <see cref="ResultBase{TResultType}.CreateCancelledResult(TimeSpan)"/>
+        /// Checks that the result yielded by <see cref="ResultBase{TResultType}.CreateCancelledResult(TimeSpan, TargetAlgorithmStatus)"/>
         /// returns true for <see cref="ResultBase{TResultType}.IsCancelled"/>.
         /// </summary>
         [Fact]
         public void CancelledResultIsMarkedAsCancelled()
         {
-            var result = TestResult.CreateCancelledResult(TimeSpan.Zero);
+            var result = ResultBase<TestResult>.CreateCancelledResult(TimeSpan.Zero);
             Assert.True(result.IsCancelled, "Cancelled result not marked as cancelled.");
         }
 
         /// <summary>
-        /// Checks that the result yielded by <see cref="ResultBase{TResultType}.CreateCancelledResult(TimeSpan)"/>
+        /// Checks that the result yielded by <see cref="ResultBase{TResultType}.CreateCancelledResult(TimeSpan, TargetAlgorithmStatus)"/>
         /// returns the runtime provided on construction when <see cref="ResultBase{TResultType}.Runtime"/> is
         /// requested.
         /// </summary>
@@ -65,8 +66,21 @@ namespace Optano.Algorithm.Tuner.Tests.TargetAlgorithm.Results
         public void CancelledResultReturnsCorrectRuntime()
         {
             var runtime = TimeSpan.FromMilliseconds(42);
-            var result = TestResult.CreateCancelledResult(runtime);
+            var result = ResultBase<TestResult>.CreateCancelledResult(runtime);
             Assert.Equal(runtime, result.Runtime);
+        }
+
+        /// <summary>
+        /// Checks that <see cref="ResultBase{TResultType}.CreateCancelledResult(TimeSpan, TargetAlgorithmStatus)"/> throws an <see cref="ArgumentOutOfRangeException"/>, if the given target algorithm status is running or finished.
+        /// </summary>
+        /// <param name="targetAlgorithmStatus">The target algorithm status.</param>
+        [Theory]
+        [InlineData(TargetAlgorithmStatus.Running)]
+        [InlineData(TargetAlgorithmStatus.Finished)]
+        public void CreateCancelledResultThrowsIfTargetAlgorithmStatusIsRunningOrFinished(TargetAlgorithmStatus targetAlgorithmStatus)
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => { ResultBase<TestResult>.CreateCancelledResult(TimeSpan.FromSeconds(30), targetAlgorithmStatus); });
         }
 
         #endregion

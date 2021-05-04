@@ -24,6 +24,7 @@ Therefore, to continue with a tuning, all you have to do is to add the parameter
 - --instanceFolder={PATH}
 - --trackConvergenceBehavior={BOOL}
 - --zipOldStatus={BOOL}
+- --allowLocalEvaluations={BOOL}
 
 In addition, you might change `trainModel` from `true` to `false`.
 

@@ -40,6 +40,7 @@ namespace Optano.Algorithm.Tuner.Configuration
     using Akka.Configuration;
 
     using Optano.Algorithm.Tuner.Genomes;
+    using Optano.Algorithm.Tuner.GrayBox;
     using Optano.Algorithm.Tuner.Logging;
     using Optano.Algorithm.Tuner.MachineLearning;
 
@@ -89,7 +90,7 @@ namespace Optano.Algorithm.Tuner.Configuration
         public int PopulationSize { get; private set; }
 
         /// <summary>
-        /// Gets the maximum number of evaluations, i. e. runs of configuration - instance combinations, which should
+        /// Gets the maximum number of evaluations, i. e. runs of configuration - instance pairs, which should
         /// be done. Program is terminated after the first generation which meets the limit.
         /// </summary>
         public int EvaluationLimit { get; private set; }
@@ -157,7 +158,7 @@ namespace Optano.Algorithm.Tuner.Configuration
         public int MaxRepairAttempts { get; private set; }
 
         /// <summary>
-        /// Gets the maximum number of tries to evaluate a genome - instance combination and tolerating a failure in a
+        /// Gets the maximum number of tries to evaluate a genome - instance pair and tolerating a failure in a
         /// row. If more failures occur, the whole program will be stopped.
         /// </summary>
         public int MaximumNumberConsecutiveFailuresPerEvaluation { get; private set; }
@@ -255,6 +256,72 @@ namespace Optano.Algorithm.Tuner.Configuration
         /// Gets the path to the log file.
         /// </summary>
         public string LogFilePath { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether data log files will be written.
+        /// </summary>
+        public bool EnableDataRecording { get; private set; }
+
+        /// <summary>
+        /// Gets the path to the data record directory.
+        /// </summary>
+        public string DataRecordDirectoryPath { get; private set; }
+
+        /// <summary>
+        /// Gets the update interval of the data record.
+        /// </summary>
+        public TimeSpan DataRecordUpdateInterval { get; private set; }
+
+        /// <summary>
+        /// Gets the generation instance composition file.
+        /// </summary>
+        public FileInfo GenerationInstanceCompositionFile { get; private set; }
+
+        /// <summary>
+        /// Gets the generation genome composition file.
+        /// </summary>
+        public FileInfo GenerationGenomeCompositionFile { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether the gray box should be used during tuning.
+        /// </summary>
+        public bool EnableGrayBox { get; private set; }
+
+        /// <summary>
+        /// Gets the gray box start generation.
+        /// </summary>
+        public int GrayBoxStartGeneration { get; private set; }
+
+        /// <summary>
+        /// Gets the gray box start time point.
+        /// </summary>
+        public TimeSpan GrayBoxStartTimePoint { get; private set; }
+
+        /// <summary>
+        /// Gets the gray box confidence threshold.
+        /// </summary>
+        public double GrayBoxConfidenceThreshold { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether to remove the list of data records from memory after training the gray box random forest.
+        /// </summary>
+        public bool RemoveDataRecordsFromMemoryAfterTraining { get; private set; }
+
+        /// <summary>
+        /// Gets the gray box random forest file.
+        /// </summary>
+        public FileInfo GrayBoxRandomForestFile { get; private set; }
+
+        /// <summary>
+        /// Gets the gray box random forest feature importance file.
+        /// </summary>
+        public FileInfo GrayBoxRandomForestFeatureImportanceFile { get; private set; }
+
+        /// <summary>
+        /// Gets the tuning random seed.
+        /// Can be null.
+        /// </summary>
+        public int? TuningRandomSeed { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether the generation history logged at the end of the tuning should include
@@ -424,7 +491,16 @@ namespace Optano.Algorithm.Tuner.Configuration
                    && Math.Abs(this.FeatureSubsetRatioForDistanceComputation - otherConfig.FeatureSubsetRatioForDistanceComputation)
                    < ConfigurationBase.CompatibilityTolerance
                    && this.DistanceMetric == otherConfig.DistanceMetric
-                   && this.AddDefaultGenome == otherConfig.AddDefaultGenome;
+                   && this.AddDefaultGenome == otherConfig.AddDefaultGenome
+                   && this.EnableDataRecording == otherConfig.EnableDataRecording
+                   && this.DataRecordDirectoryPath == otherConfig.DataRecordDirectoryPath
+                   && this.DataRecordUpdateInterval == otherConfig.DataRecordUpdateInterval
+                   && this.EnableGrayBox == otherConfig.EnableGrayBox
+                   && this.GrayBoxStartGeneration == otherConfig.GrayBoxStartGeneration
+                   && this.GrayBoxStartTimePoint == otherConfig.GrayBoxStartTimePoint
+                   && Math.Abs(this.GrayBoxConfidenceThreshold - otherConfig.GrayBoxConfidenceThreshold)
+                   < ConfigurationBase.CompatibilityTolerance
+                   && this.TuningRandomSeed == otherConfig.TuningRandomSeed;
         }
 
         /// <summary>
@@ -477,6 +553,10 @@ namespace Optano.Algorithm.Tuner.Configuration
         /// Returns a string that represents the current object.
         /// </summary>
         /// <returns>A string that represents the current object.</returns>
+        [SuppressMessage(
+            "NDepend",
+            "ND1004:MethodsTooBig",
+            Justification = "The method needs to print all configuration parameters.")]
         public override string ToString()
         {
             var descriptionBuilder = new StringBuilder();
@@ -494,6 +574,9 @@ namespace Optano.Algorithm.Tuner.Configuration
             descriptionBuilder.AppendLine(Indent + $"popSize : {this.PopulationSize}");
             descriptionBuilder.AppendLine(Indent + $"numGens : {this.Generations}");
             descriptionBuilder.AppendLine(Indent + $"goalGen : {this.GoalGeneration}");
+
+            var tuningRandomSeedString = this.TuningRandomSeed == null ? "None" : $"{this.TuningRandomSeed}";
+            descriptionBuilder.AppendLine(Indent + $"tuningRandomSeed : {tuningRandomSeedString}");
             descriptionBuilder.AppendLine(Indent + $"evaluationLimit : {this.EvaluationLimit}");
             descriptionBuilder.AppendLine(Indent + $"maxParallelThreads : {this.MaximumNumberParallelThreads}");
             descriptionBuilder.AppendLine("}");
@@ -511,6 +594,17 @@ namespace Optano.Algorithm.Tuner.Configuration
             descriptionBuilder.AppendLine(Indent + $"zipOldStatus : {this.ZipOldStatusFiles}");
             descriptionBuilder.AppendLine(Indent + $"trackConvergenceBehavior : {this.TrackConvergenceBehavior}");
             descriptionBuilder.AppendLine(Indent + $"scoreGenerationHistory : {this.ScoreGenerationHistory}");
+            descriptionBuilder.AppendLine("}");
+
+            descriptionBuilder.AppendLine("Gray box tuning: {");
+            descriptionBuilder.AppendLine(Indent + $"enableDataRecording : {this.EnableDataRecording}");
+            descriptionBuilder.AppendLine(Indent + $"dataRecordUpdateInterval : {this.DataRecordUpdateInterval}");
+            descriptionBuilder.AppendLine(Indent + $"dataRecordDirectory : {this.DataRecordDirectoryPath}");
+            descriptionBuilder.AppendLine(Indent + $"enableGrayBox : {this.EnableGrayBox}");
+            descriptionBuilder.AppendLine(Indent + $"grayBoxConfidenceThreshold : {this.GrayBoxConfidenceThreshold}");
+            descriptionBuilder.AppendLine(Indent + $"grayBoxStartGeneration : {this.GrayBoxStartGeneration}");
+            descriptionBuilder.AppendLine(Indent + $"grayBoxStartTimePoint : {this.GrayBoxStartTimePoint}");
+            descriptionBuilder.AppendLine(Indent + $"removeDataRecordsFromMemoryAfterTraining : {this.RemoveDataRecordsFromMemoryAfterTraining}");
             descriptionBuilder.AppendLine("}");
 
             descriptionBuilder.AppendLine("Fault tolerance : {");
@@ -588,6 +682,30 @@ namespace Optano.Algorithm.Tuner.Configuration
             {
                 throw new ArgumentException(
                     $"With a maximum genome age of {this.MaxGenomeAge} higher than the size {sizeOfBiggerPopulationPart} of the bigger part of the population, sometimes no genomes would be replaced in a generation.");
+            }
+
+            if (this.EnableDataRecording && this.DataRecordUpdateInterval >= this.CpuTimeout)
+            {
+                throw new ArgumentException(
+                    $"The data record update interval needs to be strictly smaller than the cpu timeout, but the following arguments were given.{Environment.NewLine}DataRecordUpdateInterval: {this.DataRecordUpdateInterval.TotalSeconds} seconds{Environment.NewLine}CpuTimeout: {this.CpuTimeout.TotalSeconds} seconds");
+            }
+
+            if (this.EnableGrayBox && !this.EnableDataRecording)
+            {
+                throw new ArgumentException(
+                    "You cannot start gray box tuning without data recording behaviour. Please set --enableDataRecording=true to enable data recording behaviour.");
+            }
+
+            if (this.EnableGrayBox && this.GrayBoxStartGeneration >= this.Generations)
+            {
+                throw new ArgumentException(
+                    $"The gray box should start at (0-indexed) generation {this.GrayBoxStartGeneration}, but only {this.Generations} generations will be executed.");
+            }
+
+            if (this.EnableGrayBox && this.GrayBoxStartTimePoint >= this.CpuTimeout)
+            {
+                throw new ArgumentException(
+                    $"The gray box start time point needs to be strictly smaller than the cpu timeout, but the following arguments were given.{Environment.NewLine}GrayBoxStartTimePoint: {this.GrayBoxStartTimePoint.TotalSeconds} seconds{Environment.NewLine}CpuTimeout: {this.CpuTimeout.TotalSeconds} seconds");
             }
         }
 
@@ -871,6 +989,51 @@ namespace Optano.Algorithm.Tuner.Configuration
             private string _logFilePath;
 
             /// <summary>
+            /// The value to set for <see cref="AlgorithmTunerConfiguration.EnableDataRecording"/>.
+            /// </summary>
+            private bool? _enableDataRecording;
+
+            /// <summary>
+            /// The value to set for <see cref="AlgorithmTunerConfiguration.DataRecordDirectoryPath"/>.
+            /// </summary>
+            private string _dataRecordDirectoryPath;
+
+            /// <summary>
+            /// The value to set for <see cref="AlgorithmTunerConfiguration.DataRecordUpdateInterval"/>.
+            /// </summary>
+            private TimeSpan? _dataRecordUpdateInterval;
+
+            /// <summary>
+            /// The value to set for <see cref="AlgorithmTunerConfiguration.EnableGrayBox"/>.
+            /// </summary>
+            private bool? _enableGrayBox;
+
+            /// <summary>
+            /// The value to set for <see cref="AlgorithmTunerConfiguration.GrayBoxStartGeneration"/>.
+            /// </summary>
+            private int? _grayBoxStartGeneration;
+
+            /// <summary>
+            /// The value to set for <see cref="AlgorithmTunerConfiguration.GrayBoxStartTimePoint"/>.
+            /// </summary>
+            private TimeSpan? _grayBoxStartTimePoint;
+
+            /// <summary>
+            /// The value to set for <see cref="AlgorithmTunerConfiguration.GrayBoxConfidenceThreshold"/>.
+            /// </summary>
+            private double? _grayBoxConfidenceThreshold;
+
+            /// <summary>
+            /// The value to set for <see cref="AlgorithmTunerConfiguration.RemoveDataRecordsFromMemoryAfterTraining"/>.
+            /// </summary>
+            private bool? _removeDataRecordsFromMemoryAfterTraining;
+
+            /// <summary>
+            /// The value to set for <see cref="AlgorithmTunerConfiguration.TuningRandomSeed"/>.
+            /// </summary>
+            private int? _tuningRandomSeed;
+
+            /// <summary>
             /// The value to set for <see cref="ScoreGenerationHistory"/>.
             /// </summary>
             private bool? _scoreGenerationHistory;
@@ -1019,7 +1182,7 @@ namespace Optano.Algorithm.Tuner.Configuration
             }
 
             /// <summary>
-            /// Sets the total population size. Default is 100.
+            /// Sets the total population size. Default is 128.
             /// </summary>
             /// <param name="populationSize">The population size, at least 2.</param>
             /// <returns>The <see cref="AlgorithmTunerConfigurationBuilder" /> in its new state.</returns>
@@ -1037,7 +1200,7 @@ namespace Optano.Algorithm.Tuner.Configuration
             }
 
             /// <summary>
-            /// Sets the maximum number of evaluations, i. e. runs of configuration - instance combinations, which should
+            /// Sets the maximum number of evaluations, i. e. runs of configuration - instance pairs, which should
             /// be done. Program is terminated after the first generation which meets the limit.
             /// <para>Default is <see cref="int.MaxValue"/>.</para>
             /// </summary>
@@ -1300,7 +1463,7 @@ namespace Optano.Algorithm.Tuner.Configuration
             }
 
             /// <summary>
-            /// Sets the maximum number of tries to evaluate a genome - instance combination and tolerating a failure
+            /// Sets the maximum number of tries to evaluate a genome - instance pair and tolerating a failure
             /// in a row. Default is 3.
             /// </summary>
             /// <param name="maximumNumberFailures">Maximum number of failures, at least 0.</param>
@@ -1668,6 +1831,125 @@ namespace Optano.Algorithm.Tuner.Configuration
             }
 
             /// <summary>
+            /// Sets, whether data log files will be written.
+            /// </summary>
+            /// <param name="enableDataRecording">True to enable data recording.</param>
+            /// <returns>The <see cref="AlgorithmTunerConfigurationBuilder" /> in its new state.</returns>
+            public AlgorithmTunerConfigurationBuilder SetEnableDataRecording(bool enableDataRecording)
+            {
+                this._enableDataRecording = enableDataRecording;
+                return this;
+            }
+
+            /// <summary>
+            /// Sets the path to the data record directory.
+            /// </summary>
+            /// <param name="path">The path.</param>
+            /// <returns>The <see cref="AlgorithmTunerConfigurationBuilder"/> in its new state.</returns>
+            public AlgorithmTunerConfigurationBuilder SetDataRecordDirectoryPath(string path)
+            {
+                this._dataRecordDirectoryPath = path;
+                return this;
+            }
+
+            /// <summary>
+            /// Sets the update interval of the data record.
+            /// </summary>
+            /// <param name="dataRecordUpdateInterval">Update interval of the data record. Must be positive.</param>
+            /// <returns>The <see cref="AlgorithmTunerConfigurationBuilder" /> in its new state.</returns>
+            /// <exception cref="ArgumentOutOfRangeException">
+            /// Thrown if the provided update interval is negative.
+            /// </exception>
+            public AlgorithmTunerConfigurationBuilder SetDataRecordUpdateInterval(TimeSpan dataRecordUpdateInterval)
+            {
+                if (dataRecordUpdateInterval <= TimeSpan.Zero)
+                {
+                    throw new ArgumentOutOfRangeException(
+                        nameof(dataRecordUpdateInterval),
+                        $"The update interval of the data record must be positive, but {dataRecordUpdateInterval.TotalSeconds} seconds was provided.");
+                }
+
+                if (dataRecordUpdateInterval.TotalSeconds > int.MaxValue)
+                {
+                    throw new ArgumentOutOfRangeException(
+                        nameof(dataRecordUpdateInterval),
+                        $"The update interval of the data record must be less than {int.MaxValue} seconds.");
+                }
+
+                this._dataRecordUpdateInterval = dataRecordUpdateInterval;
+                return this;
+            }
+
+            /// <summary>
+            /// Sets <see cref="AlgorithmTunerConfiguration.EnableGrayBox"/>.
+            /// </summary>
+            /// <param name="enableGrayBox">True to enable gray box.</param>
+            /// <returns>The <see cref="AlgorithmTunerConfigurationBuilder" /> in its new state.</returns>
+            public AlgorithmTunerConfigurationBuilder SetEnableGrayBox(bool enableGrayBox)
+            {
+                this._enableGrayBox = enableGrayBox;
+                return this;
+            }
+
+            /// <summary>
+            /// Sets <see cref="AlgorithmTunerConfiguration.GrayBoxStartGeneration"/>.
+            /// </summary>
+            /// <param name="grayBoxStartGeneration">The gray box generation.</param>
+            /// <returns>The <see cref="AlgorithmTunerConfigurationBuilder" /> in its new state.</returns>
+            public AlgorithmTunerConfigurationBuilder SetGrayBoxStartGeneration(int grayBoxStartGeneration)
+            {
+                GrayBoxUtils.CheckGrayBoxStartGeneration(grayBoxStartGeneration);
+                this._grayBoxStartGeneration = grayBoxStartGeneration;
+                return this;
+            }
+
+            /// <summary>
+            /// Sets <see cref="AlgorithmTunerConfiguration.GrayBoxStartTimePoint"/>.
+            /// </summary>
+            /// <param name="grayBoxStartTimePoint">The gray box start time point.</param>
+            /// <returns>The <see cref="AlgorithmTunerConfigurationBuilder" /> in its new state.</returns>
+            public AlgorithmTunerConfigurationBuilder SetGrayBoxStartTimePoint(TimeSpan grayBoxStartTimePoint)
+            {
+                GrayBoxUtils.CheckGrayBoxStartTimePoint(grayBoxStartTimePoint);
+                this._grayBoxStartTimePoint = grayBoxStartTimePoint;
+                return this;
+            }
+
+            /// <summary>
+            /// Sets <see cref="AlgorithmTunerConfiguration.GrayBoxConfidenceThreshold"/>.
+            /// </summary>
+            /// <param name="grayBoxConfidenceThreshold">The gray box confidence threshold.</param>
+            /// <returns>The <see cref="AlgorithmTunerConfigurationBuilder" /> in its new state.</returns>
+            public AlgorithmTunerConfigurationBuilder SetGrayBoxConfidenceThreshold(double grayBoxConfidenceThreshold)
+            {
+                GrayBoxUtils.CheckGrayBoxConfidenceThreshold(grayBoxConfidenceThreshold);
+                this._grayBoxConfidenceThreshold = grayBoxConfidenceThreshold;
+                return this;
+            }
+
+            /// <summary>
+            /// Sets <see cref="AlgorithmTunerConfiguration.RemoveDataRecordsFromMemoryAfterTraining"/>.
+            /// </summary>
+            /// <param name="removeDataRecordsFromMemoryAfterTraining">A value indicating, whether to remove data records from memory after training.</param>
+            /// <returns>The <see cref="AlgorithmTunerConfigurationBuilder" /> in its new state.</returns>
+            public AlgorithmTunerConfigurationBuilder SetRemoveDataRecordsFromMemoryAfterTraining(bool removeDataRecordsFromMemoryAfterTraining)
+            {
+                this._removeDataRecordsFromMemoryAfterTraining = removeDataRecordsFromMemoryAfterTraining;
+                return this;
+            }
+
+            /// <summary>
+            /// Sets the <see cref="AlgorithmTunerConfiguration.TuningRandomSeed"/>.
+            /// </summary>
+            /// <param name="seed">The seed.</param>
+            /// <returns>The <see cref="AlgorithmTunerConfigurationBuilder" /> in its new state.</returns>
+            public AlgorithmTunerConfigurationBuilder SetTuningRandomSeed(int seed)
+            {
+                this._tuningRandomSeed = seed;
+                return this;
+            }
+
+            /// <summary>
             /// Sets a value indicating whether the generation history logged at the end of the tuning should include
             /// average scores on the complete instance sets. Default is false.
             /// </summary>
@@ -1763,6 +2045,39 @@ namespace Optano.Algorithm.Tuner.Configuration
                     this._logFilePath ?? fallback?.LogFilePath ?? PathUtils.GetAbsolutePathFromCurrentDirectory("tunerLog.txt");
                 configuration.ScoreGenerationHistory =
                     this._scoreGenerationHistory ?? fallback?.ScoreGenerationHistory ?? false;
+
+                configuration.EnableDataRecording = this._enableDataRecording ?? fallback?.EnableDataRecording ?? false;
+                configuration.DataRecordDirectoryPath =
+                    this._dataRecordDirectoryPath
+                    ?? fallback?.DataRecordDirectoryPath ?? PathUtils.GetAbsolutePathFromCurrentDirectory("DataLogFiles");
+                configuration.GenerationInstanceCompositionFile = new FileInfo(
+                    Path.Combine(
+                        configuration.DataRecordDirectoryPath,
+                        $"generationInstanceComposition.csv"));
+                configuration.GenerationGenomeCompositionFile = new FileInfo(
+                    Path.Combine(
+                        configuration.DataRecordDirectoryPath,
+                        $"generationGenomeComposition.csv"));
+                configuration.DataRecordUpdateInterval =
+                    this._dataRecordUpdateInterval ?? fallback?.DataRecordUpdateInterval
+                    ?? TimeSpan.FromMilliseconds(configuration.CpuTimeout.TotalMilliseconds * 0.05);
+
+                configuration.EnableGrayBox = this._enableGrayBox ?? fallback?.EnableGrayBox ?? false;
+                configuration.GrayBoxStartGeneration = this._grayBoxStartGeneration ?? fallback?.GrayBoxStartGeneration ?? 5;
+                configuration.GrayBoxStartTimePoint = this._grayBoxStartTimePoint ?? fallback?.GrayBoxStartTimePoint
+                                                      ?? TimeSpan.FromMilliseconds(configuration.CpuTimeout.TotalMilliseconds * 0.05);
+                configuration.GrayBoxConfidenceThreshold = this._grayBoxConfidenceThreshold ?? fallback?.GrayBoxConfidenceThreshold ?? 0.75;
+                configuration.RemoveDataRecordsFromMemoryAfterTraining =
+                    this._removeDataRecordsFromMemoryAfterTraining ?? fallback?.RemoveDataRecordsFromMemoryAfterTraining ?? false;
+                configuration.GrayBoxRandomForestFile = new FileInfo(
+                    Path.Combine(
+                        configuration.DataRecordDirectoryPath,
+                        $"grayBoxRandomForest.rdf"));
+                configuration.GrayBoxRandomForestFeatureImportanceFile = new FileInfo(
+                    Path.Combine(
+                        configuration.DataRecordDirectoryPath,
+                        $"featureImportance.csv"));
+                configuration.TuningRandomSeed = this._tuningRandomSeed ?? fallback?.TuningRandomSeed ?? null;
 
                 configuration.TrainModel = this._trainModel ?? fallback?.TrainModel ?? false;
                 configuration.EngineeredPopulationRatio =

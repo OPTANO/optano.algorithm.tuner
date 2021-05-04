@@ -41,7 +41,7 @@ namespace Optano.Algorithm.Tuner.Tests.TargetAlgorithm.InterfaceImplementations
     /// An implementation of <see cref="ITargetAlgorithm{TInstance,TResult}"/>
     /// returning a new instance of the <see cref="TestResult"/> class after a specified time.
     /// </summary>
-    internal class NoOperation : ITargetAlgorithm<TestInstance, TestResult>
+    public class NoOperation : ITargetAlgorithm<TestInstance, TestResult>
     {
         #region Fields
 

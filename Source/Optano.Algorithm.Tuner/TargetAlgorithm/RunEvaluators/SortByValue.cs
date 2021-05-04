@@ -41,7 +41,7 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm.RunEvaluators
     using Optano.Algorithm.Tuner.TargetAlgorithm.Results;
 
     /// <summary>
-    /// An implementation of <see cref="IRunEvaluator{I,R}" /> that sorts genomes by average value in target algorithm runs.
+    /// An implementation of <see cref="IRunEvaluator{I,R}" /> that sorts genomes by the average value of all target algorithm runs.
     /// </summary>
     /// <typeparam name="TInstance">The instance type.</typeparam>
     public class SortByValue<TInstance> : IMetricRunEvaluator<TInstance, ContinuousResult>

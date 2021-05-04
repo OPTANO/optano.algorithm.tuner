@@ -62,7 +62,7 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
         /// </summary>
         /// <param name="nextEvaluation">The next evaluation.</param>
         /// <returns><c>true</c>, if an open evaluation is popped.</returns>
-        bool TryPopEvaluation(out GenomeInstancePair<TInstance> nextEvaluation);
+        bool TryPopEvaluation(out GenomeInstancePairEvaluation<TInstance> nextEvaluation);
 
         /// <summary>
         /// Updates the result for the given evaluation.

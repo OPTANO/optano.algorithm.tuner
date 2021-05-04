@@ -22,10 +22,13 @@ _OPTANO Algorithm Tuner_ (*OAT*) is a .Net-API that helps tuning (finding near-o
 The [User Documentation](userDoc/intro.md) gives help for getting started with *OAT*. Among others it provides
 * [all information to get started](userDoc/intro.md)
 * [detailed preparation tips](userDoc/preparation.md)
-* [full list of technical preparations](developerDoc/technical_preparation.md)
 * [tips for basic usage of the Generic OAT Application](userDoc/basic_usage.md)
+
+## [The Developer Documentation](developerDoc/intro.md)
+The [Developer Documentation](developerDoc/intro.md) gives help for advanced usage of *OAT*. Among others it provides
 * [tips for advanced usage of OAT](developerDoc/advanced.md)
 * [detailed information about exemplary target algorithm adapters](developerDoc/examples.md)
+* [detailed information about the innovative gray box extension of *OAT* to minimize the overall tuning time](developerDoc/gray_box_tuning.md)
 
 ## [The API Documentation](api/index.md)
 Every detail about the exposed [API](api/index.md). 
@@ -67,7 +70,7 @@ Many people and companies have supported this project with
 
 Thanks for all your help!
 
-This project is sponsored
+This project is supported by the German Federal Ministry of Economics and Technology (BMWi) and the Central Innovation Program for small and medium-sized Enterprises (ZIM).
 
 ![Bad Image Exception](images/sponsor.png)
 
@@ -83,6 +86,7 @@ This project links to the following nuget packages:
 * [NDesk.Options.Patched](https://www.nuget.org/packages/NDesk.Options.Patched/)
 * [OPTANO.Modeling.Gurobi](https://www.nuget.org/packages/OPTANO.Modeling.Gurobi/)
 * [OptimizedPriorityQueue](https://www.nuget.org/packages/OptimizedPriorityQueue/)
+* [TinyCsvParser](https://www.nuget.org/packages/TinyCsvParser/)
 * [StyleCop.Analyzers](https://www.nuget.org/packages/StyleCop.Analyzers/)
 
 Moreover its test project links to the following nuget packages:

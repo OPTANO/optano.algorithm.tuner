@@ -35,6 +35,7 @@ namespace Optano.Algorithm.Tuner.Tuning
 
     using Optano.Algorithm.Tuner.Configuration;
     using Optano.Algorithm.Tuner.Genomes;
+    using Optano.Algorithm.Tuner.GrayBox;
     using Optano.Algorithm.Tuner.MachineLearning.RandomForest;
     using Optano.Algorithm.Tuner.MachineLearning.RandomForest.RandomForestOutOfBox;
     using Optano.Algorithm.Tuner.MachineLearning.RandomForest.RandomForestTopPerformerFocus;
@@ -78,19 +79,22 @@ namespace Optano.Algorithm.Tuner.Tuning
         /// <param name="configuration">
         /// The configuration.
         /// </param>
+        /// <param name="customGrayBoxMethods">The <see cref="ICustomGrayBoxMethods{TResult}"/>, if any. Default is null.</param>
         public AlgorithmTuner(
             ITargetAlgorithmFactory<TTargetAlgorithm, TInstance, TResult> targetAlgorithmFactory,
             IRunEvaluator<TInstance, TResult> runEvaluator,
             IEnumerable<TInstance> trainingInstances,
             ParameterTree parameterTree,
-            AlgorithmTunerConfiguration configuration)
+            AlgorithmTunerConfiguration configuration,
+            ICustomGrayBoxMethods<TResult> customGrayBoxMethods = null)
             : this(
                 targetAlgorithmFactory,
                 runEvaluator,
                 trainingInstances,
                 parameterTree,
                 configuration,
-                new GenomeBuilder(parameterTree, configuration))
+                new GenomeBuilder(parameterTree, configuration),
+                customGrayBoxMethods)
         {
         }
 
@@ -115,14 +119,16 @@ namespace Optano.Algorithm.Tuner.Tuning
         /// <param name="genomeBuilder">
         /// The genome builder.
         /// </param>
+        /// <param name="customGrayBoxMethods">The <see cref="ICustomGrayBoxMethods{TResult}"/>, if any. Default is null.</param>
         public AlgorithmTuner(
             ITargetAlgorithmFactory<TTargetAlgorithm, TInstance, TResult> targetAlgorithmFactory,
             IRunEvaluator<TInstance, TResult> runEvaluator,
             IEnumerable<TInstance> trainingInstances,
             ParameterTree parameterTree,
             AlgorithmTunerConfiguration configuration,
-            GenomeBuilder genomeBuilder)
-            : base(targetAlgorithmFactory, runEvaluator, trainingInstances, parameterTree, configuration, genomeBuilder)
+            GenomeBuilder genomeBuilder,
+            ICustomGrayBoxMethods<TResult> customGrayBoxMethods = null)
+            : base(targetAlgorithmFactory, runEvaluator, trainingInstances, parameterTree, configuration, genomeBuilder, customGrayBoxMethods)
         {
         }
 

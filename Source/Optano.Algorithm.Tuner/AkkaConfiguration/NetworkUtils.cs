@@ -36,7 +36,7 @@ namespace Optano.Algorithm.Tuner.AkkaConfiguration
     /// <summary>
     /// Utility methods for networking.
     /// </summary>
-    internal static class NetworkUtils
+    public static class NetworkUtils
     {
         #region Public Methods and Operators
 

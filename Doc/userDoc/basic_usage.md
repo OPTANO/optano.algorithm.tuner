@@ -81,7 +81,8 @@ The parameter's name is specified via the `id` attribute, its type via the `doma
 A more complicated parameter tree definition using the other properties and types defined above can be found in the [example source code for Gurobi tuning](../developerDoc/gurobi.md).
 
 ## Provide what to tune for
-By default, *OAT* will tune for small run time. If, in addtion, you provide the  `--parK` argument, e.g. `--parK=10`, the tuning will use timeout penalized average run time (PAR-K) and penalize timed-out runs by multiplying there actual run time by K. To make *OAT* exploit run time tuning in order to improve its own run time by [enabling racing](parameters.md#racing), set `--enableRacing=true`.
+
+By default, *OAT* will tune for small run time. More precisely, *OAT* sorts first by the highest number of non-timed-out runs and then by the lowest unpenalized average runtime. If, in addtion, you provide the  `--parK` argument, e.g. `--parK=10`, the tuning will use timeout penalized average run time (PAR-K) and penalize timed-out runs by multiplying there actual run time by K. To make *OAT* exploit run time tuning in order to improve its own run time by [enabling racing](parameters.md#racing), set `--enableRacing=true`.
 
 You can also configure *OAT* to tune the last number that your algorithm writes to console before exiting. This value can then either be minimized or maximized.
 
@@ -106,8 +107,27 @@ In some cases, you might be interested in performance on a test set of instances
 
 	--testInstanceFolder=<instanceFolder>
 
-### Additional Parameters
+### General Parameters
 
 All parameters that can be specified either for master or for worker instances of *OAT* can be found at [Parameters](parameters.md). 
 
 _Note:_ Already the basic implementation of the *OAT* enables you to use the [Model-Based Crossover Operator](../developerDoc/model_based_crossover.md). The default setup the modified version of a random forest, that is described in the respective [paper](https://www.ijcai.org/Proceedings/15/Papers/109.pdf). More information on the [control parameters](parameters.md) and how to [specify them](parameter_selection.md#model-based-crossover) is given in the further documentation.
+
+### Specific Parameters
+
+In addition, the Generic *OAT* Application checks for the following specific parameters:
+
+<dl>
+ <dt>--master</dt>
+ <dd>Indicates that this instance of the application should act as master.</dd>
+ <dt>--basicCommand={COMMAND}</dt>
+ <dd>The basic comand to the target algorithm as it should be executed by the command line. The path to the instance file and the parameters will be set by replacing '{{instance}}' and '{{arguments}}'.</dd>
+  <dt>--parameterTree={ABSOLUTE_PATH}</dt>
+ <dd>Sets the path to an XML file specifying a parameter tree.</dd>
+  <dt>--byValue</dt>
+ <dd>Indicates that the target algorithm should be tuned by last number in its output instead of by process runtime. Usually, you should set --enableRacing=false and refrain from setting --cpuTimeout when using this.</dd>
+  <dt>--ascending={BOOL}[true]</dt>
+ <dd>Additional parameter if --byValue is set. Indicates whether low values are better than high ones.</dd>
+  <dt>--parK={VALUE} (-k) [0]</dt>
+ <dd>The factor for the penalization of the average runtime. This factor is only applied, if --byValue is not set. Needs to be greater or equal to 0. If 0, OAT sorts first by highest number of uncancelled runs and then by unpenalized average runtime.</dd>
+</dl>

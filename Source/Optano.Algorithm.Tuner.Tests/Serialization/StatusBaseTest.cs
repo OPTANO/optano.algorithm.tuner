@@ -43,7 +43,6 @@ namespace Optano.Algorithm.Tuner.Tests.Serialization
     /// Defines tests that should be implemented for each <see cref="StatusBase"/>.
     /// </summary>
     /// <typeparam name="T">Type of the status class to test.</typeparam>
-    [Collection(TestUtils.NonParallelCollectionGroupOneName)]
     public abstract class StatusBaseTest<T> : TestBase
         where T : StatusBase
     {

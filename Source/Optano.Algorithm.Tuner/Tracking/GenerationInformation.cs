@@ -47,7 +47,7 @@ namespace Optano.Algorithm.Tuner.Tracking
         /// Explanation of <see cref="ToString"/>.
         /// </summary>
         public const string LegendOfGenerationInformation =
-            "Generation;Elapsed(d:hh:mm:ss);Total # Evaluations;Average Train Incumbent;Average Test Incumbent;Strategy;Incumbent";
+            "Generation;Elapsed(d:hh:mm:ss);Total # Evaluations;Average Train Incumbent;Average Test Incumbent;Strategy;Incumbent;IncumbentID";
 
         #endregion
 
@@ -63,6 +63,7 @@ namespace Optano.Algorithm.Tuner.Tracking
         /// </param>
         /// <param name="strategy">The strategy type used in the generation.</param>
         /// <param name="incumbent">The incumbent.</param>
+        /// <param name="incumbentId">The incumbent ID.</param>
         /// <exception cref="ArgumentOutOfRangeException">
         /// Thrown if <paramref name="generation"/> or <paramref name="totalNumberOfEvaluations"/> are negative.
         /// </exception>
@@ -74,7 +75,8 @@ namespace Optano.Algorithm.Tuner.Tracking
             TimeSpan totalElapsedTime,
             int totalNumberOfEvaluations,
             Type strategy,
-            ImmutableGenome incumbent)
+            ImmutableGenome incumbent,
+            string incumbentId)
         {
             if (generation < 0)
             {
@@ -102,6 +104,7 @@ namespace Optano.Algorithm.Tuner.Tracking
             this.TotalNumberOfEvaluations = totalNumberOfEvaluations;
             this.Strategy = strategy ?? throw new ArgumentNullException(nameof(strategy));
             this.Incumbent = incumbent ?? throw new ArgumentNullException(nameof(incumbent));
+            this.IncumbentId = incumbentId;
         }
 
         #endregion
@@ -135,6 +138,11 @@ namespace Optano.Algorithm.Tuner.Tracking
         public ImmutableGenome Incumbent { get; }
 
         /// <summary>
+        /// Gets the incumbent ID.
+        /// </summary>
+        public string IncumbentId { get; }
+
+        /// <summary>
         /// Gets or sets <see cref="Incumbent"/>'s average score over the complete training set.
         /// </summary>
         public double? IncumbentTrainingScore { get; set; }
@@ -158,7 +166,7 @@ namespace Optano.Algorithm.Tuner.Tracking
         public override string ToString()
         {
             return FormattableString.Invariant(
-                $"{this.Generation};{this.TotalElapsedTime:G};{this.TotalNumberOfEvaluations};{this.IncumbentTrainingScore};{this.IncumbentTestScore};{this.Strategy.Name};{this.Incumbent}");
+                $"{this.Generation};{this.TotalElapsedTime:G};{this.TotalNumberOfEvaluations};{this.IncumbentTrainingScore};{this.IncumbentTestScore};{this.Strategy.Name};{this.Incumbent};{this.IncumbentId}");
         }
 
         #endregion

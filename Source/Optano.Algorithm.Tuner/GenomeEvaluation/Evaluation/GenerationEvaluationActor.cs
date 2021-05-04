@@ -34,6 +34,7 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
 
     using Akka.Actor;
     using Akka.Cluster;
@@ -44,6 +45,7 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
     using Optano.Algorithm.Tuner.GenomeEvaluation.Messages;
     using Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage.Messages;
     using Optano.Algorithm.Tuner.Genomes;
+    using Optano.Algorithm.Tuner.GrayBox;
     using Optano.Algorithm.Tuner.Logging;
     using Optano.Algorithm.Tuner.Parameters;
     using Optano.Algorithm.Tuner.TargetAlgorithm;
@@ -90,6 +92,11 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
         private readonly ParameterTree _parameterTree;
 
         /// <summary>
+        /// The <see cref="ICustomGrayBoxMethods{TResult}"/>.
+        /// </summary>
+        private readonly ICustomGrayBoxMethods<TResult> _customGrayBoxMethods;
+
+        /// <summary>
         /// The current <see cref="GenerationEvaluation{TInstance,TResult}" />'s sender. It is null if no generation evaluation is currently executed.
         /// </summary>
         private IActorRef _generationEvaluationIssuer;
@@ -131,18 +138,23 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
         /// <param name="configuration">The configuration.</param>
         /// <param name="resultStorageActor">The <see cref="IActorRef"/> to the result storage actor.</param>
         /// <param name="parameterTree">The parameter tree.</param>
+        /// <param name="customGrayBoxMethods">The <see cref="ICustomGrayBoxMethods{TResult}"/>.</param>
         public GenerationEvaluationActor(
             ITargetAlgorithmFactory<TTargetAlgorithm, TInstance, TResult> targetAlgorithmFactory,
             IRunEvaluator<TInstance, TResult> runEvaluator,
             AlgorithmTunerConfiguration configuration,
             IActorRef resultStorageActor,
-            ParameterTree parameterTree)
+            ParameterTree parameterTree,
+            ICustomGrayBoxMethods<TResult> customGrayBoxMethods)
         {
-            this._targetAlgorithmFactory = targetAlgorithmFactory;
-            this._runEvaluator = runEvaluator;
-            this._configuration = configuration;
-            this._resultStorageActor = resultStorageActor;
-            this._parameterTree = parameterTree;
+            this._targetAlgorithmFactory = targetAlgorithmFactory ?? throw new ArgumentNullException(nameof(targetAlgorithmFactory));
+            this._runEvaluator = runEvaluator ?? throw new ArgumentNullException(nameof(runEvaluator));
+            this._configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            this._resultStorageActor = resultStorageActor ?? throw new ArgumentNullException(nameof(resultStorageActor));
+            this._parameterTree = parameterTree ?? throw new ArgumentNullException(nameof(parameterTree));
+
+            // No need to check for null. Might be null by purpose.
+            this._customGrayBoxMethods = customGrayBoxMethods;
 
             // If Akka.Cluster gets used, watch for disconnecting cluster members to make evaluation rollbacks possible.
             if (Context.System.HasExtension<Cluster>())
@@ -168,7 +180,7 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
         /// <inheritdoc />
         public void Dispose()
         {
-            // Kill the evaluation actors + router
+            // Kill the evaluation actors
             try
             {
                 this._evaluationActorRouter?.Tell(new Broadcast(PoisonPill.Instance));
@@ -178,14 +190,20 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
                 // ignored
             }
 
+            // Kill the evaluation actor router
             try
             {
                 this._evaluationActorRouter?.Tell(PoisonPill.Instance);
             }
-            catch
+            catch (Exception)
             {
                 // ignored
             }
+
+            // Send status failure to issuer, if available.
+            this._generationEvaluationIssuer?.Tell(
+                new Status.Failure(new InvalidOperationException("Critical error occurred in the generation evaluation actor.")));
+            this.SetGenerationEvaluationIssuer(null);
         }
 
         #endregion
@@ -203,11 +221,37 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
                             this._targetAlgorithmFactory,
                             this._configuration,
                             this._parameterTree,
+                            this._customGrayBoxMethods,
                             this.Self))
                     .WithRouter(FromConfig.Instance),
                 AkkaNames.EvaluationActorRouter);
 
             base.PreStart();
+        }
+
+        /// <summary>
+        /// The supervisor strategy for the evaluation actors. Stops the tuning, whenever an exception is thrown on these actors.
+        /// </summary>
+        /// <returns>The supervisor strategy.</returns>
+        protected override SupervisorStrategy SupervisorStrategy()
+        {
+            return new AllForOneStrategy(
+                0,
+                Timeout.InfiniteTimeSpan,
+                exception =>
+                    {
+                        this.HandleErrorInEvaluationActor(exception, null);
+                        return Directive.Stop;
+                    });
+        }
+
+        /// <summary>
+        /// Sets the generation evaluation issuer.
+        /// </summary>
+        /// <param name="actorRef">The <see cref="IActorRef"/>.</param>
+        private void SetGenerationEvaluationIssuer(IActorRef actorRef)
+        {
+            this._generationEvaluationIssuer = actorRef;
         }
 
         /// <summary>
@@ -250,6 +294,7 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
         /// </summary>
         private void BecomeReady()
         {
+            this.SetGenerationEvaluationIssuer(null);
             this._evaluationsByAssignedActor = new Dictionary<IActorRef, GenomeInstancePair<TInstance>>();
             this.Become(this.Ready);
 
@@ -265,7 +310,7 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
             this.Receive<GenerationEvaluation<TInstance, TResult>>(
                 generationEvaluation =>
                     {
-                        this._generationEvaluationIssuer = this.Sender;
+                        this.SetGenerationEvaluationIssuer(this.Sender);
                         this._currentGenerationEvaluation = generationEvaluation;
                         this._evaluationStrategy = generationEvaluation.EvaluationStrategyFactory(
                             this._runEvaluator,
@@ -315,7 +360,7 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
 
                         if (this._evaluationStrategy.IsGenerationFinished)
                         {
-                            this._generationEvaluationIssuer.Tell(this._evaluationStrategy.CreateResultMessageForPopulationStrategy());
+                            this._generationEvaluationIssuer?.Tell(this._evaluationStrategy.CreateResultMessageForPopulationStrategy());
                             this.BecomeReady();
                             return;
                         }
@@ -349,7 +394,7 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
             this.Receive<HelloWorld>(
                 message =>
                     {
-                        // If the evaluation actor was already assigned to an evaluation, requeue its last assigned evaluation and ...
+                        // If the evaluation actor was already assigned to an evaluation, requeue its last assigned evaluation.
                         if (this._evaluationsByAssignedActor.Remove(this.Sender, out var lastEvaluation))
                         {
                             LoggingHelper.WriteLine(
@@ -358,25 +403,21 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
                             this._evaluationStrategy.RequeueEvaluation(lastEvaluation);
                         }
 
-                        // ... start the next not already started evaluation.
-                        // this.StartNextNotAlreadyStartedEvaluation(this.Sender);
                         this.Sender.Tell(new Poll());
                     });
 
             this.Receive<Accept>(
                 message =>
                     {
-                        // If the evaluation actor was already assigned to an evaluation, requeue its last assigned evaluation and ignore it for the rest of the generation.
+                        // If the evaluation actor was already assigned to an evaluation, requeue its last assigned evaluation.
                         if (this._evaluationsByAssignedActor.Remove(this.Sender, out var lastEvaluation))
                         {
                             LoggingHelper.WriteLine(
                                 VerbosityLevel.Warn,
-                                $"The generation evaluation actor assumed that the evaluation actor {this.Sender} was working on an evaluation, while receiving an accept message from it. Therefore requeue sender's last assigned evaluation and ignore sender for the rest of the generation.");
+                                $"The generation evaluation actor assumed that the evaluation actor {this.Sender} was working on an evaluation, while receiving an accept message from it. Therefore requeue sender's last assigned evaluation and reschedule sender.");
                             this._evaluationStrategy.RequeueEvaluation(lastEvaluation);
-                            return;
                         }
 
-                        // Else, start the next not already started evaluation.
                         this.StartNextNotAlreadyStartedEvaluation(this.Sender);
                     });
 
@@ -402,7 +443,6 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
                         // If the generation is not finished, start the next not already started evaluation ...
                         if (!this._evaluationStrategy.IsGenerationFinished)
                         {
-                            // this.StartNextNotAlreadyStartedEvaluation(this.Sender);
                             this.Sender.Tell(new Poll());
                             return;
                         }
@@ -412,8 +452,12 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
                         {
                             if (!this._configuration.EnableRacing)
                             {
-                                throw new InvalidOperationException(
+                                var exception = new InvalidOperationException(
                                     "The generation evaluation strategy reports that the generation is finished, but the generation evaluation actor thinks that there are running evaluations, while racing is disabled!");
+                                LoggingHelper.WriteLine(
+                                    VerbosityLevel.Warn,
+                                    $"Error: {exception.Message}");
+                                throw exception;
                             }
 
                             LoggingHelper.WriteLine(
@@ -423,7 +467,7 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
                         }
 
                         // ... else, send generation result to issuer.
-                        this._generationEvaluationIssuer.Tell(this._evaluationStrategy.CreateResultMessageForPopulationStrategy());
+                        this._generationEvaluationIssuer?.Tell(this._evaluationStrategy.CreateResultMessageForPopulationStrategy());
                         this.BecomeReady();
                     });
 
@@ -440,30 +484,27 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
         {
             while (this._evaluationStrategy.TryPopEvaluation(out var nextEvaluation))
             {
-                if (this._evaluationsByAssignedActor.Values.Contains(nextEvaluation))
+                if (this._evaluationsByAssignedActor.Values.Contains(nextEvaluation.GenomeInstancePair))
                 {
                     LoggingHelper.WriteLine(
                         VerbosityLevel.Info,
-                        $"The following evaluation is not started a second time, because it is already running.{Environment.NewLine}{nextEvaluation}");
+                        $"The following genome instance pair is not started a second time, because it is already running.{Environment.NewLine}{nextEvaluation.GenomeInstancePair}");
                 }
                 else
                 {
                     LoggingHelper.WriteLine(
                         VerbosityLevel.Info,
-                        $"Sending the following evaluation to evaluation actor {actor}.{Environment.NewLine}{nextEvaluation}");
-                    this._evaluationsByAssignedActor.Add(actor, nextEvaluation);
+                        $"Sending the following genome instance pair to evaluation actor {actor}.{Environment.NewLine}{nextEvaluation.GenomeInstancePair}");
+                    this._evaluationsByAssignedActor.Add(actor, nextEvaluation.GenomeInstancePair);
                     actor.Ask<EvaluationResult<TInstance, TResult>>(nextEvaluation).ContinueWith(
-                        (evalTask) =>
+                        (task) =>
                             {
-                                if (evalTask.IsFaulted)
+                                if (task.IsFaulted)
                                 {
-                                    LoggingHelper.WriteLine(
-                                        VerbosityLevel.Warn,
-                                        $"Critical error occurred in evaluation actor: {this.Sender}.{Environment.NewLine}Message:{evalTask?.Exception?.Message}");
-                                    this._generationEvaluationIssuer.Tell(new Status.Failure(evalTask.Exception));
+                                    this.HandleErrorInEvaluationActor(task.Exception, this.Sender);
                                 }
 
-                                return evalTask.Result;
+                                return task.Result;
                             }).PipeTo<EvaluationResult<TInstance, TResult>>(this.Self, this.Sender);
                     return;
                 }
@@ -471,6 +512,21 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
 
             actor.Tell(new NoJob());
             LoggingHelper.WriteLine(VerbosityLevel.Info, "No open evaluations left. Waiting for running evaluations!");
+        }
+
+        /// <summary>
+        /// Handles an error in an evaluation actor by logging the error and sending a <see cref="Status.Failure"/> message to the generation evaluation issuer.
+        /// </summary>
+        /// <param name="exception">The exception.</param>
+        /// <param name="actor">The evaluation actor.</param>
+        private void HandleErrorInEvaluationActor(Exception exception, IActorRef actor)
+        {
+            var actorString = actor == null ? "an evaluation actor" : $"evaluation actor {this.Sender}";
+            LoggingHelper.WriteLine(
+                VerbosityLevel.Warn,
+                $"Critical error occurred in {actorString}.{Environment.NewLine}Message: {exception.Message}");
+            this._generationEvaluationIssuer?.Tell(new Status.Failure(exception));
+            this.SetGenerationEvaluationIssuer(null);
         }
 
         /// <summary>

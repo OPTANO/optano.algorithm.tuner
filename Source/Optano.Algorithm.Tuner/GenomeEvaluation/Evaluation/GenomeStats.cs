@@ -103,8 +103,30 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
                                       + this._cancelledByRacingInstances.Count;
             if (this.TotalInstanceCount == 0)
             {
-                throw new ArgumentException($"You need to provide at least one instance in the GenomeStats constructor.");
+                var exception = new ArgumentException($"You need to provide at least one instance in the GenomeStats constructor.");
+                LoggingHelper.WriteLine(
+                    VerbosityLevel.Warn,
+                    $"Error: {exception.Message}");
+                throw exception;
             }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GenomeStats{TInstance,TResult}"/> class.
+        /// </summary>
+        /// <param name="genome">The genome.</param>
+        /// <param name="finishedInstances">The finished instances dictionary.</param>
+        public GenomeStats(ImmutableGenome genome, Dictionary<TInstance, TResult> finishedInstances)
+        {
+            this.Genome = genome;
+            this._openInstances = new HashSet<TInstance>();
+            this._runningInstances = new HashSet<TInstance>();
+            this._finishedInstances = finishedInstances;
+            this._cancelledByRacingInstances = new HashSet<TInstance>();
+            this.TotalInstanceCount = this._openInstances.Count
+                                      + this._runningInstances.Count
+                                      + this._finishedInstances.Count
+                                      + this._cancelledByRacingInstances.Count;
         }
 
         /// <summary>

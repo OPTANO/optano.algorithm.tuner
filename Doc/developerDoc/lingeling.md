@@ -6,7 +6,7 @@ The implementation we tune in this example is the SAT competition 2016 version `
 
 Since Lingeling is written for execution on a Linux machine, you need to execute *OPTANO Algorithm Lingeling Tuner* on a Linux machine. For details see [Cross Platform Execution of *OPTANO Algorithm Tuner*](../userDoc/cross_platform.md).
 
-Please consider the [technical preparations](technical_preparation.md) before using *OPTANO Algorithm Lingeling Tuner*.
+Please consider the [technical preparations](unittests.md) before using *OPTANO Algorithm Lingeling Tuner*.
 
 Moreover note, that you may use [FuzzSAT](http://fmv.jku.at/fuzzsat/) as a generator for your SAT instances.
 
@@ -25,8 +25,8 @@ Analogue to what is done in the [SAPS example](saps.md), *OPTANO Algorithm Linge
 
 In addition, it provides
 
-- `lingelingMemoryLimited.sh`, sets the memory limit on a Linux computer; and
-- `lingelingParamTree.xml`, the XML definition of the Lingeling parameter tree.
+- `lingelingMemoryLimited.sh`, handles the memory limit on a Linux computer; and
+- `parameterTree.xml`, the XML definition of the Lingeling parameter tree.
 
 ## Customization
 The Lingeling tuning classes are a simple example on [how to customize <i>OPTANO Algorithm Tuner</i>](advanced.md) to your liking.
@@ -56,19 +56,19 @@ The `Main` method shows how to call the tuner code from your customized applicat
 <dd>RandomForestAverageRank</dd>
 <dd>StandardRandomForest (same as Default)</dd>
  </dd>
- <dt>--factorParK={VALUE}</dt>
- <dd>The factor for the penalization of the average runtime. Needs to be greater than 0. Default is 10.</dd>
- <dt>--rngSeed={VALUE}</dt>
- <dd>The random number generator seed, which generates #numberOfSeeds seeds for every instance of the Lingeling algorithm. Default is 42.</dd>
- <dt>--numberOfSeeds={VALUE}</dt>
- <dd>Specifies the number of different seeds, which are combined with each distinct SAT instance file for evaluating the Lingeling algorithm. Needs to be greater than 0. Default is 1.</dd>
- <dt>--memoryLimitMegabyte={VALUE}</dt>
- <dd>Specifies the memory limit (in megabyte), which can be used for the algorithm. Needs to be greater than 0. Default is 4000.</dd>
+ <dt>--factorParK={VALUE} [0]</dt>
+ <dd>The factor for the penalization of the average runtime. Needs to be greater or equal to 0. If 0, OAT sorts first by highest number of uncancelled runs and then by unpenalized average runtime.</dd>
+ <dt>--rngSeed={VALUE} [42]</dt>
+ <dd>The random number generator seed, which generates #numberOfSeeds seeds for every instance of the Lingeling algorithm.</dd>
+ <dt>--numberOfSeeds={VALUE} [1]</dt>
+ <dd>Specifies the number of different seeds, which are combined with each distinct SAT instance file for evaluating the Lingeling algorithm. Needs to be greater than 0.</dd>
+ <dt>--memoryLimitMegabyte={VALUE} [4000]</dt>
+ <dd>Specifies the memory limit (in megabyte), which can be used for the algorithm. Needs to be greater than 0.</dd>
 </dl>
 
 ## A Closer Look on `lingelingMemoryLimited.sh`
 
-`lingelingMemoryLimited.sh` is a bash script for limiting the maximum amount of RAM that a single evaluation of Lingeling (i.e. a candidate parameterization on a specific InstanceSeedFile) can use. It is used by the `LingelingRunner.cs` as an adapter through which the call to the Lingeling executable is forwarded.
+The bash script `lingelingMemoryLimited.sh` is used limit the memory of each Lingeling evaluation during a tuning. It works as a wrapper for a single evaluation of Lingeling, which forwards the call to the Lingeling executable in `LingelingRunner.cs`.
 
 ```
 #!/bin/bash
@@ -80,7 +80,7 @@ echo $1
 exec $1
 ```
 
-Here, the command ``exec`` makes sure, that the execution of Lingeling is stopped, when the `lingelingMemoryLimited.sh` is terminated, e.g. because ``process.kill()`` is called by the `LingelingRunner`, or because the memory limit is exceeded.
+Here, the command ``exec`` makes sure, that the execution of Lingeling is stopped, when `lingelingMemoryLimited.sh` is terminated, e.g. because ``process.kill()`` is called by the `LingelingRunner`, or because the memory limit is exceeded.
 
 ## Error Handling
 

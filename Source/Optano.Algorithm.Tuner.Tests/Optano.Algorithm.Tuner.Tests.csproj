@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -41,7 +41,7 @@
     </PackageReference>
     <PackageReference Include="Xunit.SkippableFact" Version="1.3.12" />
   </ItemGroup>
-
+  
   <ItemGroup>
     <ProjectReference Include="..\Optano.Algorithm.Tuner\Optano.Algorithm.Tuner.csproj" />
 	<AdditionalFiles Include="..\..\stylecop.json" />
@@ -54,6 +54,27 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="GrayBox\TestData\dataLog_generation_0_process_123_id_1_Finished.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="GrayBox\TestData\genomeInstancePairs.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="GrayBox\TestData\brokenDataLog.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="GrayBox\TestData\dataLog_generation_0_process_123_id_2_CancelledByGrayBox.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="GrayBox\TestData\dataLog_generation_0_process_123_id_0_Finished.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+	    <None Update="GrayBox\TestData\generationGenomeComposition.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+	    <None Update="GrayBox\TestData\generationInstanceComposition.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
 	<None Include="..\..\Tools\TestApplication.dll" Link="Tools\TestApplication.dll">
 		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	</None>

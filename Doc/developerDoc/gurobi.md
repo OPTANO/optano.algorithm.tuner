@@ -6,7 +6,7 @@ Our example concentrates on tuning Gurobi on LPs, tuning for success rate first,
 
 We tune Gurobi via the Gurobi90.NET package, integrated in [OPTANO.Modeling.Gurobi](https://www.nuget.org/packages/OPTANO.Modeling.Gurobi/9.0.1.23).
 
-Please consider the [technical preparations](technical_preparation.md) before using *OPTANO Algorithm Gurobi Tuner*.
+Please consider the [technical preparations](unittests.md) before using *OPTANO Algorithm Gurobi Tuner*.
 
 ## Overview
 Analogue to what is done in the [SAPS example](saps.md), *OPTANO Algorithm Gurobi Tuner* contains the following files:
@@ -23,7 +23,10 @@ In addition, it provides
 - `parameterTree.xml`, the XML definition of the Gurobi parameter tree;
 - `GurobiRunEvaluator.cs`, describing the custom tuning metric and racing strategy;
 - `GurobiResult.cs`, storing all run properties relevant to the tuning metric; and
-- `GurobiCallback.cs`, responsible for checking for cancellations in Gurobi runs.
+- `GurobiCallback.cs`, responsible for checking for cancellations in Gurobi runs; and
+- `GurobiGrayBoxMethods.cs`, implementing `ICustomGrayBoxMethods` to support [gray box tuning](gray_box_tuning.md); and
+- `GurobiRuntimeFeatures.cs`, implementing `AdapterFeaturesBase` and containing the runtime features of Gurobi; and
+- `GurobiInstanceFeatures.cs`, implementing `AdapterFeaturesBase` and containing some rudimentary instance features.
 
 ## Tuneable Parameters
 *OPTANO Algorithm Gurobi Tuner* tunes 55 Gurobi parameters relevant for LP solving, many of them influencing each other. Explanations for each parameter are given as comments in the `parameterTree.xml` file and can also be found at the [official Gurobi website](http://www.gurobi.com/documentation/9.0/refman/parameters.html#sec:Parameters).
@@ -78,21 +81,61 @@ For parsing the parameters, a `GurobiRunnerConfigurationParser` is implemented w
  <dd>Indicates that this instance of the application should act as master.</dd>
  <dt>--grbThreadCount={VALUE}</dt>
  <dd>Sets the maximum number of threads that may be used by Gurobi. Default is 4. Needs to be greater than 0.</dd>
- <dt>--numberOfSeeds={VALUE}</dt>
- <dd>Sets the number of random seeds to use for every .mps file found in the instance folder. For each file, numberOfSeeds many independent seeds will be used, effectively increasing the instance count by a factor of numberOfSeeds. Default is 1. Needs to be greater than 0.</dd>
- <dt>--rngSeed={VALUE}</dt>
- <dd>Sets the random number generator seed, which generates #numberOfSeeds seeds for every instance of the Gurobi algorithm. Default is 42.</dd>
- <dt>--grbNodefileDirectory={PATH}</dt>
- <dd>Sets the [nodefile directory of Gurobi](https://www.gurobi.com/documentation/8.1/refman/nodefiledir.html). Default is a subfolder 'nodefiles' in the current working directory.</dd>
- <dt>--grbNodefileStartSizeGigabyte={VALUE}</dt>
- <dd>Sets the [memory threshold in gigabyte of Gurobi](https://www.gurobi.com/documentation/8.1/refman/nodefilestart.html) for writing MIP tree nodes in nodefile on disk. Default is 0.5 GB. Needs to be greater than or equal to 0.</dd>
- <dt>--grbTerminationMipGap={VALUE}</dt>
- <dd>Sets the [termination mip gap of Gurobi](https://www.gurobi.com/documentation/8.1/refman/mipgap2.html). Default is 0.01. Needs to be greater than or equal to 0.</dd>
+ <dt>--numberOfSeeds={VALUE} [1]</dt>
+ <dd>Sets the number of random seeds to use for every .mps file found in the instance folder. For each file, numberOfSeeds many independent seeds will be used, effectively increasing the instance count by a factor of numberOfSeeds. Needs to be greater than 0.</dd>
+ <dt>--rngSeed={VALUE} [42]</dt>
+ <dd>Sets the random number generator seed, which generates #numberOfSeeds seeds for every instance of the Gurobi algorithm.</dd>
+ <dt>--grbNodefileDirectory={PATH} [<i>current directory</i>/nodefiles]</dt>
+ <dd>Sets the [nodefile directory of Gurobi](https://www.gurobi.com/documentation/8.1/refman/nodefiledir.html).</dd>
+ <dt>--grbNodefileStartSizeGigabyte={VALUE} [0.5]</dt>
+ <dd>Sets the [memory threshold in gigabyte of Gurobi](https://www.gurobi.com/documentation/8.1/refman/nodefilestart.html) for writing MIP tree nodes in nodefile on disk. Needs to be greater than or equal to 0.</dd>
+ <dt>--grbTerminationMipGap={VALUE} [0.01]</dt>
+ <dd>Sets the [termination mip gap of Gurobi](https://www.gurobi.com/documentation/8.1/refman/mipgap2.html). Needs to be greater than or equal to 0.</dd>
 </dl>
 
 ## Error Handling
 
 To handle upcoming errors (e.g. crash of target algorithm) reasonable, the method `CreateGurobiResult()` is implemented in `GurobiRunner`. This method checks the [status codes of Gurobi](https://www.gurobi.com/documentation/9.0/refman/optimization_status_codes.html) and handles the result accordingly. If the status of Gurobi is `"LOADED"`, `"TIME_LIMIT"`, `"INTERRUPTED"`, `"NUMERIC"` or `"INPROGRESS"` it creates a cancelled result and sets the corresponding runtime to the given timeout.
+
+## Gray Box Tuning
+
+As mentioned in the [gray box tuning](gray_box_tuning.md) section, *OPTANO Algorithm Gurobi Tuner* gives an example on how to implement the `IGrayBoxTargetAlgorithm` and `ICustomGrayBoxMethods` interfaces to support gray box tuning.
+
+In this example we use the [callback codes of Gurobi](https://www.gurobi.com/documentation/9.0/refman/cb_codes.html) in `GurobiCallback` to receive the desired runtime features and pass them to the `GurobiRunner`, which implements the `IGrayBoxTargetAlgorithm` interface. Moreover, the `GurobiGrayBoxMethods` implement the `ICustomGrayBoxMethods` interface and returns the desired gray box features and feature names from a given [data record entry](gray_box_tuning.md#DataRecordEntry).
+
+More precisecly, *OPTANO Algorithm Gurobi Tuner* makes use of the following runtime and instance features to detect timeouts at runtime.
+* Current expended wall clock time
+* Current and last cutting planes count
+* Current and last explored node count
+* Current and last feasible solutions count
+* Current and last MIP gap
+* Current and last simplex iterations count
+* Current and last unexplored node count
+* Current number of variables
+* Current number of integer variables
+* Current number of linear constraints
+* Current number of non-zero coefficients
+
+### Gray Box Simulation
+
+As mentioned in the [gray box simulation](gray_box_simulation.md) section, the *OPTANO Algorithm Gurobi Tuner* can easily form the basis for gray box simulations to estimate the impact of the presented [gray box parameters](gray_box_tuning.md). Please refer to referenced section for detailed information on how to use and evaluate this simulation.
+
+### Post Tuning Runner
+
+As mentioned in the [post tuning runner](post_tuning_runner.md) section, *OPTANO Algorithm Gurobi Tuner* gives an example on how to implement the `ParallelPostTuningRunner` in your custom target algorithm adapter to extend *OAT* by an additional run mode, responsible for post tuning data recording.
+
+In particular, it makes use of the `PostTuningAdapterArgumentParser` base class to support the following additional post tuning parameters.
+
+<dl>
+ <dt>--postTuning</dt>
+ <dd>Indicates that this instance of the application should act as post tuning runner.</dd>
+ <dt>--pathToPostTuningFile={ABSOLUTE_PATH} [<i>current directory</i>/postTuningRuns.csv]</dt>
+ <dd>Sets the path to the post tuning file, containing the desired genome instance pairs.</dd>
+  <dt>--indexOfFirstPostTuningRun={VALUE} [0]</dt>
+ <dd>Sets the index of the first post tuning genome instance pair to evaluate.</dd>
+  <dt>--numberOfPostTuningRuns={VALUE} [1]</dt>
+ <dd>Sets the number of post tuning runs to start in total.</dd>
+</dl>
 
 ## How to Use
 

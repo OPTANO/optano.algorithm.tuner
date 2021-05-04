@@ -12,7 +12,7 @@
     <iconUrl>https://optano.com/wp-content/uploads/2016/07/OPTANO_Logo_weiss_auf_violett_quadr.png</iconUrl>
 	<icon>logo.png</icon>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
-	<tags>algorithm tuning configuration gurobi ubisat bbob lingelin saps application optimization automatic</tags>
+	<tags>algorithm tuning configuration parameter gurobi ubcsat bbob lingeling saps aclib application optimization automatic</tags>
     <description>This package provides an algorithm which is a able to tune (improve the performance of) an algorithm.</description>
     <summary>In order to tune an algorithm, the user needs to provide the parameter tree for her algorithm. The parameter tree specifies which parameters the algorithm exposes and how they interact with each other. 
 
@@ -31,6 +31,7 @@
         <dependency id="MathNet.Numerics" version="4.9.0" />
         <dependency id="NDesk.Options.Patched" version="0.3.2" />
         <dependency id="OptimizedPriorityQueue" version="5.0.0" />
+		<dependency id="TinyCsvParser" version="2.6.0" />
       </group>
     </dependencies>
   </metadata>

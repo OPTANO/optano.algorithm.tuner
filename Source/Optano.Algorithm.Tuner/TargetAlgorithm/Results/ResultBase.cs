@@ -53,9 +53,20 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm.Results
         /// <param name="runtime">
         /// The observed runtime.
         /// </param>
-        protected ResultBase(TimeSpan runtime)
+        /// <param name="targetAlgorithmStatus">
+        /// The target algorithm status.
+        /// </param>
+        protected ResultBase(TimeSpan runtime, TargetAlgorithmStatus targetAlgorithmStatus)
         {
+            if (targetAlgorithmStatus == TargetAlgorithmStatus.Running)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(targetAlgorithmStatus),
+                    "While creating a result, the target algorithm status should not be running.");
+            }
+
             this.Runtime = runtime;
+            this.TargetAlgorithmStatus = targetAlgorithmStatus;
         }
 
         #endregion
@@ -68,9 +79,15 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm.Results
         public TimeSpan Runtime { get; protected set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the run was cancelled due to CPU timeout.
+        /// Gets a value indicating whether the run was cancelled.
         /// </summary>
-        public bool IsCancelled { get; protected set; }
+        public bool IsCancelled => this.TargetAlgorithmStatus != TargetAlgorithmStatus.Running
+                                   && this.TargetAlgorithmStatus != TargetAlgorithmStatus.Finished;
+
+        /// <summary>
+        /// Gets or sets the final <see cref="TargetAlgorithmStatus"/>.
+        /// </summary>
+        public TargetAlgorithmStatus TargetAlgorithmStatus { get; protected set; }
 
         #endregion
 
@@ -82,12 +99,22 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm.Results
         /// <param name="runtime">
         /// Run's duration before cancellation. 
         /// </param>
+        /// <param name="targetAlgorithmStatus">The final <see cref="TargetAlgorithmStatus"/>. Default is TargetAlgorithmStatus.CancelledByTimeout.</param>
         /// <returns>
         /// A <see cref="ResultBase{TResultType}"/> representing a cancelled run.
         /// </returns>
-        public static TResultType CreateCancelledResult(TimeSpan runtime)
+        public static TResultType CreateCancelledResult(
+            TimeSpan runtime,
+            TargetAlgorithmStatus targetAlgorithmStatus = TargetAlgorithmStatus.CancelledByTimeout)
         {
-            return new TResultType() { IsCancelled = true, Runtime = runtime };
+            if (targetAlgorithmStatus == TargetAlgorithmStatus.Running || targetAlgorithmStatus == TargetAlgorithmStatus.Finished)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(targetAlgorithmStatus),
+                    "While creating a cancelled result, the target algorithm status should not be running or finished.");
+            }
+
+            return new TResultType() { TargetAlgorithmStatus = targetAlgorithmStatus, Runtime = runtime };
         }
 
         /// <summary>
@@ -102,6 +129,32 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm.Results
             return this.IsCancelled
                        ? FormattableString.Invariant($"Cancelled after {this.Runtime:G}")
                        : FormattableString.Invariant($"{this.Runtime:G}");
+        }
+
+        /// <summary>
+        /// Returns the header.
+        /// </summary>
+        /// <returns>The header.</returns>
+        public virtual string[] GetHeader()
+        {
+            return new[]
+                       {
+                           "TargetAlgorithmStatus",
+                           "Runtime",
+                       };
+        }
+
+        /// <summary>
+        /// Returns the string array representation.
+        /// </summary>
+        /// <returns>The string array representation.</returns>
+        public virtual string[] ToStringArray()
+        {
+            return new[]
+                       {
+                           this.TargetAlgorithmStatus.ToString(),
+                           $"{this.Runtime.TotalMilliseconds:0}",
+                       };
         }
 
         #endregion

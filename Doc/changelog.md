@@ -1,6 +1,22 @@
 # _OPTANO Algorithm Tuner_ Change-Log
 
-_OPTANO Algorithm Tuner_ is a Genetic Algorithm implementation. It finds near-optimal parameters (a configuration) for any given target algorithm. 
+_OPTANO Algorithm Tuner_ (*OAT*) is a Genetic Algorithm implementation. It finds near-optimal parameters (a configuration) for any given target algorithm. 
+
+## Version 2.0.0 (2021-05-04)
+
+Changes:
+
+- Feature: Introduce [gray box extension](developerDoc/gray_box_tuning.md) to detect out-timing target algorithm runs at runtime. By enabling this extension, *OAT* can find good configurations faster than its black box counterpart. Detailed information can be found at
+    - [Gray Box Tuning](developerDoc/gray_box_tuning.md)
+    - [Gray Box Simulation](developerDoc/gray_box_simulation.md)
+    - [Post Tuning Runner](developerDoc/post_tuning_runner.md)
+- Feature: Add [ACLib adapter](developerDoc/aclib.md) to [advanced examples](developerDoc/examples.md) of *OAT*.
+- Feature: Introduce `allowLocalEvaluations` parameter to control whether target algorithm evaluations can be executed on the master node. 
+- Feature: Introduce `tuningRandomSeed` parameter to control the initial population and the subset of instances, used per generation.
+- Improvement: Tighten the racing strategies of the [Generic *OAT* Application](userDoc/basic_usage.md) and some [advanced examples](developerDoc/examples.md) of *OAT* (i.e. [Lingeling](developerDoc/lingeling.md), [Gurobi](developerDoc/gurobi.md) and [SAPS](developerDoc/saps.md)). Again, this led to a strong reduction of required compute time, in addition to the one achieved in version 1.0.0.
+- Improvement: Rework usage of [Akka.net](https://getakka.net/) in *OAT*: More stability, better logging.
+- Improvement: The new [memory limitation page](developerDoc/memory_limited.md) now provides two ways to limit the memory of each target algorithm evaluation of *OAT* in your custom *OAT* adapter.
+- Improvement: Further code clean ups + additional unit tests in *OAT* and its [advanced examples](developerDoc/examples.md).
 
 ## Version 1.0.0 (2021-03-25)
 

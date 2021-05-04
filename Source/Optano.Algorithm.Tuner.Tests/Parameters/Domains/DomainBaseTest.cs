@@ -37,12 +37,9 @@ namespace Optano.Algorithm.Tuner.Tests.Parameters.Domains
     using Optano.Algorithm.Tuner.Genomes.Values;
     using Optano.Algorithm.Tuner.Parameters.Domains;
 
-    using Xunit;
-
     /// <summary>
     /// Defines tests that should be implemented for each <see cref="IDomain"/>.
     /// </summary>
-    [Collection(TestUtils.NonParallelCollectionGroupOneName)]
     public abstract class DomainBaseTest : IDisposable
     {
         #region Constructors and Destructors
@@ -54,7 +51,7 @@ namespace Optano.Algorithm.Tuner.Tests.Parameters.Domains
         {
             ProcessUtils.SetDefaultCultureInfo(CultureInfo.InvariantCulture);
             Randomizer.Reset();
-            Randomizer.Configure(new Random().Next());
+            Randomizer.Configure();
         }
 
         #endregion

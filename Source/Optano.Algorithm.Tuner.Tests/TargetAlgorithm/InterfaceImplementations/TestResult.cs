@@ -33,6 +33,7 @@ namespace Optano.Algorithm.Tuner.Tests.TargetAlgorithm.InterfaceImplementations
 {
     using System;
 
+    using Optano.Algorithm.Tuner.TargetAlgorithm;
     using Optano.Algorithm.Tuner.TargetAlgorithm.Results;
 
     /// <summary>
@@ -47,12 +48,13 @@ namespace Optano.Algorithm.Tuner.Tests.TargetAlgorithm.InterfaceImplementations
         /// </summary>
         /// <param name="runtime">The runtime to store.</param>
         public TestResult(TimeSpan runtime)
-            : base(runtime)
+            : base(runtime, TargetAlgorithmStatus.Finished)
         {
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TestResult"/> class.
+        /// Empty ctor required for <see cref = "ResultBase{TResultType}.CreateCancelledResult" />.
         /// </summary>
         public TestResult()
             : this(TimeSpan.Zero)

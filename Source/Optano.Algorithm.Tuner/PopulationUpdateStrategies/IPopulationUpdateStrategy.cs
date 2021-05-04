@@ -36,6 +36,7 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies
     using Optano.Algorithm.Tuner.GenomeEvaluation;
     using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.MachineLearning;
+    using Optano.Algorithm.Tuner.MachineLearning.GenomeRepresentation;
     using Optano.Algorithm.Tuner.TargetAlgorithm.Instances;
     using Optano.Algorithm.Tuner.TargetAlgorithm.Results;
     using Optano.Algorithm.Tuner.Tracking;
@@ -58,19 +59,25 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies
         /// <param name="basePopulation">Population to start with.</param>
         /// <param name="currentIncumbent">Most recent incumbent genome. Might be <c>null</c>.</param>
         /// <param name="instancesForEvaluation">Instances to use for evaluation.</param>
+        /// <param name="currentGeneration">The current generation.</param>
+        /// <param name="useGrayBoxInGeneration">Boolean indicating whether to use gray box tuning in current generation.</param>
         void Initialize(
             Population basePopulation,
             IncumbentGenomeWrapper<TResult> currentIncumbent,
-            IEnumerable<TInstance> instancesForEvaluation);
+            IEnumerable<TInstance> instancesForEvaluation,
+            int currentGeneration,
+            bool useGrayBoxInGeneration);
 
         /// <summary>
         /// Performs an iteration of the population update strategy.
         /// </summary>
         /// <param name="currentGeneration">The current generation index.</param>
         /// <param name="instancesForEvaluation">Instances to use for evaluation.</param>
+        /// <param name="useGrayBoxInGeneration">Boolean indicating whether to use gray box tuning in current generation.</param>
         void PerformIteration(
             int currentGeneration,
-            IEnumerable<TInstance> instancesForEvaluation);
+            IEnumerable<TInstance> instancesForEvaluation,
+            bool useGrayBoxInGeneration);
 
         /// <summary>
         /// Finds an incumbent genome.
@@ -102,6 +109,12 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies
         /// Logs information about the current population to console.
         /// </summary>
         void LogPopulationToConsole();
+
+        /// <summary>
+        /// Gets all competitive genomes as <see cref="GenomeDoubleRepresentation"/>.
+        /// </summary>
+        /// <returns>The competitive genomes as <see cref="GenomeDoubleRepresentation"/>.</returns>
+        List<GenomeDoubleRepresentation> GetAllCompetitiveGenomesAsGenomeDoubleRepresentation();
 
         /// <summary>
         /// Exports the standard deviations of the numerical features of the current population's competitive part via

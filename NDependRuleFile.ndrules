@@ -1013,7 +1013,7 @@ select new { t, t.LCOM, t.LCOMHS,
     </Group>
     <Group Name="Object Oriented Design" Active="True" ShownInReport="True">
       <Query Active="True" DisplayList="True" DisplayStat="False" DisplaySelectionView="False" IsCriticalRule="True"><![CDATA[// <Name>Base class should not use derivatives</Name>
-// <Id>ND1201:BaseClassShouldNotUseDerivatives</Id>
+// <Id>ND1202:BaseClassShouldNotUseDerivatives</Id>
 warnif count > 0 
 from baseClass in JustMyCode.Types
 where baseClass.IsClass && baseClass.NbChildren > 0 // <-- for optimization!

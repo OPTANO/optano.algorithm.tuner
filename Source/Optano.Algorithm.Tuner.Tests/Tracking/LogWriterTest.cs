@@ -37,7 +37,6 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
     using System.IO;
     using System.Linq;
     using System.Threading;
-    using System.Threading.Tasks;
 
     using Optano.Algorithm.Tuner.Configuration;
     using Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage.Messages;
@@ -55,7 +54,6 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
     /// <summary>
     /// Contains tests for the <see cref="LogWriter{TInstance,TResult}"/> class.
     /// </summary>
-    [Collection(TestUtils.NonParallelCollectionGroupOneName)]
     public class LogWriterTest : IDisposable
     {
         #region Static Fields
@@ -335,80 +333,6 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
             this._writer = new LogWriter<InstanceFile, RuntimeResult>(this._parameterTree, this._configuration);
             Assert.Throws<DirectoryNotFoundException>(
                 () => this._writer.LogFinishedGeneration(0, 1, this._genomeBuilder.CreateRandomGenome(0), LogWriterTest.EmptyResults));
-        }
-
-        /// <summary>
-        /// Checks that <see cref="LogWriter{I,R}.LogFinishedGeneration"/> only replaces a log file after a new one was
-        /// completed.
-        /// </summary>
-        [Fact]
-        public void LogFinishedGenerationOnlyDeletesLastLogAfterWriteFinished()
-        {
-            /* Watch directory to see what happens with log files. */
-            var tempFileChanged = DateTime.MaxValue;
-            var logFileDeleted = DateTime.MaxValue;
-            var tempFileRenamed = DateTime.MaxValue;
-            using (var watcher = new FileSystemWatcher(PathUtils.GetAbsolutePathFromCurrentDirectory(string.Empty)))
-            {
-                watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.LastAccess;
-                watcher.EnableRaisingEvents = true;
-
-                /* Remember when the temporary file got changed last. */
-                watcher.Changed += (sender, e) =>
-                    {
-                        if (e.Name.EndsWith(LogWriter<InstanceFile, RuntimeResult>.WorkInProgressSuffix))
-                        {
-                            tempFileChanged = DateTime.Now;
-                        }
-                        else
-                        {
-                            Assert.True(false, $"Changed file {e.FullPath}.");
-                        }
-                    };
-                /* Remember when old log file was deleted. */
-                watcher.Deleted += (sender, e) =>
-                    {
-                        if (e.FullPath.Equals(LogWriterTest.LogFilePath))
-                        {
-                            logFileDeleted = DateTime.Now;
-                        }
-                        else
-                        {
-                            Assert.True(false, $"Deleted file {e.FullPath}.");
-                        }
-                    };
-                /* Remember when temporary file was renamed to be the log file. */
-                watcher.Renamed += (sender, e) =>
-                    {
-                        if (e.OldName.EndsWith(LogWriter<InstanceFile, RuntimeResult>.WorkInProgressSuffix))
-                        {
-                            tempFileRenamed = DateTime.Now;
-                            Assert.True(LogWriterTest.LogFilePath == e.FullPath, "Should have replaced log file.");
-                        }
-                        else
-                        {
-                            Assert.True(false, $"Renamed file {e.FullPath}.");
-                        }
-                    };
-
-                /* Write to file. */
-                this._writer.LogFinishedGeneration(
-                    0,
-                    1,
-                    this._genomeBuilder.CreateRandomGenome(0),
-                    new GenomeResults<InstanceFile, RuntimeResult>(new ImmutableGenome(new Genome()), new Dictionary<InstanceFile, RuntimeResult>()));
-
-                /* Wait a while for all events to be handled. */
-                Task.Delay(TimeSpan.FromMilliseconds(100)).Wait();
-
-                /* Make sure log file was replaced at last possible moment. */
-                Assert.True(
-                    tempFileChanged < logFileDeleted,
-                    "Log file should have been deleted only after the last change to the temporary file.");
-                Assert.True(
-                    tempFileRenamed - logFileDeleted <= TimeSpan.FromMilliseconds(50),
-                    "Temporary file should have been renamed directly after old log file was deleted.");
-            }
         }
 
         #endregion

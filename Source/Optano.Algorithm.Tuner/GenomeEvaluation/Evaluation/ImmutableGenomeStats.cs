@@ -32,12 +32,9 @@
 namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
 {
     using System;
-    using System.Collections.Generic;
     using System.Collections.Immutable;
-    using System.Linq;
 
     using Optano.Algorithm.Tuner.Genomes;
-    using Optano.Algorithm.Tuner.Logging;
     using Optano.Algorithm.Tuner.TargetAlgorithm.Instances;
     using Optano.Algorithm.Tuner.TargetAlgorithm.Results;
 
@@ -123,47 +120,6 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
         /// Gets a value indicating whether this genome is a candidate to use for killing other evaluations, when performing racing.
         /// </summary>
         public bool AllInstancesFinishedWithoutCancelledResult => this._genomeStats.AllInstancesFinishedWithoutCancelledResult;
-
-        #endregion
-
-        #region Public Methods and Operators
-
-        /// <summary>
-        /// Creates a list of <see cref="ImmutableGenomeStats{TInstance,TResult}"/> from the given parameter.
-        /// </summary>
-        /// <param name="genomes">The genomes.</param>
-        /// <param name="instances">The instances.</param>
-        /// <param name="resultDictionary">The result dictionary.</param>
-        /// <returns>The list of <see cref="ImmutableGenomeStats{TInstance,TResult}"/>.</returns>
-        public static List<ImmutableGenomeStats<TInstance, TResult>> CreateImmutableGenomeStats(
-            IReadOnlyList<ImmutableGenome> genomes,
-            IReadOnlyList<TInstance> instances,
-            Dictionary<GenomeInstancePair<TInstance>, TResult> resultDictionary)
-        {
-            var allGenomeStats = new List<ImmutableGenomeStats<TInstance, TResult>>();
-            foreach (var genome in genomes)
-            {
-                var currentGenomeStats = new GenomeStats<TInstance, TResult>(genome, Enumerable.Empty<TInstance>(), instances);
-                foreach (var instance in instances)
-                {
-                    var currentGenomeInstancePair = new GenomeInstancePair<TInstance>(genome, instance);
-                    if (!resultDictionary.TryGetValue(currentGenomeInstancePair, out var result))
-                    {
-                        LoggingHelper.WriteLine(
-                            VerbosityLevel.Warn,
-                            $"Cannot create the desired immutable genome stats, because for the following genome instance pair no result was provided.{Environment.NewLine}{currentGenomeInstancePair}");
-                        throw new InvalidOperationException(
-                            $"Cannot create the desired immutable genome stats, because for the following genome instance pair no result was provided.{Environment.NewLine}{currentGenomeInstancePair}");
-                    }
-
-                    currentGenomeStats.FinishInstance(instance, result);
-                }
-
-                allGenomeStats.Add(currentGenomeStats.ToImmutable());
-            }
-
-            return allGenomeStats;
-        }
 
         #endregion
     }

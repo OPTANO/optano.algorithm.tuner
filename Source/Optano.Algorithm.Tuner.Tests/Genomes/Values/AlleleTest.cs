@@ -38,7 +38,6 @@ namespace Optano.Algorithm.Tuner.Tests.Genomes.Values
     /// <summary>
     /// Contains tests for class <see cref="Allele{T}"/>.
     /// </summary>
-    [Collection(TestUtils.NonParallelCollectionGroupOneName)]
     public class AlleleTest
     {
         #region Public Methods and Operators

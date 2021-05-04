@@ -52,6 +52,40 @@ namespace Optano.Algorithm.Tuner.DistributedExecution
     /// </summary>
     public class MasterArgumentParser : HelpSupportingArgumentParser<AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder>
     {
+        #region Constants
+
+        /// <summary>
+        /// The option name of max parallel evaluations.
+        /// </summary>
+        public const string MaxParallelEvaluationsOptionName = "maxParallelEvaluations";
+
+        /// <summary>
+        /// The option name of cpu timeout.
+        /// </summary>
+        public const string CpuTimeoutOptionName = "cpuTimeout";
+
+        /// <summary>
+        /// The option name of enable data recording.
+        /// </summary>
+        public const string EnableDataRecordingOptionName = "enableDataRecording";
+
+        /// <summary>
+        /// The option name of data record directory.
+        /// </summary>
+        public const string DataRecordDirectoryOptionName = "dataRecordDirectory";
+
+        /// <summary>
+        /// The option name of data record update interval.
+        /// </summary>
+        public const string DataRecordUpdateIntervalOptionName = "dataRecordUpdateInterval";
+
+        /// <summary>
+        /// The master arguments headline.
+        /// </summary>
+        public const string MasterArgumentsHeadline = "OAT arguments for master";
+
+        #endregion
+
         #region Fields
 
         /// <summary>
@@ -88,6 +122,11 @@ namespace Optano.Algorithm.Tuner.DistributedExecution
         /// If specified by parsed arguments, this variable contains the desired port for the cluster seed.
         /// </summary>
         private int _port = 8081;
+
+        /// <summary>
+        /// If specified by parsed arguments, this variable contains a value indicating whether target algorithm evaluations on the master node are allowed.
+        /// </summary>
+        private bool _allowLocalEvaluations = true;
 
         /// <summary>
         /// If specified by parsed arguments, this variable contains the path to the status file directory.
@@ -204,6 +243,22 @@ namespace Optano.Algorithm.Tuner.DistributedExecution
         }
 
         /// <summary>
+        /// Gets a value indicating whether target algorithm evaluations on the master node are allowed.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if called before <see cref="ParseArguments(string[])" />
+        /// has been executed.
+        /// </exception>
+        public bool AllowLocalEvaluations
+        {
+            get
+            {
+                this.ThrowExceptionIfNoParsingHasBeenDone();
+                return this._allowLocalEvaluations;
+            }
+        }
+
+        /// <summary>
         /// Gets the status file directory.
         /// </summary>
         /// <exception cref="InvalidOperationException">
@@ -280,14 +335,14 @@ namespace Optano.Algorithm.Tuner.DistributedExecution
         public override void PrintHelp(bool printHelpParameter)
         {
             var helperTextBuilder = new StringBuilder();
-            helperTextBuilder.AppendLine("Arguments for master:");
+            helperTextBuilder.AppendLine($"{MasterArgumentParser.MasterArgumentsHeadline}:");
 
             var textWriter = new StringWriter(helperTextBuilder);
             this.CreatePreprocessingOptionSet(printHelpParameter).WriteOptionDescriptions(textWriter);
             this.CreateBaseOptionSet().WriteOptionDescriptions(textWriter);
             helperTextBuilder.AppendLine("\nAdditional options for the master if a new tuning is started (i.e. --continue not provided):");
             this.CreateAdditionalOptionsForNewTunings().WriteOptionDescriptions(textWriter);
-            helperTextBuilder.AppendLine("\nThe maximum number of parallel evaluations per node (i.e. --maxParallelEvaluations) must be provided.");
+            helperTextBuilder.AppendLine("\nThe maximum number of parallel evaluations per node (i.e. --maxParallelEvaluations) must be provided for master.");
 
             Console.WriteLine(helperTextBuilder.ToString());
 
@@ -328,6 +383,7 @@ namespace Optano.Algorithm.Tuner.DistributedExecution
             this.AddGeneticAlgorithmOptions(options);
             this.AddTargetAlgorithmSpecificOptions(options);
             this.AddModelBasedCrossoverOptions(options);
+            this.AddDataRecordingAndGrayBoxTuningOptions(options);
 
             return options;
         }
@@ -341,7 +397,7 @@ namespace Optano.Algorithm.Tuner.DistributedExecution
             if (this._maximumNumberParallelEvaluations == null)
             {
                 throw new OptionException(
-                    "The maximum number of parallel evaluations per node must be provided.",
+                    "The maximum number of parallel evaluations per node must be provided for master.",
                     "maxParallelEvaluations");
             }
 
@@ -373,7 +429,7 @@ namespace Optano.Algorithm.Tuner.DistributedExecution
             var options = new OptionSet
                               {
                                   {
-                                      "maxParallelEvaluations=",
+                                      $"{MasterArgumentParser.MaxParallelEvaluationsOptionName}=",
                                       () =>
                                           "The maximum {NUMBER} of parallel target algorithm evaluations per node.\nThis parameter must be specified.\nIt must be an integer.",
                                       (int maximumNumberParallelEvaluations) =>
@@ -429,6 +485,11 @@ namespace Optano.Algorithm.Tuner.DistributedExecution
                 () =>
                     "The port {NUMBER} on which the master listens for worker connections. Must be identical for master and respective workers, but different for different parallel runs.\nDefault is 8081.\nThis must be an integer.",
                 (int p) => this._port = p);
+            options.Add(
+                "allowLocalEvaluations=",
+                () =>
+                    "Value indicating whether target algorithm evaluations on the master node are allowed. If false, the master will not execute any target algorithm evaluations, but will only be responsible for their distribution. In particular, the master will wait for worker nodes to join and execute the evaluations. In both cases, the master is potentially responsible for training the genome prediction random forest and the gray box random forest and should be endowed with sufficient cpu power, if genetic engineering or gray box tuning are enabled.\nDefault is true.\nThis must be a boolean value.",
+                (bool a) => this._allowLocalEvaluations = a);
         }
 
         /// <summary>
@@ -490,6 +551,51 @@ namespace Optano.Algorithm.Tuner.DistributedExecution
         }
 
         /// <summary>
+        /// Adds the data recording and the gray box tuning options to the provided <see cref="OptionSet"/>.
+        /// </summary>
+        /// <param name="options">The <see cref="OptionSet" /> to extend.</param>
+        private void AddDataRecordingAndGrayBoxTuningOptions(OptionSet options)
+        {
+            options.Add(
+                $"{MasterArgumentParser.EnableDataRecordingOptionName}=",
+                () =>
+                    "If this option is enabled, this OPTANO Algorithm Tuner instance will record the target algorithm's runtime features and write data log files, potentially used for gray box tuning. To enable gray box tuning, this option and the gray box tuning option need to be enabled.\nDefault is false.\nMust be a boolean value.",
+                (bool x) => this.InternalConfigurationBuilder.SetEnableDataRecording(x));
+            options.Add(
+                $"{MasterArgumentParser.DataRecordUpdateIntervalOptionName}=",
+                () => "Sets the update interval of the data recorder in seconds. Every dataRecordUpdateInterval seconds a data point is recorded and the gray box classifier is applied, if gray box tuning is enabled.\nDefault is 5% of given CPU timeout.\nMust be a double.",
+                (double x) => this.InternalConfigurationBuilder.SetDataRecordUpdateInterval(TimeSpan.FromSeconds(x)));
+            options.Add(
+                $"{MasterArgumentParser.DataRecordDirectoryOptionName}=",
+                () => "Sets the {PATH} to the directory where the data log files should be written to.\nDefault is 'currentDirectory/DataLogFiles'.",
+                x => this.InternalConfigurationBuilder.SetDataRecordDirectoryPath(x));
+            options.Add(
+                "enableGrayBox=",
+                () =>
+                    "If this option is enabled, this OPTANO Algorithm Tuner instance will use gray box tuning in order to minimize the overall tuning time.\nDefault is false.\nMust be a boolean value.",
+                (bool x) => this.InternalConfigurationBuilder.SetEnableGrayBox(x));
+            options.Add(
+                "grayBoxConfidenceThreshold=",
+                () =>
+                    "Sets the confidence threshold of the gray box random forest. The current target algorithm run is cancelled by the gray box, if the confidence of the random forest exceeds this threshold.\nDefault is 0.75.\nMust be in [0,1].",
+                (double x) => this.InternalConfigurationBuilder.SetGrayBoxConfidenceThreshold(x));
+            options.Add(
+                "grayBoxStartGeneration=",
+                () => "Sets the 0-indexed gray box start generation. Before this generation, no target algorithm run is cancelled by the gray box.\nDefault is 5.\nMust be an integer.",
+                (int x) => this.InternalConfigurationBuilder.SetGrayBoxStartGeneration(x));
+            options.Add(
+                "grayBoxStartTimePoint=",
+                () =>
+                    "Sets the gray box start time point during a target algorithm run in seconds. Before this time point, no target algorithm run is cancelled by the gray box.\nDefault is 5% of given CPU timeout.\nMust be a double.",
+                (double x) => this.InternalConfigurationBuilder.SetGrayBoxStartTimePoint(TimeSpan.FromSeconds(x)));
+            options.Add(
+                "removeDataRecordsFromMemoryAfterTraining=",
+                () =>
+                    "If this option is enabled, this OPTANO Algorithm Tuner instance will remove the list of data records from memory after training the gray box random forest and read in all data log files again in every generation. This option will decrease the memory usage, but increase the time, needed to read in the data log files in every generation.\nDefault is false.\nMust be a boolean value.",
+                (bool x) => this.InternalConfigurationBuilder.SetRemoveDataRecordsFromMemoryAfterTraining(x));
+        }
+
+        /// <summary>
         /// Adds the evaluation limit option to the provided <see cref="OptionSet"/>.
         /// </summary>
         /// <param name="options">The <see cref="OptionSet" /> to extend.</param>
@@ -545,6 +651,11 @@ namespace Optano.Algorithm.Tuner.DistributedExecution
                 () =>
                     "The 0-indexed {GENERATION} at which the maximum number instances per genome evaluation will be reached.\nDefault is 74.\nThis must be an integer.",
                 (int gg) => this.InternalConfigurationBuilder.SetGoalGeneration(gg));
+            options.Add(
+                "tuningRandomSeed=",
+                () =>
+                    "The random seed to control the initial population and the subset of instances, used per generation.\nIf not specified, a time-dependent seed is used.\nThis must be an integer.",
+                (int s) => this.InternalConfigurationBuilder.SetTuningRandomSeed(s));
         }
 
         /// <summary>
@@ -703,7 +814,7 @@ namespace Optano.Algorithm.Tuner.DistributedExecution
                     $"Value indicating whether racing should be enabled.\nDefault is {AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder.DefaultEnableRacing}.\nThis must be a boolean value.",
                 (bool r) => this.InternalConfigurationBuilder.SetEnableRacing(r));
             options.Add(
-                "t|cpuTimeout=",
+                $"t|{MasterArgumentParser.CpuTimeoutOptionName}=",
                 () =>
                     $"The CPU timeout per target algorithm run in {{SECONDS}}.\nDefault is {TimeSpan.FromMilliseconds(int.MaxValue).TotalSeconds:0} seconds.\nThis must be a double.",
                 (double t) => this.InternalConfigurationBuilder.SetCpuTimeout(TimeSpan.FromSeconds(t)));

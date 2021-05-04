@@ -37,6 +37,7 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
     using System.IO;
     using System.Linq;
     using System.Threading;
+    using System.Threading.Tasks;
 
     using Akka.Configuration;
 
@@ -60,12 +61,13 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
     using Optano.Algorithm.Tuner.Tracking;
     using Optano.Algorithm.Tuner.Tuning;
 
+    using Shouldly;
+
     using Xunit;
 
     /// <summary>
     /// Contains tests for the <see cref="Master{TTargetAlgorithm,TInstance,TResult}"/> class.
     /// </summary>
-    [Collection(TestUtils.NonParallelCollectionGroupTwoName)]
     public class MasterTest : TestBase
     {
         #region Fields
@@ -116,11 +118,13 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
         /// Checks that all command line parameters provided via
         /// <see cref="Master{TTargetAlgorithm, TInstance, TResult, TLearnerModel, TPredictorModel, TSamplingStrategy}.Run"/>
         /// get translated into some kind of configuration.
+        /// Skip enable data recording and enable gray box parameter, because we do not want to test data recording and gray box tuning here.
+        /// Skip port parameter, because specifying the port can lead to problems in cross-platform-tests.
         /// </summary>
         [Fact]
         public void CommandLineParametersAreTranslatedIntoConfiguration()
         {
-            // Specify a value for all command line parameters (except the port parameter). The port parameter is skipped, because specifying the port can lead to problems in cross-platform-tests.
+            // Specify a value for all useful command line parameters.
             string[] args =
                 {
                     "--popSize=23",
@@ -134,7 +138,6 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
                     "--maxParallelThreads=7",
                     "--trainingInstanceFolder=C:\\Temp",
                     "--testInstanceFolder=C:\\Test",
-                    "--port=42",
                     "--enableRacing=false",
                     "--maxGenomeAge=5",
                     "--mutationRate=0.2",
@@ -144,6 +147,16 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
                     "--verbose=3",
                     "--faultTolerance=5",
                     $"--logFile={this._alternativeLogFilePath}",
+                    "--dataRecordDirectory=C:\\Test",
+                    "--dataRecordUpdateInterval=3",
+                    "--grayBoxStartGeneration=20",
+                    "--grayBoxStartTimePoint=5",
+                    "--grayBoxConfidenceThreshold=0.5",
+                    "--removeDataRecordsFromMemoryAfterTraining=true",
+                    "--tuningRandomSeed=42",
+                    "--pathToPostTuningFile=test.csv",
+                    "--indexOfFirstPostTuningRun=5",
+                    "--numberOfPostTuningRuns=7",
                     "--engineeredProportion=0.0",
                     "--strictCompatibilityCheck=false",
                     "--trackConvergenceBehavior=true",
@@ -190,9 +203,6 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
                             config.MaximumNumberParallelThreads);
                         Assert.Equal("C:\\Temp", pathToTrainingInstances);
                         Assert.Equal("C:\\Test", pathToTestInstances);
-                        Assert.Equal(
-                            42,
-                            config.AkkaConfiguration.GetInt("akka.remote.dot-netty.tcp.port"));
                         Assert.False(config.EnableRacing);
                         Assert.Equal(
                             5,
@@ -221,6 +231,13 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
                         Assert.Equal(
                             this._alternativeLogFilePath,
                             config.LogFilePath);
+                        Assert.Equal("C:\\Test", config.DataRecordDirectoryPath);
+                        Assert.Equal(3, config.DataRecordUpdateInterval.TotalSeconds);
+                        Assert.Equal(20, config.GrayBoxStartGeneration);
+                        Assert.Equal(5, config.GrayBoxStartTimePoint.TotalSeconds);
+                        Assert.Equal(0.5, config.GrayBoxConfidenceThreshold);
+                        Assert.True(config.RemoveDataRecordsFromMemoryAfterTraining);
+                        Assert.Equal(42, config.TuningRandomSeed);
                         Assert.False(
                             config.StrictCompatibilityCheck);
                         Assert.True(
@@ -299,6 +316,7 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
         /// <summary>
         /// Checks that parameters specified alongside "--continue" are combined with the ones from the original
         /// configuration read from status.
+        /// Skip enable data recording and enable gray box parameter, because we do not want to test data recording and gray box tuning here.
         /// </summary>
         [Fact]
         public void OriginalConfigurationGetsOverwrittenWithNewParametersOnContinue()
@@ -340,6 +358,13 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
                     .SetDistanceMetric(DistanceMetric.L1Average.ToString())
                     .SetMaximumNumberParallelEvaluations(2)
                     .SetMaximumNumberParallelThreads(5)
+                    .SetDataRecordDirectoryPath("C:\\Test")
+                    .SetDataRecordUpdateInterval(TimeSpan.FromSeconds(3))
+                    .SetGrayBoxStartGeneration(20)
+                    .SetGrayBoxStartTimePoint(TimeSpan.FromSeconds(5))
+                    .SetGrayBoxConfidenceThreshold(0.5)
+                    .SetRemoveDataRecordsFromMemoryAfterTraining(true)
+                    .SetTuningRandomSeed(42)
                     .AddDetailedConfigurationBuilder(
                         RegressionForestArgumentParser.Identifier,
                         new GenomePredictionRandomForestConfig.GenomePredictionRandomForestConfigBuilder())
@@ -468,6 +493,13 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
                         Assert.Equal(
                             originalConfig.EngineeredPopulationRatio,
                             config.EngineeredPopulationRatio);
+                        Assert.Equal(originalConfig.DataRecordDirectoryPath, config.DataRecordDirectoryPath);
+                        Assert.Equal(originalConfig.DataRecordUpdateInterval, config.DataRecordUpdateInterval);
+                        Assert.Equal(originalConfig.GrayBoxStartGeneration, config.GrayBoxStartGeneration);
+                        Assert.Equal(originalConfig.GrayBoxStartTimePoint, config.GrayBoxStartTimePoint);
+                        Assert.Equal(originalConfig.GrayBoxConfidenceThreshold, config.GrayBoxConfidenceThreshold);
+                        Assert.Equal(originalConfig.RemoveDataRecordsFromMemoryAfterTraining, config.RemoveDataRecordsFromMemoryAfterTraining);
+                        Assert.Equal(originalConfig.TuningRandomSeed, config.TuningRandomSeed);
 
                         // Return an algorithm tuner that quickly terminates.
                         return this.BuildSimpleAlgorithmTuner(config, pathToTrainingInstances, pathToTestInstances);
@@ -613,7 +645,7 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
         /// prints the best parameters to console at the end of execution.
         /// </summary>
         [Fact]
-        public void MasterPrintsEndResultToConsole()
+        public void MasterPrintsBestParametersToConsole()
         {
             TestUtils.CheckOutput(
                 action: () =>
@@ -640,11 +672,64 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
                             var lastLine = output
                                 .Split('\r', '\n')
                                 .SkipWhile(s => !s.Contains("Best Configuration"))
-                                .Last(s => s != "");
+                                .Where(s => s != "")
+                                .ElementAt(1);
+
                             Assert.True(
                                 lastLine.Contains("a: 1"),
                                 $"Best parameters are not being printed at the end of execution. Last relevant line is {lastLine}, complete output {output}.");
                         }
+                    });
+        }
+
+        /// <summary>
+        /// Tests that the allowLocalEvaluations parameter prevents the master from completing a (simple) tuning.
+        /// </summary>
+        [Fact]
+        public void DisableLocalEvaluationsPreventsMasterFromWorking()
+        {
+            var flag = false;
+            Task.Run(
+                () =>
+                    {
+                        var args = new[]
+                                       {
+                                           "--maxParallelEvaluations=1",
+                                           "--verbose=1",
+                                           "--numGens=1",
+                                           "--goalGen=0",
+                                           "--instanceNumbers=1:1",
+                                           "--engineeredProportion=0.0",
+                                           $"--allowLocalEvaluations=false",
+                                       };
+                        Master<NoOperation, TestInstance, TestResult>.Run(args, this.BuildSimpleAlgorithmTuner);
+                        flag = true;
+                    });
+            Task.Delay(TimeSpan.FromSeconds(5)).Wait();
+            flag.ShouldBe(false);
+        }
+
+        /// <summary>
+        /// Tests that enabling local evaluations lets the master complete a (simple) tuning.
+        /// </summary>
+        /// <returns>A simple tuning run.</returns>
+        [Fact(Timeout = 5000)]
+        public async Task EnableLocalEvaluationsLetsMasterWorkLocally()
+        {
+            await Task.Run(
+                () =>
+                    {
+                        var args = new[]
+                                       {
+                                           "--maxParallelEvaluations=1",
+                                           "--verbose=1",
+                                           "--numGens=1",
+                                           "--goalGen=0",
+                                           "--instanceNumbers=1:1",
+                                           "--engineeredProportion=0.0",
+                                           $"--allowLocalEvaluations=true",
+                                       };
+                        Master<NoOperation, TestInstance, TestResult>.Run(args, this.BuildSimpleAlgorithmTuner);
                     });
         }
 
@@ -772,7 +857,7 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
         /// Builds a simple <see cref="AlgorithmTuner{NoOperation, TestInstance, TestResult}"/> instance with a single parameter
         /// a which is always 1.
         /// </summary>
-        /// <param name="config">The configuratoin to use.</param>
+        /// <param name="config">The configuration to use.</param>
         /// <param name="trainingInstancePath">Path to training instance folder.</param>
         /// <param name="testInstancePath">Path to test instance folder.</param>
         /// <returns>The build <see cref="AlgorithmTuner{NoOperation, TestInstance, TestResult}"/> instance.</returns>

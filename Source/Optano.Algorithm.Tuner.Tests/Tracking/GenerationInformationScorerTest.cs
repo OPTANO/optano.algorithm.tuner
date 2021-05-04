@@ -54,7 +54,6 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
     /// <summary>
     /// Contains tests for the <see cref="GenerationInformationScorer{TInstance,TResult}"/> class.
     /// </summary>
-    [Collection(TestUtils.NonParallelCollectionGroupOneName)]
     public class GenerationInformationScorerTest : TestBase
     {
         #region Fields
@@ -69,7 +68,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
         /// The <see cref="Optano.Algorithm.Tuner.TargetAlgorithm.RunEvaluators.IMetricRunEvaluator{TInstance, TResult}"/>
         /// to score the target algorithm run results.
         /// </summary>
-        private readonly SortByValue<InstanceSeedFile> _runEvaluator = new SortByValue<InstanceSeedFile>();
+        private readonly SortByDescendingIntegerValue<InstanceSeedFile> _runEvaluator = new SortByDescendingIntegerValue<InstanceSeedFile>();
 
         /// <summary>
         /// An <see cref="IActorRef" /> to a <see cref="GenerationEvaluationActor{TTargetAlgorithm,TInstance,TResult}" />.
@@ -161,7 +160,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
                 this._resultStorageActor,
                 this._runEvaluator);
 
-            var dummyInformation = new GenerationInformation(0, TimeSpan.Zero, 0, typeof(int), new ImmutableGenome(new Genome()));
+            var dummyInformation = new GenerationInformation(0, TimeSpan.Zero, 0, typeof(int), new ImmutableGenome(new Genome()), "id");
             Assert.Throws<ArgumentNullException>(
                 () => scorer.ScoreInformationHistory(
                     informationHistory: new List<GenerationInformation> { dummyInformation },
@@ -181,7 +180,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
                 this._resultStorageActor,
                 this._runEvaluator);
 
-            var dummyInformation = new GenerationInformation(0, TimeSpan.Zero, 0, typeof(int), new ImmutableGenome(new Genome()));
+            var dummyInformation = new GenerationInformation(0, TimeSpan.Zero, 0, typeof(int), new ImmutableGenome(new Genome()), "id");
             Assert.Throws<ArgumentOutOfRangeException>(
                 () => scorer.ScoreInformationHistory(
                     informationHistory: new List<GenerationInformation> { dummyInformation },
@@ -201,7 +200,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
                 this._resultStorageActor,
                 this._runEvaluator);
 
-            var dummyInformation = new GenerationInformation(0, TimeSpan.Zero, 0, typeof(int), new ImmutableGenome(new Genome()));
+            var dummyInformation = new GenerationInformation(0, TimeSpan.Zero, 0, typeof(int), new ImmutableGenome(new Genome()), "id");
             Assert.Throws<ArgumentNullException>(
                 () => scorer.ScoreInformationHistory(
                     informationHistory: new List<GenerationInformation> { dummyInformation },
@@ -218,7 +217,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
         {
             var incumbent1 = new Genome();
             incumbent1.SetGene(ExtractIntegerValue.ParameterName, new Allele<int>(-2));
-            var generationInformation = new GenerationInformation(0, TimeSpan.Zero, 0, typeof(int), new ImmutableGenome(incumbent1));
+            var generationInformation = new GenerationInformation(0, TimeSpan.Zero, 0, typeof(int), new ImmutableGenome(incumbent1), "id");
 
             var scorer = new GenerationInformationScorer<InstanceSeedFile, IntegerResult>(
                 this._generationEvaluationActor,
@@ -246,7 +245,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
         {
             var incumbent1 = new Genome();
             incumbent1.SetGene(ExtractIntegerValue.ParameterName, new Allele<int>(-2));
-            var generationInformation = new GenerationInformation(0, TimeSpan.Zero, 0, typeof(int), new ImmutableGenome(incumbent1));
+            var generationInformation = new GenerationInformation(0, TimeSpan.Zero, 0, typeof(int), new ImmutableGenome(incumbent1), "id");
 
             var scorer = new GenerationInformationScorer<InstanceSeedFile, IntegerResult>(
                 this._generationEvaluationActor,
@@ -279,7 +278,8 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
 
             this.ActorSystem = ActorSystem.Create(TestBase.ActorSystemName, configuration.AkkaConfiguration);
             this._resultStorageActor = this.ActorSystem.ActorOf(
-                Props.Create(() => new ResultStorageActor<InstanceSeedFile, IntegerResult>()),
+                Props.Create(
+                    () => new ResultStorageActor<InstanceSeedFile, IntegerResult>()),
                 AkkaNames.ResultStorageActor);
             this._generationEvaluationActor = this.ActorSystem.ActorOf(
                 Props.Create(
@@ -288,7 +288,8 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
                         this._runEvaluator,
                         configuration,
                         this._resultStorageActor,
-                        this._parameterTree)),
+                        this._parameterTree,
+                        null)),
                 AkkaNames.GenerationEvaluationActor);
         }
 

@@ -110,7 +110,7 @@ namespace Optano.Algorithm.Tuner.MachineLearning.RandomForest.Configuration
         /// <inheritdoc />
         public override void PrintHelp(bool printHelpParameter)
         {
-            Console.WriteLine("Arguments for random forest:");
+            Console.WriteLine("Arguments for genome prediction random forest:");
             base.PrintHelp(printHelpParameter);
         }
 

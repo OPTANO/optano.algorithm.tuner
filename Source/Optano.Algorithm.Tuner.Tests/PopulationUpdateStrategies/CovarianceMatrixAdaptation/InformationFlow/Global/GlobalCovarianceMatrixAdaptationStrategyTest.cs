@@ -153,7 +153,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
         public void InitializeUsesIncumbentForDistributionMean()
         {
             var incumbent = this.CreateIncumbentGenomeWrapper();
-            this.Strategy.Initialize(this.CreatePopulation(), incumbent, this.SingleTestInstance);
+            this.Strategy.Initialize(this.CreatePopulation(), incumbent, this.SingleTestInstance, 0, false);
             this.Strategy.DumpStatus();
 
             var status = StatusBase.ReadFromFile<CmaEsStatus>(this.CmaEsStatusFilePath);
@@ -184,7 +184,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
             var competitivesAsSearchPoints = population.GetCompetitiveIndividuals()
                 .Select(individual => ContinuizedGenomeSearchPoint.CreateFromGenome(individual, this.ParameterTree));
 
-            this.Strategy.Initialize(population, null, this.SingleTestInstance);
+            this.Strategy.Initialize(population, null, this.SingleTestInstance, 0, false);
             this.Strategy.DumpStatus();
 
             var status = StatusBase.ReadFromFile<CmaEsStatus>(this.CmaEsStatusFilePath);
@@ -213,8 +213,8 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
                                     IncumbentGenome = originalPopulation.GetCompetitiveIndividuals().First(),
                                     IncumbentInstanceResults = new List<IntegerResult>().ToImmutableList(),
                                 };
-            this.Strategy.Initialize(originalPopulation, incumbent, this.SingleTestInstance);
-            this.Strategy.PerformIteration(0, this.SingleTestInstance);
+            this.Strategy.Initialize(originalPopulation, incumbent, this.SingleTestInstance, 0, false);
+            this.Strategy.PerformIteration(0, this.SingleTestInstance, false);
             this.Strategy.DumpStatus();
 
             var status =
@@ -259,9 +259,11 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
             var originalPopulation = this.CreatePopulation();
             this.Strategy.Initialize(
                 originalPopulation,
-                currentIncumbent: null,
-                instancesForEvaluation: this.SingleTestInstance);
-            this.Strategy.PerformIteration(0, this.SingleTestInstance);
+                null,
+                this.SingleTestInstance,
+                0,
+                false);
+            this.Strategy.PerformIteration(0, this.SingleTestInstance, false);
             this.Strategy.DumpStatus();
 
             var status =

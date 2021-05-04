@@ -216,8 +216,12 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments
                             currentExpandedImmutableGenomeStats.Count(gs => gs.IsCancelledByRacing || canBeCancelledByRacing.Contains(gs.Genome));
                         if (numberOfCancelledByRacing > this.Participants.Count() - this._desiredNumberOfWinners)
                         {
-                            throw new InvalidOperationException(
+                            var exception = new InvalidOperationException(
                                 $"You cannot cancel more genomes by racing than number of participants - desired number of winners!{Environment.NewLine}Number of genomes cancelled by racing: {numberOfCancelledByRacing}{Environment.NewLine}Number of participants: {this.Participants.Count()}{Environment.NewLine}Desired number of winners: {this._desiredNumberOfWinners}");
+                            LoggingHelper.WriteLine(
+                                VerbosityLevel.Warn,
+                                $"Error: {exception.Message}");
+                            throw exception;
                         }
 
                         foreach (var genome in canBeCancelledByRacing)
@@ -324,11 +328,12 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments
             {
                 if (!this.IsTournamentFinished)
                 {
+                    var exception = new InvalidOperationException(
+                        $"You cannot create the mini tournament result of the mini tournament {this.MiniTournamentId}, before finishing it.");
                     LoggingHelper.WriteLine(
                         VerbosityLevel.Warn,
-                        $"You cannot create the mini tournament result of the mini tournament {this.MiniTournamentId}, before finishing it.");
-                    throw new InvalidOperationException(
-                        $"You cannot create the mini tournament result of the mini tournament {this.MiniTournamentId}, before finishing it.");
+                        $"Error: {exception.Message}");
+                    throw exception;
                 }
 
                 var orderedGenomeStats = this._runEvaluator.Sort(this.GetExpandedImmutableGenomeStats()).ToList();

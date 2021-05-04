@@ -45,7 +45,6 @@ namespace Optano.Algorithm.Tuner.Tests.Genomes
     /// <summary>
     /// Contains tests for the <see cref="ImmutableGenome"/> class.
     /// </summary>
-    [Collection(TestUtils.NonParallelCollectionGroupOneName)]
     public class ImmutableGenomeTest
     {
         #region Constants

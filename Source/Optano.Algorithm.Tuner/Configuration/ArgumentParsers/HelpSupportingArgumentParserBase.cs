@@ -69,6 +69,18 @@ namespace Optano.Algorithm.Tuner.Configuration.ArgumentParsers
         protected string[] _allArguments;
 
         /// <summary>
+        /// List of arguments that could not be parsed when calling <see cref="ParseArguments(string[])"/>.
+        /// </summary>
+        [SuppressMessage(
+            "NDepend",
+            "ND1905:DontAssignAFieldFromManyMethods",
+            Justification = "Reviewed. Assignments are necessary.")]
+        // ReSharper disable once InconsistentNaming
+#pragma warning disable SA1401 // Fields should be private
+        protected List<string> _additionalArguments;
+#pragma warning restore SA1401 // Fields should be private
+
+        /// <summary>
         /// A value indicating whether the parsed arguments requested the help text to be printed.
         /// </summary>
         private bool _helpTextRequested;
@@ -82,11 +94,6 @@ namespace Optano.Algorithm.Tuner.Configuration.ArgumentParsers
         /// A value indicating whether <see cref="ParseArguments(string[])"/> has processed preprocessing options yet.
         /// </summary>
         private bool _preProcessingHappened = false;
-
-        /// <summary>
-        /// List of arguments that could not be parsed when calling <see cref="ParseArguments(string[])"/>.
-        /// </summary>
-        private List<string> _additionalArguments;
 
         /// <summary>
         /// Backing field for <see cref="Options"/>.

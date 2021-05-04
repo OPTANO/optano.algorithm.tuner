@@ -73,6 +73,16 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies
         /// </summary>
         private readonly List<TInstance> _instances = new List<TInstance>();
 
+        /// <summary>
+        /// The current generation.
+        /// </summary>
+        private int _currentGeneration;
+
+        /// <summary>
+        /// Boolean indicating whether to use gray box tuning in current generation.
+        /// </summary>
+        private bool _useGrayBoxInGeneration;
+
         #endregion
 
         #region Constructors and Destructors
@@ -100,6 +110,17 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies
         {
             this._instances.Clear();
             this._instances.AddRange(instances);
+        }
+
+        /// <summary>
+        /// Updates the current generation information.
+        /// </summary>
+        /// <param name="currentGeneration">The current generation.</param>
+        /// <param name="useGrayBoxInGeneration">Boolean indicating whether to use gray box tuning in current generation.</param>
+        public void UpdateGenerationInformation(int currentGeneration, bool useGrayBoxInGeneration)
+        {
+            this._currentGeneration = currentGeneration;
+            this._useGrayBoxInGeneration = useGrayBoxInGeneration;
         }
 
         #endregion
@@ -141,15 +162,30 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies
         /// <returns>The sorting result.</returns>
         protected SortResult SortGenomes(ImmutableList<ImmutableGenome> genomesToSort)
         {
-            var generationEvaluationTask = this._generationEvaluationActor.Ask<SortResult>(
-                new GenerationEvaluation<TInstance, TResult>(
-                    genomesToSort,
-                    this._instances,
-                    (runEvaluator, participantsOfGeneration, instancesOfGeneration) =>
-                        new SortingGenerationEvaluationStrategy<TInstance, TResult>(runEvaluator, participantsOfGeneration, instancesOfGeneration)));
+            var generationEvaluationMessage = new GenerationEvaluation<TInstance, TResult>(
+                genomesToSort,
+                this._instances,
+                (runEvaluator, participantsOfGeneration, instancesOfGeneration) =>
+                    new SortingGenerationEvaluationStrategy<TInstance, TResult>(
+                        runEvaluator,
+                        participantsOfGeneration,
+                        instancesOfGeneration,
+                        this._currentGeneration,
+                        this._useGrayBoxInGeneration));
+
+            var generationEvaluationTask = this._generationEvaluationActor.Ask<SortResult>(generationEvaluationMessage).ContinueWith(
+                task =>
+                    {
+                        if (task.IsFaulted)
+                        {
+                            throw new InvalidOperationException(
+                                $"The generation evaluation in generation {this._currentGeneration} resulted in an exception!{Environment.NewLine}Message: {task.Exception?.Message}");
+                        }
+
+                        return task.Result;
+                    });
 
             generationEvaluationTask.Wait();
-
             return generationEvaluationTask.Result;
         }
 

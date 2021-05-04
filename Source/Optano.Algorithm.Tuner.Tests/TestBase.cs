@@ -45,12 +45,9 @@ namespace Optano.Algorithm.Tuner.Tests
     using Optano.Algorithm.Tuner.Parameters.Domains;
     using Optano.Algorithm.Tuner.Parameters.ParameterTreeNodes;
 
-    using Xunit;
-
     /// <summary>
     /// Provides useful abilities for test classes.
     /// </summary>
-    [Collection(TestUtils.NonParallelCollectionGroupOneName)]
     public abstract class TestBase : IDisposable
     {
         #region Constants

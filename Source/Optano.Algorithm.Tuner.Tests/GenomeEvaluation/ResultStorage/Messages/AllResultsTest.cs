@@ -73,7 +73,7 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.ResultStorage.Messages
             var instance1 = new TestInstance("1");
             var instance2 = new TestInstance("2");
 
-            // (b) Create results for each combination.
+            // (b) Create results for each pair.
             var results1 = new Dictionary<TestInstance, TestResult>();
             var results2 = new Dictionary<TestInstance, TestResult>();
             results1.Add(instance1, new TestResult(1));

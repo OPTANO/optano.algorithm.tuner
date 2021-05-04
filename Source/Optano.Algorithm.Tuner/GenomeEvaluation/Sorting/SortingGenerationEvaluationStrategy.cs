@@ -37,6 +37,7 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Sorting
     using System.Linq;
 
     using Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation;
+    using Optano.Algorithm.Tuner.GenomeEvaluation.Messages;
     using Optano.Algorithm.Tuner.GenomeEvaluation.Sorting.Messages;
     using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.Logging;
@@ -66,6 +67,16 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Sorting
         private readonly IReadOnlyList<ImmutableGenome> _genomes;
 
         /// <summary>
+        /// The generation number.
+        /// </summary>
+        private readonly int _generation;
+
+        /// <summary>
+        /// A boolean indicating whether to use gray box tuning in current generation.
+        /// </summary>
+        private readonly bool _useGrayBoxInGeneration;
+
+        /// <summary>
         /// The genome to genome stats dictionary.
         /// </summary>
         private readonly Dictionary<ImmutableGenome, GenomeStats<TInstance, TResult>> _genomeToGenomeStats;
@@ -85,10 +96,14 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Sorting
         /// <param name="runEvaluator">The <see cref="IRunEvaluator{TInstance,TResult}"/> for sorting genomes.</param>
         /// <param name="genomes">The genomes for evaluation.</param>
         /// <param name="instances">The instances for evaluation.</param>
+        /// <param name="generation">The generation number.</param>
+        /// <param name="useGrayBoxInGeneration">Boolean indicating whether to use gray box tuning in current generation.</param>
         public SortingGenerationEvaluationStrategy(
             IRunEvaluator<TInstance, TResult> runEvaluator,
             IEnumerable<ImmutableGenome> genomes,
-            IEnumerable<TInstance> instances)
+            IEnumerable<TInstance> instances,
+            int generation,
+            bool useGrayBoxInGeneration)
         {
             this._runEvaluator = runEvaluator ?? throw new ArgumentNullException(nameof(runEvaluator));
 
@@ -103,6 +118,9 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Sorting
             {
                 throw new ArgumentNullException(nameof(instances));
             }
+
+            this._generation = generation;
+            this._useGrayBoxInGeneration = useGrayBoxInGeneration;
 
             this._genomeToGenomeStats = this._genomes.Distinct(ImmutableGenome.GenomeComparer).ToDictionary(
                 g => g,
@@ -127,7 +145,7 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Sorting
         /// </summary>
         /// <param name="nextEvaluation">The next evaluation.</param>
         /// <returns><c>true</c>, if an evaluation has been popped.</returns>
-        public bool TryPopEvaluation(out GenomeInstancePair<TInstance> nextEvaluation)
+        public bool TryPopEvaluation(out GenomeInstancePairEvaluation<TInstance> nextEvaluation)
         {
             if (!this._hasStartedWorking)
             {
@@ -150,11 +168,20 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Sorting
 
             if (!nextGenomeStats.TryStartInstance(out var nextInstance))
             {
-                throw new InvalidOperationException(
+                var exception = new InvalidOperationException(
                     $"The GenomeStats for Genome {Environment.NewLine}{nextGenomeStats.Genome}{Environment.NewLine} reports that it has open instances, but fails to pop the next instance for evaluation.");
+                LoggingHelper.WriteLine(
+                    VerbosityLevel.Warn,
+                    $"Error: {exception.Message}");
+                throw exception;
             }
 
-            nextEvaluation = new GenomeInstancePair<TInstance>(nextGenomeStats.Genome, nextInstance);
+            nextEvaluation = new GenomeInstancePairEvaluation<TInstance>(
+                new GenomeInstancePair<TInstance>(nextGenomeStats.Genome, nextInstance),
+                this._generation,
+                // Set tournamentId to -1, since a sorting generation evaluation strategy does not use any tournaments.
+                -1,
+                this._useGrayBoxInGeneration);
             return true;
         }
 
@@ -176,11 +203,12 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Sorting
             if (!this.IsGenerationFinished)
             {
                 {
+                    var exception = new InvalidOperationException(
+                        $"You cannot create the sort result of the current generation, before finishing it.");
                     LoggingHelper.WriteLine(
                         VerbosityLevel.Warn,
-                        $"You cannot create the sort result of the current generation, before finishing it.");
-                    throw new InvalidOperationException(
-                        $"You cannot create the sort result of the current generation, before finishing it.");
+                        $"Error: {exception.Message}");
+                    throw exception;
                 }
             }
 

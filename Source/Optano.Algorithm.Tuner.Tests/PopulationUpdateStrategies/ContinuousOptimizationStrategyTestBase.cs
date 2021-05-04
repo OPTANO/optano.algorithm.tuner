@@ -85,7 +85,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
         /// tests.
         /// </summary>
         protected IRunEvaluator<TestInstance, IntegerResult> RunEvaluator { get; } =
-            new TargetAlgorithm.InterfaceImplementations.ValueConsideration.SortByValue<TestInstance>();
+            new TargetAlgorithm.InterfaceImplementations.ValueConsideration.SortByDescendingIntegerValue<TestInstance>();
 
         /// <summary>
         /// Gets a list of <see cref="TestInstance"/>s consisting of a single instance.
@@ -145,7 +145,9 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
                 () => this.Strategy.Initialize(
                     basePopulation: null,
                     currentIncumbent: this.CreateIncumbentGenomeWrapper(),
-                    instancesForEvaluation: this.SingleTestInstance));
+                    instancesForEvaluation: this.SingleTestInstance,
+                    0,
+                    false));
         }
 
         /// <summary>
@@ -160,7 +162,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
             population.AddGenome(this.GenomeBuilder.CreateRandomGenome(age: 1), isCompetitive: false);
 
             Assert.Throws<ArgumentOutOfRangeException>(
-                () => this.Strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance));
+                () => this.Strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance, 0, false));
         }
 
         /// <summary>
@@ -172,11 +174,11 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
         {
             var population = this.CreatePopulation();
 
-            this.Strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance);
-            this.Strategy.PerformIteration(0, this.SingleTestInstance);
-            this.Strategy.PerformIteration(0, this.SingleTestInstance);
+            this.Strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance, 0, false);
+            this.Strategy.PerformIteration(0, this.SingleTestInstance, false);
+            this.Strategy.PerformIteration(0, this.SingleTestInstance, false);
 
-            this.Strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance);
+            this.Strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance, 0, false);
             this.Strategy.DumpStatus();
 
             Assert.Equal(0, this.FindCurrentGeneration());
@@ -191,9 +193,9 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
         public void PerformIterationThrowsForNegativeGenerationIndex()
         {
             var population = this.CreatePopulation();
-            this.Strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance);
+            this.Strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance, 0, false);
             Assert.Throws<ArgumentOutOfRangeException>(
-                () => this.Strategy.PerformIteration(-1, this.SingleTestInstance));
+                () => this.Strategy.PerformIteration(-1, this.SingleTestInstance, false));
         }
 
         /// <summary>
@@ -206,8 +208,8 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
         {
             var population = this.CreatePopulation();
 
-            this.Strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance);
-            this.Strategy.PerformIteration(0, this.SingleTestInstance);
+            this.Strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance, 0, false);
+            this.Strategy.PerformIteration(0, this.SingleTestInstance, false);
             this.Strategy.DumpStatus();
 
             Assert.Equal(1, this.FindCurrentGeneration());
@@ -230,8 +232,8 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
             var population = this.CreatePopulation();
 
             // Start first phase.
-            this.Strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance);
-            this.Strategy.PerformIteration(0, severalInstances);
+            this.Strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance, 0, false);
+            this.Strategy.PerformIteration(0, severalInstances, false);
             this.Strategy.DumpStatus();
 
             // Check instances have not been updated.
@@ -240,8 +242,8 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
                 incumbent.IncumbentInstanceResults);
 
             // Start second phase.
-            this.Strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), severalInstances);
-            this.Strategy.PerformIteration(0, this.SingleTestInstance);
+            this.Strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), severalInstances, 0, false);
+            this.Strategy.PerformIteration(0, this.SingleTestInstance, false);
             this.Strategy.DumpStatus();
 
             // Instances should have been updated now.
@@ -260,8 +262,8 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
         {
             var originalPopulation = this.CreatePopulation();
             var incumbent = this.CreateIncumbentGenomeWrapper();
-            this.Strategy.Initialize(originalPopulation, incumbent, this.SingleTestInstance);
-            this.Strategy.PerformIteration(0, this.SingleTestInstance);
+            this.Strategy.Initialize(originalPopulation, incumbent, this.SingleTestInstance, 0, false);
+            this.Strategy.PerformIteration(0, this.SingleTestInstance, false);
             this.Strategy.DumpStatus();
 
             var updatedPopulation = this.Strategy.FinishPhase(originalPopulation);
@@ -281,8 +283,10 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
             this.Strategy.Initialize(
                 this.CreatePopulation(),
                 this.CreateIncumbentGenomeWrapper(),
-                this.SingleTestInstance);
-            this.Strategy.PerformIteration(0, this.SingleTestInstance);
+                this.SingleTestInstance,
+                0,
+                false);
+            this.Strategy.PerformIteration(0, this.SingleTestInstance, false);
 
             Assert.Throws<ArgumentNullException>(() => this.Strategy.FinishPhase(basePopulation: null));
         }
@@ -295,8 +299,8 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
         public void FinishPhaseCopiesNonCompetitive()
         {
             var originalPopulation = this.CreatePopulation();
-            this.Strategy.Initialize(originalPopulation, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance);
-            this.Strategy.PerformIteration(0, this.SingleTestInstance);
+            this.Strategy.Initialize(originalPopulation, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance, 0, false);
+            this.Strategy.PerformIteration(0, this.SingleTestInstance, false);
             this.Strategy.DumpStatus();
 
             var updatedPopulation = this.Strategy.FinishPhase(originalPopulation);
@@ -317,12 +321,12 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
         {
             // Execute a complete phase beforehand.
             var basePopulation = this.CreatePopulation();
-            this.Strategy.Initialize(basePopulation, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance);
-            this.Strategy.PerformIteration(0, this.SingleTestInstance);
+            this.Strategy.Initialize(basePopulation, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance, 0, false);
+            this.Strategy.PerformIteration(0, this.SingleTestInstance, false);
             var dePopulation = this.Strategy.FinishPhase(basePopulation);
 
             Assert.NotEqual(dePopulation, basePopulation);
-            this.Strategy.Initialize(basePopulation, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance);
+            this.Strategy.Initialize(basePopulation, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance, 0, false);
             Assert.Equal(
                 basePopulation,
                 this.Strategy.FinishPhase(basePopulation));
@@ -398,14 +402,14 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
 
             // Use the strategy.
             var severalInstances = new List<TestInstance> { new TestInstance("c"), new TestInstance("d") };
-            this.Strategy.Initialize(this.CreatePopulation(), this.CreateIncumbentGenomeWrapper(), severalInstances);
-            this.Strategy.PerformIteration(0, severalInstances);
+            this.Strategy.Initialize(this.CreatePopulation(), this.CreateIncumbentGenomeWrapper(), severalInstances, 0, false);
+            this.Strategy.PerformIteration(0, severalInstances, false);
             this.Strategy.DumpStatus();
 
             // Create new strategy to read the status dump.
             var newStrategy = this.CreateStrategy(this.Configuration);
             newStrategy.UseStatusDump(null);
-            newStrategy.PerformIteration(0, severalInstances);
+            newStrategy.PerformIteration(0, severalInstances, false);
 
             // Check instances are as before.
             var incumbent = newStrategy.FindIncumbentGenome();
@@ -435,7 +439,8 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
             this.ParameterTree = new ParameterTree(root);
 
             this.ResultStorageActor = this.ActorSystem.ActorOf(
-                Props.Create(() => new ResultStorageActor<TestInstance, IntegerResult>()),
+                Props.Create(
+                    () => new ResultStorageActor<TestInstance, IntegerResult>()),
                 AkkaNames.ResultStorageActor);
 
             this.GenerationEvaluationActor = this.ActorSystem.ActorOf(
@@ -445,7 +450,8 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
                         this.RunEvaluator,
                         this.Configuration,
                         this.ResultStorageActor,
-                        this.ParameterTree)),
+                        this.ParameterTree,
+                        null)),
                 AkkaNames.GenerationEvaluationActor);
 
             this.GenomeBuilder = new ValueGenomeBuilder(this.ParameterTree, this.Configuration, this._genomeValues);

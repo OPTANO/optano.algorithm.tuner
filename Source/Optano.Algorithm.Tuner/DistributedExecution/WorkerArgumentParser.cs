@@ -146,7 +146,7 @@ namespace Optano.Algorithm.Tuner.DistributedExecution
             if (this.SeedHostName == null)
             {
                 throw new OptionException(
-                    "Seed host name must be provided. Where is the master located?",
+                    "Seed host name must be provided for worker. Where is the master located?",
                     "seedHostName");
             }
         }
@@ -157,7 +157,7 @@ namespace Optano.Algorithm.Tuner.DistributedExecution
         /// <param name="printHelpParameter">Indicates whether the help parameter should be printed.</param>
         public override void PrintHelp(bool printHelpParameter)
         {
-            Console.WriteLine("Arguments for worker:");
+            Console.WriteLine("OAT arguments for worker:");
             base.PrintHelp(printHelpParameter);
         }
 

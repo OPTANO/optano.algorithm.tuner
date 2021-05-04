@@ -48,7 +48,9 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies
     using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.Logging;
     using Optano.Algorithm.Tuner.MachineLearning;
+    using Optano.Algorithm.Tuner.MachineLearning.GenomeRepresentation;
     using Optano.Algorithm.Tuner.Parameters;
+    using Optano.Algorithm.Tuner.Parameters.ParameterConverters;
     using Optano.Algorithm.Tuner.PopulationUpdateStrategies.GeneticAlgorithm;
     using Optano.Algorithm.Tuner.Serialization;
     using Optano.Algorithm.Tuner.TargetAlgorithm.Instances;
@@ -174,14 +176,19 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies
         public virtual void Initialize(
             Population basePopulation,
             IncumbentGenomeWrapper<TResult> currentIncumbent,
-            IEnumerable<TInstance> instancesForEvaluation)
+            IEnumerable<TInstance> instancesForEvaluation,
+            int currentGeneration,
+            bool useGrayBoxInGeneration)
         {
+            this._currentGeneration = currentGeneration;
+
             // If the instance set is fixed throughout the phase, this is the only place it is updated.
             // Even if it is not fixed, some methods sort provided points in their Initialize methods and
             // therefore need the update.
             this.CurrentEvaluationInstances = instancesForEvaluation?.ToList() ??
                                               throw new ArgumentNullException(nameof(instancesForEvaluation));
             this.SearchPointSorter.UpdateInstances(this.CurrentEvaluationInstances);
+            this.SearchPointSorter.UpdateGenerationInformation(currentGeneration, useGrayBoxInGeneration);
 
             this.InitializeContinuousOptimizer(basePopulation, currentIncumbent);
             this.OriginalIncumbent = currentIncumbent?.IncumbentGenome;
@@ -190,9 +197,13 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies
         /// <summary>
         /// Updates the current population.
         /// </summary>
-        /// <param name="currentGeneration">The current generation.</param>
+        /// <param name="currentGeneration">The current generation index.</param>
         /// <param name="instancesForEvaluation">Instances to use for evaluation.</param>
-        public void PerformIteration(int currentGeneration, IEnumerable<TInstance> instancesForEvaluation)
+        /// <param name="useGrayBoxInGeneration">Boolean indicating whether to use gray box tuning in current generation.</param>
+        public void PerformIteration(
+            int currentGeneration,
+            IEnumerable<TInstance> instancesForEvaluation,
+            bool useGrayBoxInGeneration)
         {
             if (currentGeneration < 0)
             {
@@ -207,6 +218,8 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies
                 this.CurrentEvaluationInstances = instancesForEvaluation.ToList();
                 this.SearchPointSorter.UpdateInstances(this.CurrentEvaluationInstances);
             }
+
+            this.SearchPointSorter.UpdateGenerationInformation(currentGeneration, useGrayBoxInGeneration);
 
             this.MostRecentSorting = this.ContinuousOptimizer.NextGeneration().ToList();
         }
@@ -309,6 +322,18 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies
             LoggingHelper.WriteLine(
                 VerbosityLevel.Debug,
                 $"Competitive genomes:\n {string.Join("\n ", this.MostRecentSorting.Select(point => point.Genome.ToFilteredGeneString(this.ParameterTree)))}");
+        }
+
+        /// <summary>
+        /// Gets all competitive genomes as <see cref="GenomeDoubleRepresentation"/>.
+        /// </summary>
+        /// <returns>The competitive genomes as <see cref="GenomeDoubleRepresentation"/>.</returns>
+        public List<GenomeDoubleRepresentation> GetAllCompetitiveGenomesAsGenomeDoubleRepresentation()
+        {
+            var converter = new GenomeTransformation<CategoricalBinaryEncoding>(this.ParameterTree);
+            var listOfGenomeDoubleRepresentations = this.MostRecentSorting
+                .Select(point => (GenomeDoubleRepresentation)converter.ConvertGenomeToArray(point.Genome.CreateMutableGenome())).ToList();
+            return listOfGenomeDoubleRepresentations;
         }
 
         /// <summary>

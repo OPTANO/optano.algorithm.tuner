@@ -151,7 +151,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
         public void InitializeUsesIncumbentForDistributionMean()
         {
             var incumbent = this.CreateIncumbentGenomeWrapper();
-            this.Strategy.Initialize(this.CreatePopulation(), incumbent, this.SingleTestInstance);
+            this.Strategy.Initialize(this.CreatePopulation(), incumbent, this.SingleTestInstance, 0, false);
             this.Strategy.DumpStatus();
 
             var status = StatusBase.ReadFromFile<CmaEsStatus>(this.CmaEsStatusFilePath);
@@ -168,7 +168,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
         public void InitializeThrowsForMissingIncumbent()
         {
             Assert.Throws<ArgumentNullException>(
-                () => this.Strategy.Initialize(this.CreatePopulation(), null, this.SingleTestInstance));
+                () => this.Strategy.Initialize(this.CreatePopulation(), null, this.SingleTestInstance, 0, false));
         }
 
         /// <summary>
@@ -180,8 +180,8 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
         {
             var population = this.CreatePopulation();
 
-            this.Strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance);
-            this.Strategy.PerformIteration(0, this.SingleTestInstance);
+            this.Strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance, 0, false);
+            this.Strategy.PerformIteration(0, this.SingleTestInstance, false);
             this.Strategy.DumpStatus();
 
             var status =
@@ -217,8 +217,8 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
             basePopulation.AddGenome(new Genome(incumbent.IncumbentGenome), isCompetitive: true);
 
             // Find some search points using CMA-ES. 
-            this.Strategy.Initialize(basePopulation, incumbent, this.SingleTestInstance);
-            this.Strategy.PerformIteration(0, this.SingleTestInstance);
+            this.Strategy.Initialize(basePopulation, incumbent, this.SingleTestInstance, 0, false);
+            this.Strategy.PerformIteration(0, this.SingleTestInstance, false);
             this.Strategy.DumpStatus();
             var status =
                 StatusBase.ReadFromFile<CovarianceMatrixAdaptationStrategyStatus<PartialGenomeSearchPoint, TestInstance>>(this.StatusFilePath);
@@ -299,8 +299,8 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
                 this.ResultStorageActor);
 
             // Perform an iteration and finish the phase.
-            this.Strategy.Initialize(basePopulation, incumbent, this.SingleTestInstance);
-            this.Strategy.PerformIteration(0, this.SingleTestInstance);
+            this.Strategy.Initialize(basePopulation, incumbent, this.SingleTestInstance, 0, false);
+            this.Strategy.PerformIteration(0, this.SingleTestInstance, false);
             this.Strategy.DumpStatus();
             var updatedPopulation = this.Strategy.FinishPhase(basePopulation);
 
@@ -332,8 +332,8 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
         {
             var population = this.CreatePopulation();
 
-            this.Strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance);
-            this.Strategy.PerformIteration(0, this.SingleTestInstance);
+            this.Strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance, 0, false);
+            this.Strategy.PerformIteration(0, this.SingleTestInstance, false);
             this.Strategy.DumpStatus();
             var originalStatus =
                 StatusBase.ReadFromFile<CovarianceMatrixAdaptationStrategyStatus<PartialGenomeSearchPoint, TestInstance>>(this.StatusFilePath);

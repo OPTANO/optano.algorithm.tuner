@@ -43,7 +43,6 @@ namespace Optano.Algorithm.Tuner.Tests.Core
     /// <summary>
     /// Contains tests for <see cref="Randomizer"/>.
     /// </summary>
-    [Collection(TestUtils.NonParallelCollectionGroupOneName)]
     public class RandomizerTest : IDisposable
     {
         #region Fields
@@ -62,6 +61,7 @@ namespace Optano.Algorithm.Tuner.Tests.Core
         /// </summary>
         public RandomizerTest()
         {
+            Randomizer.Reset();
             Randomizer.Configure();
         }
 

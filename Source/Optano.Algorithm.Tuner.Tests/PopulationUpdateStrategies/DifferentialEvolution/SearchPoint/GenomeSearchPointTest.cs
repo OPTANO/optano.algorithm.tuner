@@ -53,7 +53,6 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.DifferentialEv
     /// <summary>
     /// Contains tests for the <see cref="GenomeSearchPoint"/> class.
     /// </summary>
-    [Collection(TestUtils.NonParallelCollectionGroupOneName)]
     public class GenomeSearchPointTest : IDisposable
     {
         #region Fields
@@ -87,6 +86,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.DifferentialEv
         /// </summary>
         public GenomeSearchPointTest()
         {
+            Randomizer.Reset();
             Randomizer.Configure();
 
             this._parameterTree = this.CreateParameterTree();

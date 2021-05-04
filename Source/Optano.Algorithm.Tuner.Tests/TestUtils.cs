@@ -31,14 +31,9 @@
 
 namespace Optano.Algorithm.Tuner.Tests
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
     using System.Linq;
 
     using NLog;
-    using NLog.Config;
-    using NLog.Targets;
 
     using Xunit;
 
@@ -47,28 +42,6 @@ namespace Optano.Algorithm.Tuner.Tests
     /// </summary>
     public static class TestUtils
     {
-        #region Constants
-
-        /// <summary>
-        /// The name for the first test collection which should not be executed in parallel, e.g. because:
-        /// <para>- they may try to access the same status file.</para>
-        /// <para>- they may try to use the same port for an actor system.</para>
-        /// <para>- they modify the <see cref="Randomizer"/> singleton.</para>
-        /// <para>- they interact with I/O, e.g. by reading output.</para>
-        /// </summary>
-        public const string NonParallelCollectionGroupOneName = "NonParallelGroupOne";
-
-        /// <summary>
-        /// The name for the second test collection which should not be executed in parallel, e.g. because:
-        /// <para>- they may try to access the same status file.</para>
-        /// <para>- they may try to use the same port for an actor system.</para>
-        /// <para>- they modify the <see cref="Randomizer"/> singleton.</para>
-        /// <para>- they interact with I/O, e.g. by reading output.</para>
-        /// </summary>
-        public const string NonParallelCollectionGroupTwoName = "NonParallelGroupTwo";
-
-        #endregion
-
         #region Public Methods and Operators
 
         /// <summary>
@@ -86,7 +59,7 @@ namespace Optano.Algorithm.Tuner.Tests
                 message += $"\n{additionalInformation}";
             }
 
-            Assert.True(Math.Abs(value - expected) < tolerance, message);
+            Assert.True(System.Math.Abs(value - expected) < tolerance, message);
         }
 
         /// <summary>
@@ -96,7 +69,7 @@ namespace Optano.Algorithm.Tuner.Tests
         /// <param name="set1">First set.</param>
         /// <param name="set2">Second set.</param>
         /// <returns>Whether or not the sets are equivalent.</returns>
-        public static bool SetsAreEquivalent<T>(IEnumerable<T> set1, IEnumerable<T> set2)
+        public static bool SetsAreEquivalent<T>(System.Collections.Generic.IEnumerable<T> set1, System.Collections.Generic.IEnumerable<T> set2)
         {
             return set1.Count() == set2.Count() && !set1.Except(set2).Any();
         }
@@ -107,7 +80,7 @@ namespace Optano.Algorithm.Tuner.Tests
         /// <typeparam name="T">The type of the list items.</typeparam>
         /// <param name="list">The list to print.</param>
         /// <returns>A <see cref="string"/> representing the given list.</returns>
-        public static string PrintList<T>(IEnumerable<T> list)
+        public static string PrintList<T>(System.Collections.Generic.IEnumerable<T> list)
         {
             return $"{{{string.Join(", ", list)}}}";
         }
@@ -117,21 +90,21 @@ namespace Optano.Algorithm.Tuner.Tests
         /// </summary>
         /// <param name="action">The action to invoke.</param>
         /// <param name="check">Checks to do on the output.</param>
-        public static void CheckOutput(Action action, Action<string> check)
+        public static void CheckOutput(System.Action action, System.Action<string> check)
         {
             // grab output to console.
-            var originalOut = Console.Out;
-            var writer = new StringWriter();
+            var originalOut = System.Console.Out;
+            var writer = new System.IO.StringWriter();
 
             try
             {
-                Console.SetOut(writer);
+                System.Console.SetOut(writer);
                 action.Invoke();
                 check.Invoke(writer.ToString());
             }
             finally
             {
-                Console.SetOut(originalOut);
+                System.Console.SetOut(originalOut);
             }
         }
 
@@ -141,21 +114,21 @@ namespace Optano.Algorithm.Tuner.Tests
         public static void InitializeLogger()
         {
             // Step 1. Create configuration object 
-            var config = new LoggingConfiguration();
+            var config = new NLog.Config.LoggingConfiguration();
 
             // Step 2. Create targets and add them to the configuration 
-            var consoleTarget = new ColoredConsoleTarget();
+            var consoleTarget = new NLog.Targets.ColoredConsoleTarget();
             config.AddTarget("console", consoleTarget);
 
             // Step 3. Set target properties 
             consoleTarget.Layout = @"${message}";
 
             // Step 4. Define rules
-            var rule1 = new LoggingRule("*", LogLevel.Trace, consoleTarget);
+            var rule1 = new NLog.Config.LoggingRule("*", LogLevel.Trace, consoleTarget);
             config.LoggingRules.Add(rule1);
 
             // Step 5. Activate the configuration
-            LogManager.Configuration = config;
+            NLog.LogManager.Configuration = config;
         }
 
         #endregion

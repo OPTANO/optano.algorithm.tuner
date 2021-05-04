@@ -148,7 +148,7 @@ namespace Optano.Algorithm.Tuner.Tuning
         public void Initialize(Population population)
         {
             this.BasePopulation = population;
-            this.CurrentStrategy.Initialize(new Population(this.BasePopulation), null, null);
+            this.CurrentStrategy.Initialize(new Population(this.BasePopulation), null, null, 0, false);
         }
 
         /// <summary>
@@ -159,10 +159,14 @@ namespace Optano.Algorithm.Tuner.Tuning
         /// Instances to use for potential evaluations on strategy initialization.
         /// </param>
         /// <param name="currentIncumbent">Most recent incumbent genome. Might be <c>null</c>.</param>
+        /// <param name="currentGeneration">The current generation.</param>
+        /// <param name="useGrayBoxInGeneration">Boolean indicating whether to use gray box tuning in current generation.</param>
         /// <returns>The chosen <see cref="IPopulationUpdateStrategy{TInstance,TResult}"/>.</returns>
         public IPopulationUpdateStrategy<TInstance, TResult> ChangePopulationUpdateStrategy(
             ICollection<TInstance> initializationInstances,
-            IncumbentGenomeWrapper<TResult> currentIncumbent)
+            IncumbentGenomeWrapper<TResult> currentIncumbent,
+            int currentGeneration,
+            bool useGrayBoxInGeneration)
         {
             var currentStrategy = this.CurrentStrategy;
             while (currentStrategy.HasTerminated())
@@ -172,7 +176,7 @@ namespace Optano.Algorithm.Tuner.Tuning
                 this.CurrentUpdateStrategyIndex = currentStrategy.NextStrategy(this._populationUpdateStrategies);
 
                 var newStrategy = this.CurrentStrategy;
-                newStrategy.Initialize(this.BasePopulation, currentIncumbent, initializationInstances);
+                newStrategy.Initialize(this.BasePopulation, currentIncumbent, initializationInstances, currentGeneration, useGrayBoxInGeneration);
 
                 LoggingHelper.WriteLine(
                     VerbosityLevel.Info,

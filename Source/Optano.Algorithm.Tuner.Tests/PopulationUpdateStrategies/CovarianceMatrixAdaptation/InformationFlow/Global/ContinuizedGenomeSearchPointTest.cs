@@ -55,7 +55,6 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
     /// <summary>
     /// Contains tests for the <see cref="ContinuizedGenomeSearchPoint"/> class.
     /// </summary>
-    [Collection(TestUtils.NonParallelCollectionGroupOneName)]
     public class ContinuizedGenomeSearchPointTest : IDisposable
     {
         #region Fields
@@ -89,6 +88,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
         /// </summary>
         public ContinuizedGenomeSearchPointTest()
         {
+            Randomizer.Reset();
             Randomizer.Configure();
 
             this._parameterTree = this.CreateParameterTree();

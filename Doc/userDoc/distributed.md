@@ -8,6 +8,3 @@ Master and Workers communicate via TCP and send serialized messages to each othe
 Workers get informed about all [tuning parameters](parameters.md) by the Master, but they need to know how to connect to the Master when starting. Therefore, you need to provide them with the Master node's public hostname when starting the program. You may additionally set how much information they should print to console.
 
 Troubleshooting: If the worker does not connect to the master, try to explicitely set the IP adress of the master as host name with `--ownHostName=[IPADRESS]` by starting the master.
-
-## Limit the memory of *OPTANO Algorithm Tuner* on a Linux machine
-For instructions on how to limit the memory of each algorithm run of *OPTANO Algorithm Tuner* on a Linux machine, see [Cross Platform Execution of *OPTANO Algorithm Tuner*](cross_platform.md).

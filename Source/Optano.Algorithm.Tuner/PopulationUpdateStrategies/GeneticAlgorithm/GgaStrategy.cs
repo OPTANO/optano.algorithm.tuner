@@ -48,8 +48,10 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.GeneticAlgorithm
     using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.Logging;
     using Optano.Algorithm.Tuner.MachineLearning;
+    using Optano.Algorithm.Tuner.MachineLearning.GenomeRepresentation;
     using Optano.Algorithm.Tuner.MachineLearning.TrainingData;
     using Optano.Algorithm.Tuner.Parameters;
+    using Optano.Algorithm.Tuner.Parameters.ParameterConverters;
     using Optano.Algorithm.Tuner.PopulationUpdateStrategies.CovarianceMatrixAdaptation.InformationFlow;
     using Optano.Algorithm.Tuner.PopulationUpdateStrategies.DifferentialEvolution;
     using Optano.Algorithm.Tuner.Serialization;
@@ -117,7 +119,7 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.GeneticAlgorithm
         private int _currentGeneration;
 
         /// <summary>
-        /// The number of times <see cref="PerformIteration(int, IEnumerable{TInstance})"/> has been
+        /// The number of times <see cref="PerformIteration"/> has been
         /// called in this GGA phase.
         /// </summary>
         private int _iterationCounter;
@@ -131,6 +133,11 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.GeneticAlgorithm
         /// Information about the genome that was identified as best in the most recent evaluation.
         /// </summary>
         private IncumbentGenomeWrapper<TResult> _mostRecentBest;
+
+        /// <summary>
+        /// Boolean indicating whether to use gray box tuning in current generation.
+        /// </summary>
+        private bool _useGrayBoxInGeneration;
 
         #endregion
 
@@ -189,14 +196,20 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.GeneticAlgorithm
         /// <param name="basePopulation">Population to start with.</param>
         /// <param name="currentIncumbent">Most recent incumbent genome. Might be <c>null</c>.</param>
         /// <param name="instancesForEvaluation">Instances to use for evaluation.</param>
+        /// <param name="currentGeneration">The current generation.</param>
+        /// <param name="useGrayBoxInGeneration">Boolean indicating whether to use gray box tuning in current generation.</param>
         public void Initialize(
             Population basePopulation,
             IncumbentGenomeWrapper<TResult> currentIncumbent,
-            IEnumerable<TInstance> instancesForEvaluation)
+            IEnumerable<TInstance> instancesForEvaluation,
+            int currentGeneration,
+            bool useGrayBoxInGeneration)
         {
             this._population = basePopulation;
             this._iterationCounter = 0;
             this._incumbentKeptCounter = 0;
+            this._currentGeneration = currentGeneration;
+            this._useGrayBoxInGeneration = useGrayBoxInGeneration;
         }
 
         /// <summary>
@@ -204,10 +217,15 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.GeneticAlgorithm
         /// </summary>
         /// <param name="currentGeneration">The current generation index.</param>
         /// <param name="instancesForEvaluation">Instances to use for evaluation.</param>
-        public void PerformIteration(int currentGeneration, IEnumerable<TInstance> instancesForEvaluation)
+        /// <param name="useGrayBoxInGeneration">Boolean indicating whether to use gray box tuning in current generation.</param>
+        public void PerformIteration(
+            int currentGeneration,
+            IEnumerable<TInstance> instancesForEvaluation,
+            bool useGrayBoxInGeneration)
         {
             this._iterationCounter++;
             this._currentGeneration = currentGeneration;
+            this._useGrayBoxInGeneration = useGrayBoxInGeneration;
 
             var tournamentResults = this.PerformSelection(instancesForEvaluation);
 
@@ -321,6 +339,18 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.GeneticAlgorithm
         }
 
         /// <summary>
+        /// Gets all competitive genomes as <see cref="GenomeDoubleRepresentation"/>.
+        /// </summary>
+        /// <returns>The competitive genomes as <see cref="GenomeDoubleRepresentation"/>.</returns>
+        public List<GenomeDoubleRepresentation> GetAllCompetitiveGenomesAsGenomeDoubleRepresentation()
+        {
+            var converter = new GenomeTransformation<CategoricalBinaryEncoding>(this._parameterTree);
+            var listOfGenomeDoubleRepresentations = this._population.GetCompetitiveIndividuals()
+                .Select(genome => (GenomeDoubleRepresentation)converter.ConvertGenomeToArray(genome)).ToList();
+            return listOfGenomeDoubleRepresentations;
+        }
+
+        /// <summary>
         /// Exports the standard deviations of the numerical features of the current population's competitive part via
         /// <see cref="RunStatisticTracker.ComputeAndExportNumericalFeatureCoefficientOfVariation"/>.
         /// </summary>
@@ -430,35 +460,36 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.GeneticAlgorithm
         /// <returns>
         /// Competitive genomes allowed to reproduce.
         /// </returns>
-        private TournamentWinnersWithRank<TResult> PerformSelection(IEnumerable<TInstance> instancesForEvaluation)
+        private TournamentWinnersWithRank<TResult> PerformSelection(
+            IEnumerable<TInstance> instancesForEvaluation)
         {
-            var participants = this._population.GetCompetitiveIndividuals().Select(genome => new ImmutableGenome(genome)).ToList();
             var generationEvaluationMessage = new GenerationEvaluation<TInstance, TResult>(
-                participants,
+                this._population.GetCompetitiveIndividuals().Select(genome => new ImmutableGenome(genome)),
                 instancesForEvaluation,
                 (runEvaluator, participantsOfGeneration, instancesOfGeneration) => new MiniTournamentGenerationEvaluationStrategy<TInstance, TResult>(
                     runEvaluator,
                     participantsOfGeneration,
                     instancesOfGeneration,
+                    this._currentGeneration,
                     this._configuration,
-                    this._currentGeneration));
+                    this._useGrayBoxInGeneration));
 
             var generationEvaluationTask = this._tournamentSelector.Ask<GgaResult<TResult>>(generationEvaluationMessage).ContinueWith(
-                tr =>
+                task =>
                     {
-                        if (tr.IsFaulted)
+                        if (task.IsFaulted)
                         {
                             // It was impossible to determine the best genomes, i.e. something really bad happened.
                             // In this case, we throw an exception for the caller to handle.
                             throw new InvalidOperationException(
-                                $"The generation evaluation with GGA in generation {this._currentGeneration} resulted in an exception!");
+                                $"The generation evaluation with GGA in generation {this._currentGeneration} resulted in an exception!{Environment.NewLine}Message: {task.Exception?.Message}");
                         }
 
                         var result = new TournamentWinnersWithRank<TResult>(
-                            tr.Result.CompetitiveParents,
-                            tr.Result.GenerationBest,
-                            tr.Result.GenerationBestResult,
-                            tr.Result.GenomeToTournamentRank);
+                            task.Result.CompetitiveParents,
+                            task.Result.GenerationBest,
+                            task.Result.GenerationBestResult,
+                            task.Result.GenomeToTournamentRank);
                         return result;
                     });
 

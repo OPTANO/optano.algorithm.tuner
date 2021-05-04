@@ -128,6 +128,17 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
         }
 
         /// <summary>
+        /// Verifies that accessing <see cref="MasterArgumentParser.OwnHostName"/> before calling
+        /// <see cref="MasterArgumentParser.ParseArguments(string[])"/> throws an
+        /// <see cref="InvalidOperationException"/>.
+        /// </summary>
+        [Fact]
+        public void AccessingOwnHostNameBeforeParsingThrowsException()
+        {
+            Assert.Throws<InvalidOperationException>(() => this._parser.OwnHostName);
+        }
+
+        /// <summary>
         /// Verifies that accessing <see cref="MasterArgumentParser.Port"/> before calling
         /// <see cref="MasterArgumentParser.ParseArguments(string[])"/> throws an
         /// <see cref="InvalidOperationException"/>.
@@ -136,6 +147,17 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
         public void AccessingPortBeforeParsingThrowsException()
         {
             Assert.Throws<InvalidOperationException>(() => this._parser.Port);
+        }
+
+        /// <summary>
+        /// Verifies that accessing <see cref="MasterArgumentParser.AllowLocalEvaluations"/> before calling
+        /// <see cref="MasterArgumentParser.ParseArguments(string[])"/> throws an
+        /// <see cref="InvalidOperationException"/>.
+        /// </summary>
+        [Fact]
+        public void AccessingAllowLocalEvaluationsBeforeParsingThrowsException()
+        {
+            Assert.Throws<InvalidOperationException>(() => this._parser.AllowLocalEvaluations);
         }
 
         /// <summary>
@@ -162,7 +184,7 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
 
         /// <summary>
         /// Checks that <see cref="MasterArgumentParser.ParseArguments(string[])"/> correctly interprets arguments
-        /// given in the --longoption=value format.
+        /// given in the --longOption=value format.
         /// </summary>
         [Fact]
         public void LongOptionsAreParsedCorrectly()
@@ -181,6 +203,8 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
                     "--trainingInstanceFolder=C:\\Temp",
                     "--testInstanceFolder=C:\\Test",
                     "--port=42",
+                    "--ownHostName=bar",
+                    "--allowLocalEvaluations=false",
                     "--enableRacing=false",
                     "--maxGenomeAge=5",
                     "--mutationRate=0.2",
@@ -190,13 +214,22 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
                     "--verbose=1",
                     "--faultTolerance=5",
                     "--logFile=foo",
+                    "--cmaEs",
+                    "--enableDataRecording=true",
+                    "--dataRecordDirectory=test",
+                    "--dataRecordUpdateInterval=3",
+                    "--enableGrayBox=true",
+                    "--grayBoxStartGeneration=20",
+                    "--grayBoxStartTimePoint=5",
+                    "--grayBoxConfidenceThreshold=0.5",
+                    "--removeDataRecordsFromMemoryAfterTraining=true",
+                    "--tuningRandomSeed=42",
                     "--statusFileDir=bar",
-                    "--strictCompatibilityCheck=true",
+                    "--strictCompatibilityCheck=false",
                     "--trackConvergenceBehavior=true",
                     "--trainModel=true",
                     "--enableSexualSelection=true",
                     "--evaluationLimit=12",
-                    "--jade",
                     "--maxGenerationsPerGgaPhase=13",
                     "--maxGgaGenerationsWithSameIncumbent=4",
                     "--scoreGenerationHistory",
@@ -229,6 +262,8 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
                 7,
                 parsedConfig.MaximumMiniTournamentSize);
             Assert.Equal(42, this._parser.Port);
+            Assert.Equal("bar", this._parser.OwnHostName);
+            Assert.False(this._parser.AllowLocalEvaluations);
             Assert.Equal(
                 "C:\\Temp",
                 this._parser.PathToTrainingInstanceFolder);
@@ -252,18 +287,25 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
                 5,
                 parsedConfig.MaximumNumberConsecutiveFailuresPerEvaluation);
             Assert.Equal("foo", parsedConfig.LogFilePath);
+            Assert.Equal(ContinuousOptimizationMethod.CmaEs, parsedConfig.ContinuousOptimizationMethod);
+            Assert.True(parsedConfig.EnableDataRecording);
+            Assert.Equal("test", parsedConfig.DataRecordDirectoryPath);
+            Assert.Equal(3, parsedConfig.DataRecordUpdateInterval.TotalSeconds);
+            Assert.True(parsedConfig.EnableGrayBox);
+            Assert.Equal(20, parsedConfig.GrayBoxStartGeneration);
+            Assert.Equal(5, parsedConfig.GrayBoxStartTimePoint.TotalSeconds);
+            Assert.Equal(0.5, parsedConfig.GrayBoxConfidenceThreshold);
+            Assert.True(parsedConfig.RemoveDataRecordsFromMemoryAfterTraining);
+            Assert.Equal(42, parsedConfig.TuningRandomSeed);
             Assert.Equal("bar", parsedConfig.StatusFileDirectory);
             Assert.Equal("bar", this._parser.StatusFileDirectory);
-            Assert.True(
+            Assert.False(
                 parsedConfig.StrictCompatibilityCheck);
             Assert.True(
                 parsedConfig.TrackConvergenceBehavior);
             Assert.True(parsedConfig.TrainModel);
             Assert.True(parsedConfig.EnableSexualSelection);
             Assert.Equal(12, parsedConfig.EvaluationLimit);
-            Assert.Equal(
-                ContinuousOptimizationMethod.Jade,
-                parsedConfig.ContinuousOptimizationMethod);
             Assert.Equal(
                 13,
                 parsedConfig.MaximumNumberGgaGenerations);
@@ -365,7 +407,7 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
 
         /// <summary>
         /// Checks that options defined by <see cref="CovarianceMatrixAdaptationStrategyArgumentParser"/> are parsed when
-        /// using --jade.
+        /// using --cmaEs.
         /// </summary>
         [Fact]
         public void CovarianceMatrixAdaptationOptionsAreParsedWithDifferentialEvolutionOption()
@@ -413,11 +455,13 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
                     "--logFile=foo",
                     "--statusFileDir=lala",
                     "--ownHostName=bar",
+                    "--allowLocalEvaluations=false",
                     "--trackConvergenceBehavior=true",
                     "--trainModel=true",
                     "--evaluationLimit=12",
                     "--scoreGenerationHistory",
                     "--zipOldStatus=true",
+                    "--removeDataRecordsFromMemoryAfterTraining=true",
                 };
 
             this._parser.ParseArguments(args);
@@ -448,6 +492,7 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
             Assert.Equal("lala", parsedConfig.StatusFileDirectory);
             Assert.Equal("lala", this._parser.StatusFileDirectory);
             Assert.Equal("bar", this._parser.OwnHostName);
+            Assert.False(this._parser.AllowLocalEvaluations);
             Assert.True(
                 parsedConfig.TrackConvergenceBehavior,
                 "Track convergence behavior setting was not parsed correctly.");
@@ -457,6 +502,7 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
                 parsedConfig.ScoreGenerationHistory,
                 "Score generation history flag was not parsed correctly.");
             Assert.True(parsedConfig.ZipOldStatusFiles, "Zip old status files option was not parsed correctly.");
+            Assert.True(parsedConfig.RemoveDataRecordsFromMemoryAfterTraining);
         }
 
         /// <summary>
@@ -516,6 +562,15 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
                     "--jade",
                     "--maxGenerationsPerGgaPhase=13",
                     "--maxGgaGenerationsWithSameIncumbent=4",
+                    "--addDefaultGenome=false",
+                    "--enableDataRecording=true",
+                    "--dataRecordDirectory=test",
+                    "--dataRecordUpdateInterval=3",
+                    "--enableGrayBox=true",
+                    "--grayBoxStartGeneration=20",
+                    "--grayBoxStartTimePoint=5",
+                    "--grayBoxConfidenceThreshold=0.5",
+                    "--tuningRandomSeed=42",
                 };
 
             // The main test here is that no exception happens.
@@ -551,6 +606,15 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
             Assert.True(parsedConfig.ContinuousOptimizationMethod == ContinuousOptimizationMethod.Jade);
             Assert.Equal(13, parsedConfig.MaximumNumberGgaGenerations);
             Assert.Equal(4, parsedConfig.MaximumNumberGgaGenerationsWithSameIncumbent);
+            Assert.False(parsedConfig.AddDefaultGenome);
+            Assert.True(parsedConfig.EnableDataRecording);
+            Assert.Equal("test", parsedConfig.DataRecordDirectoryPath);
+            Assert.Equal(3, parsedConfig.DataRecordUpdateInterval.TotalSeconds);
+            Assert.True(parsedConfig.EnableGrayBox);
+            Assert.Equal(20, parsedConfig.GrayBoxStartGeneration);
+            Assert.Equal(5, parsedConfig.GrayBoxStartTimePoint.TotalSeconds);
+            Assert.Equal(0.5, parsedConfig.GrayBoxConfidenceThreshold);
+            Assert.Equal(42, parsedConfig.TuningRandomSeed);
         }
 
         /// <summary>

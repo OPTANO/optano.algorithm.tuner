@@ -58,7 +58,6 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.Evaluation
     /// <summary>
     /// Contains tests for <see cref="EvaluationActor{TTargetAlgorithm,TInstance,TResult}"/>.
     /// </summary>
-    [Collection(TestUtils.NonParallelCollectionGroupTwoName)]
     public class EvaluationActorTest : TestKit
     {
         #region Fields
@@ -114,7 +113,8 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.Evaluation
                             new KeepSuggestedOrder<TestInstance, TestResult>(),
                             new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder().Build(1),
                             resultStorage,
-                            new ParameterTree(new ValueNode<int>("value", new IntegerDomain(0, 10, new Allele<int>(0)))))));
+                            new ParameterTree(new ValueNode<int>("value", new IntegerDomain(0, 10, new Allele<int>(0)))),
+                            null)));
             this._evaluationActorRef = this.Sys.ActorOf(
                 props: new EvaluationActorPropsBuilder().Build(this._generationEvaluationActorRef),
                 name: "EvaluationActor");
@@ -145,16 +145,16 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.Evaluation
 
         /// <summary>
         /// Verifies that <see cref="EvaluationActor{A, I, R}"/>'s constructor throws an exception when called without
-        /// an <see cref="IActorRef"/> to a result storage actor.
+        /// an <see cref="IActorRef"/> to the generation evaluation actor.
         /// </summary>
         [Fact]
-        public void ConstructorThrowsErrorOnMissingResultStorageActor()
+        public void ConstructorThrowsErrorOnMissingGenerationEvaluationActor()
         {
             // Expect an exception on initialization...
             this.EventFilter.Exception<ActorInitializationException>().ExpectOne(
                 () =>
                     {
-                        // ...when no result storage actor is provided.
+                        // ...when no generation evaluation actor is provided.
                         var evaluationActorRef = this.Sys.ActorOf(
                             new EvaluationActorPropsBuilder().Build(generationEvaluationActorRef: null));
                     });
@@ -223,11 +223,12 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.Evaluation
 
             // Start evaluation.
             ((ICanTell)evaluationActorRef).Tell(new Poll(), this._generationEvaluationActorRef);
-            evaluationActorRef.Tell(new GenomeInstancePair<TestInstance>(this._genome, this._testInstance));
+            evaluationActorRef.Tell(
+                new GenomeInstancePairEvaluation<TestInstance>(new GenomeInstancePair<TestInstance>(this._genome, this._testInstance), 0, 0, false));
 
             // Makes sure it was cancelled after CPU timeout.
             this.IgnoreMessages<Poll>();
-            this.IgnoreMessages<GenomeInstancePair<TestInstance>>();
+            this.IgnoreMessages<GenomeInstancePairEvaluation<TestInstance>>();
             var evaluationResult = this.ExpectMsg<EvaluationResult<TestInstance, TestResult>>();
             Assert.True(
                 evaluationResult.RunResult.IsCancelled,
@@ -258,7 +259,9 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.Evaluation
 
             // Start evaluation.
             ((ICanTell)actorRef).Tell(new Poll(), this._generationEvaluationActorRef);
-            ((ICanTell)actorRef).Tell(new GenomeInstancePair<TestInstance>(this._genome, this._testInstance), this._generationEvaluationActorRef);
+            ((ICanTell)actorRef).Tell(
+                new GenomeInstancePairEvaluation<TestInstance>(new GenomeInstancePair<TestInstance>(this._genome, this._testInstance), 0, 0, false),
+                this._generationEvaluationActorRef);
 
             // Wait a while to make sure the evaluation really started.
             this.ExpectNoMsg(TimeSpan.FromMilliseconds(1000));
@@ -293,7 +296,9 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.Evaluation
             // Expect exception when starting evaluation.
 
             actorRef.Tell(new Poll());
-            actorRef.Tell(new GenomeInstancePair<TestInstance>(this._genome, this._testInstance), this.TestActor);
+            actorRef.Tell(
+                new GenomeInstancePairEvaluation<TestInstance>(new GenomeInstancePair<TestInstance>(this._genome, this._testInstance), 0, 0, false),
+                this.TestActor);
 
             this.ExpectMsg<Accept>();
             this.ExpectMsg<Status.Failure>();
@@ -321,7 +326,11 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.Evaluation
                         // Start genome evaluation and therefore provoke failing evaluations.
                         ((ICanTell)actorRef).Tell(new Poll(), this._generationEvaluationActorRef);
                         ((ICanTell)actorRef).Tell(
-                            new GenomeInstancePair<TestInstance>(this._genome, this._testInstance),
+                            new GenomeInstancePairEvaluation<TestInstance>(
+                                new GenomeInstancePair<TestInstance>(this._genome, this._testInstance),
+                                0,
+                                0,
+                                false),
                             this._generationEvaluationActorRef);
 
                         // Wait a while to really let them fail.
@@ -345,7 +354,7 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.Evaluation
         public void FlakyEvaluationGetsRepeatedWithoutException()
         {
             // Build evaluation actor that allows 1 failure per evaluation and uses risky operations that
-            // producs 1 failure in a row.
+            // produces 1 failure in a row.
             var actorRef = this.CreateEvaluationActorWithRiskyOperation(
                 config: new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder()
                     .SetMaximumNumberConsecutiveFailuresPerEvaluation(1)
@@ -354,7 +363,8 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.Evaluation
 
             // Start evaluation.
             ((ICanTell)actorRef).Tell(new Poll(), this._generationEvaluationActorRef);
-            actorRef.Tell(new GenomeInstancePair<TestInstance>(this._genome, this._testInstance));
+            actorRef.Tell(
+                new GenomeInstancePairEvaluation<TestInstance>(new GenomeInstancePair<TestInstance>(this._genome, this._testInstance), 0, 0, false));
 
             // Expect successful results.
             this.ExpectMsg<EvaluationResult<TestInstance, TestResult>>();
@@ -378,7 +388,8 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.Evaluation
 
             // Start evaluation and expect successful results.
             ((ICanTell)actorRef).Tell(new Poll(), this._generationEvaluationActorRef);
-            actorRef.Tell(new GenomeInstancePair<TestInstance>(this._genome, this._testInstance));
+            actorRef.Tell(
+                new GenomeInstancePairEvaluation<TestInstance>(new GenomeInstancePair<TestInstance>(this._genome, this._testInstance), 0, 0, false));
 
             this.ExpectMsg<EvaluationResult<TestInstance, TestResult>>(TimeSpan.FromSeconds(120));
 
@@ -386,7 +397,8 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.Evaluation
             var secondGenomeData = new Genome();
             secondGenomeData.SetGene("value", new Allele<int>(2));
             ((ICanTell)actorRef).Tell(new Poll(), this._generationEvaluationActorRef);
-            actorRef.Tell(new GenomeInstancePair<TestInstance>(new ImmutableGenome(secondGenomeData), this._testInstance));
+            actorRef.Tell(
+                new GenomeInstancePairEvaluation<TestInstance>(new GenomeInstancePair<TestInstance>(this._genome, this._testInstance), 0, 0, false));
 
             // Still expect successful results.
             this.ExpectMsg<EvaluationResult<TestInstance, TestResult>>(TimeSpan.FromSeconds(10));
@@ -415,6 +427,7 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.Evaluation
                                 () => new RiskyOperation(failuresInARow)),
                             config,
                             parameterTree,
+                            null,
                             this._generationEvaluationActorRef)));
         }
 
@@ -441,35 +454,6 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.Evaluation
         }
 
         #endregion
-
-        //
-        // /// <summary>
-        // /// A stub for <see cref="ResultStorageActor{TInstance,TResult}"/> that only reacts to
-        // /// <see cref="ResultRequest{TInstance}"/>: It sends a <see cref="StorageMiss{TestInstance}"/>
-        // /// after a certain timeframe.
-        // /// </summary>
-        // private class SlowStorageMisser : ReceiveActor
-        // {
-        //     #region Constructors and Destructors
-        //
-        //     /// <summary>
-        //     /// Initializes a new instance of the <see cref="SlowStorageMisser"/> class.
-        //     /// </summary>
-        //     public SlowStorageMisser()
-        //     {
-        //         // If the slow storage misser receives a result request, it will answer with a storage miss after
-        //         // waiting for a while.
-        //         this.Receive<ResultRequest<TestInstance>>(
-        //             request =>
-        //                 {
-        //                     var sender = this.Sender;
-        //                     Task.Delay(millisecondsDelay: 3000).ContinueWith(
-        //                         task => { ((ICanTell)sender).Tell(new StorageMiss<TestInstance>(request.Genome, request.Instance)); });
-        //                 });
-        //     }
-        //
-        //     #endregion
-        // }
 
         /// <summary>
         /// Convenience class for building <see cref="Props"/> for creating an
@@ -516,6 +500,7 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.Evaluation
                         this._targetAlgorithmFactory,
                         this._configuration,
                         this._parameterTree,
+                        null,
                         generationEvaluationActorRef));
             }
 

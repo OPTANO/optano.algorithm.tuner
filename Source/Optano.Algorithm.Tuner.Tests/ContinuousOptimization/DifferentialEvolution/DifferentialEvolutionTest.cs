@@ -47,7 +47,6 @@ namespace Optano.Algorithm.Tuner.Tests.ContinuousOptimization.DifferentialEvolut
     /// <summary>
     /// Contains tests for the <see cref="DifferentialEvolution"/> class.
     /// </summary>
-    [Collection(TestUtils.NonParallelCollectionGroupOneName)]
     public class DifferentialEvolutionTest : IDisposable
     {
         #region Fields
@@ -104,6 +103,7 @@ namespace Optano.Algorithm.Tuner.Tests.ContinuousOptimization.DifferentialEvolut
             this._runner =
                 new DifferentialEvolution<SearchPoint>(this._sorter, this._searchPointFactory, this._configuration);
 
+            Randomizer.Reset();
             Randomizer.Configure(0);
         }
 

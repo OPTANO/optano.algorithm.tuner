@@ -15,13 +15,13 @@ Finally, check the [parameter selection](parameter_selection.md) page for some g
  <dd>Prints information about usage to console.</dd>
 </dl>
 
-### <a name="required"></a>Required parameters
+### <a name="required"></a>Required Parameters
 Most parameters in *OAT* have a default value, but you have to specify the parameters that depend on your hardware. As part of the tuning, your algorithm is run many, many times with different configurations. You need to specify how many of these runs can be conducted in parallel per node.
 
  <dt>--maxParallelEvaluations={NUMBER}</dt>
  <dd>The maximum number of parallel target algorithm evaluations per node.</dd>
 
-  <dt>--maxParallelThreads={NUMBER}[maxParallelEvaluations]</dt>
+  <dt>--maxParallelThreads={NUMBER} [maxParallelEvaluations]</dt>
  <dd>The maximum number of parallel threads per node to process parallelizable task related to the tuner algorithm. For example this parameter is used to speed up the genetic engineering. If not specified, maxParallelEvaluations is used.</dd>
 </dl>
 
@@ -31,10 +31,12 @@ Most parameters in *OAT* have a default value, but you have to specify the param
 In addition, it is possible to specify the port on which the master listens for worker connections.
 
 <dl>
- <dt>--ownHostName={HOSTNAME}[Fully Qualified Domain Name]</dt>
+ <dt>--ownHostName={HOSTNAME} [Fully Qualified Domain Name]</dt>
  <dd>The address that the master uses for incoming messages. On some systems the FQDN cannot be resolved on the fly. In that case, please provide the FQDN or an IP address.</dd>
  <dt>--port={NUMBER} [8081]</dt>
  <dd>The port on which the master listens for worker connections. Must be identical for master and respective workers, but different for different parallel runs.</dd>
+ <dt>--allowLocalEvaluations={BOOLEAN} [true]</dt>
+ <dd>Value indicating whether target algorithm evaluations on the master node are allowed. If false, the master will not execute any target algorithm evaluations, but will only be responsible for their distribution. In particular, the master will wait for worker nodes to join and execute the evaluations. In both cases, the master is potentially responsible for training the genome prediction random forest and the gray box random forest and should be endowed with sufficient cpu power, if genetic engineering or gray box tuning are enabled.</dd>
 </dl>
 
 ### Target Algorithm Specific Parameters
@@ -83,7 +85,10 @@ Note: For most applications, if you execute <i>OAT</i> in a distributed fashion,
  <dt>--goalGen={INDEX} [74]</dt>
  <dd>The first generation (0-indexed) at which the maximum number instances per genome evaluation will be reached.</dd>
 
- <dt>--evaluationLimit={NUMBER}[2147483647]</dt>
+ <dt>--tuningRandomSeed={NUMBER} [None]</dt>
+ <dd>The random seed to control the initial population and the subset of instances, used per generation. If not specified, a time-dependent seed is used.</dd>
+
+ <dt>--evaluationLimit={NUMBER} [2147483647]</dt>
  <dd>A maximum number of (configuration - instance) evaluations after which the program terminates.</dd>
 </dl>
 
@@ -103,6 +108,29 @@ Note that workers have the same parameter for their own output.</dd>
  <dt>--scoreGenerationHistory</dt>
   <dd>Add to create <code>scores.csv</code> <a href="../developerDoc/logging.md">logging file</a>.<br/>
 Can significantly increase total software runtime as it adds a post-processing phase. However, best parameterization is printed before that phase.</dd>
+</dl>
+
+### [Gray Box Tuning](../developerDoc/gray_box_tuning.md)
+
+To reduce the runtime, wasted on out-timing target algorithm runs, *OAT* provides a [gray box extension](../developerDoc/gray_box_tuning.md), which aims for detecting and cancelling these timeouts at run time. You can adapt the behaviour of this gray box extension with the following parameters.
+
+<dl>
+  <dt>--enableDataRecording={BOOL} [false]</dt>
+ <dd>If this option is enabled, this OPTANO Algorithm Tuner instance will record the target algorithm's runtime features and write data log files, potentially used for gray box tuning. To enable gray box tuning, this option and the gray box tuning option need to be enabled.</dd>
+  <dt>--dataRecordUpdateInterval={NUMBER} [5% of CPU timeout]</dt>
+ <dd>Sets the update interval of the data recorder in seconds. Every <i>dataRecordUpdateInterval</i> seconds a data point is recorded and the gray box classifier is applied, if gray box tuning is enabled.</dd>
+  <dt>--dataRecordDirectory={ABSOLUTE_PATH} [currentDirectory/DataLogFiles]</dt>
+ <dd>Sets the path to the directory where the data log files should be written to.</dd>
+  <dt>--enableGrayBox={BOOL} [false]</dt>
+ <dd>If this option is enabled, this OPTANO Algorithm Tuner instance will use gray box tuning in order to minimize the overall tuning time.</dd>
+  <dt>--grayBoxConfidenceThreshold={NUMBER} [0.75]</dt>
+ <dd>Sets the confidence threshold of the gray box random forest. The current target algorithm run is cancelled by the gray box, if the confidence of the random forest exceeds this threshold.</dd>
+  <dt>--grayBoxStartGeneration={NUMBER} [5]</dt>
+ <dd>Sets the 0-indexed gray box start generation. Before this generation, no target algorithm run is cancelled by the gray box.</dd>
+  <dt>--grayBoxStartTimePoint={NUMBER} [5% of CPU timeout]</dt>
+ <dd>Sets the gray box start time point during a target algorithm run in seconds. Before this time point, no target algorithm run is cancelled by the gray box.</dd>
+  <dt>--removeDataRecordsFromMemoryAfterTraining={BOOL} [false]</dt>
+ <dd>If this option is enabled, this OPTANO Algorithm Tuner instance will remove the list of data records from memory after training the gray box random forest and read in all data log files again in every generation. This option will decrease the memory usage, but increase the time, needed to read in the data log files in every generation.</dd>
 </dl>
 
 ### Fault Tolerance
@@ -332,7 +360,7 @@ As *OAT* instances that are started as workers connect with a master and get mos
 ### Own Address
 *OAT* will try to automatically detect your computing nodes' fully qualified domain names and use them for exchanging messages. If you experience connection problems on your system, you should try to set the host names explicitly.
 <dl>
- <dt>--ownHostName={HOSTNAME}[Fully Qualified Domain Name]</dt>
+ <dt>--ownHostName={HOSTNAME} [Fully Qualified Domain Name]</dt>
  <dd>The address that the worker uses for incoming messages. On some systems the FQDN cannot be resolved on the fly. In that case, please provide the FQDN or an IP address.</dd>
 </dl>
 

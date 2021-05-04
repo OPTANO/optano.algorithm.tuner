@@ -53,7 +53,6 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.DifferentialEv
     /// <summary>
     /// Contains tests for the <see cref="DifferentialEvolutionStrategy{TInstance,TResult}"/> class.
     /// </summary>
-    [Collection(TestUtils.NonParallelCollectionGroupOneName)]
     public class DifferentialEvolutionStrategyTest : ContinuousOptimizationStrategyTestBase
     {
         #region Fields
@@ -168,9 +167,9 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.DifferentialEv
         {
             var population = this.CreatePopulation();
 
-            this.Strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance);
-            this.Strategy.PerformIteration(0, this.SingleTestInstance);
-            this.Strategy.PerformIteration(0, this.SingleTestInstance);
+            this.Strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance, 0, false);
+            this.Strategy.PerformIteration(0, this.SingleTestInstance, false);
+            this.Strategy.PerformIteration(0, this.SingleTestInstance, false);
             this.Strategy.DumpStatus();
 
             var originalStatus =
@@ -178,7 +177,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.DifferentialEv
             var crossoverRate = originalStatus.MeanCrossoverRate;
             var mutationFactor = originalStatus.MeanMutationFactor;
 
-            this.Strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance);
+            this.Strategy.Initialize(population, this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance, 0, false);
             this.Strategy.DumpStatus();
 
             var newlyInitializedStatus =
@@ -234,10 +233,10 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.DifferentialEv
             basePopulation.AddGenome(incumbent.IncumbentGenome, isCompetitive: true);
 
             // Let both DE strategies run for an iteration.
-            globalStrategy.Initialize(basePopulation, incumbent, this.SingleTestInstance);
-            localStrategy.Initialize(basePopulation, incumbent, this.SingleTestInstance);
-            globalStrategy.PerformIteration(0, this.SingleTestInstance);
-            localStrategy.PerformIteration(0, this.SingleTestInstance);
+            globalStrategy.Initialize(basePopulation, incumbent, this.SingleTestInstance, 0, false);
+            localStrategy.Initialize(basePopulation, incumbent, this.SingleTestInstance, 0, false);
+            globalStrategy.PerformIteration(0, this.SingleTestInstance, false);
+            localStrategy.PerformIteration(0, this.SingleTestInstance, false);
 
             // Count the number of competitive genomes which did not change for the local strategy.
             var newCompetitives = localStrategy.FinishPhase(basePopulation).GetCompetitiveIndividuals();
@@ -278,13 +277,15 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.DifferentialEv
         [Fact]
         public void FindIncumbentGenomeReturnsBestInCurrentGeneration()
         {
-            this.Strategy.Initialize(this.CreatePopulation(), this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance);
+            this.Strategy.Initialize(this.CreatePopulation(), this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance, 0, false);
             this.Strategy.PerformIteration(
                 0,
-                new List<TestInstance> { new TestInstance("a"), new TestInstance("b"), new TestInstance("c") });
+                new List<TestInstance> { new TestInstance("a"), new TestInstance("b"), new TestInstance("c") },
+                false);
             this.Strategy.PerformIteration(
                 12,
-                new List<TestInstance> { new TestInstance("c"), new TestInstance("d") });
+                new List<TestInstance> { new TestInstance("c"), new TestInstance("d") },
+                false);
             this.Strategy.DumpStatus();
 
             var incumbent = this.Strategy.FindIncumbentGenome();
@@ -310,10 +311,10 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.DifferentialEv
         public void HasTerminatedReturnsTrueAfterCorrectNumberGenerations()
         {
             int generation = 0;
-            this.Strategy.Initialize(this.CreatePopulation(), this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance);
+            this.Strategy.Initialize(this.CreatePopulation(), this.CreateIncumbentGenomeWrapper(), this.SingleTestInstance, 0, false);
             while (!this.Strategy.HasTerminated())
             {
-                this.Strategy.PerformIteration(generation, this.SingleTestInstance);
+                this.Strategy.PerformIteration(generation, this.SingleTestInstance, false);
                 generation++;
             }
 
@@ -344,8 +345,8 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.DifferentialEv
         public override void DumpedStatusHasNoEmptyProperties()
         {
             var incumbent = this.CreateIncumbentGenomeWrapper();
-            this.Strategy.Initialize(this.CreatePopulation(), incumbent, this.SingleTestInstance);
-            this.Strategy.PerformIteration(0, this.SingleTestInstance);
+            this.Strategy.Initialize(this.CreatePopulation(), incumbent, this.SingleTestInstance, 0, false);
+            this.Strategy.PerformIteration(0, this.SingleTestInstance, false);
             this.Strategy.DumpStatus();
 
             // Check last status dump
@@ -375,8 +376,8 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.DifferentialEv
             var basePopulation = this.CreatePopulation();
             var incumbent = this.CreateIncumbentGenomeWrapper();
 
-            this.Strategy.Initialize(basePopulation, incumbent, this.SingleTestInstance);
-            this.Strategy.PerformIteration(0, this.SingleTestInstance);
+            this.Strategy.Initialize(basePopulation, incumbent, this.SingleTestInstance, 0, false);
+            this.Strategy.PerformIteration(0, this.SingleTestInstance, false);
             this.Strategy.DumpStatus();
             var originalPoints = StatusBase.ReadFromFile<DifferentialEvolutionStrategyStatus<TestInstance>>(this._statusFilePath)
                 .MostRecentSorting;

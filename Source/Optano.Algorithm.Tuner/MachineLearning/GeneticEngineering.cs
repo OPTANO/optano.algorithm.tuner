@@ -1035,10 +1035,10 @@ namespace Optano.Algorithm.Tuner.MachineLearning
         /// (<see cref="ComputeIndexSetsForCategoricalFeaturesInDoubleRepresentation"/>).
         /// </param>
         /// <param name="targetLeaves">
-        /// The leafs to sample for.
+        /// The leaves to sample for.
         /// </param>
         /// <returns>
-        /// All genrated offspring with predicted rank.
+        /// All generated offspring with predicted rank.
         /// </returns>
         private List<GenomeDoubleRepresentationWithPredictedRank> PerformTargetedSampling(
             ParentGenomesConverted parentGenomes,

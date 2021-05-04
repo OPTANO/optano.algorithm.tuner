@@ -242,6 +242,29 @@ namespace Optano.Algorithm.Tuner.Parameters.ParameterConverters
         }
 
         /// <summary>
+        /// Returns an array with fitting headers for the current <typeparamref name="TCategoricalEncoding"/>'s <see cref="ConvertGenome(Genome)"/> result.
+        /// </summary>
+        /// <returns>All header names.</returns>
+        public string[] GetConverterColumnHeader()
+        {
+            var headerColumnCounts = this.GetFeatureLengths();
+            var headers = headerColumnCounts.Select((headerLength, headerIndex) => new { headerIndex, headerLength })
+                .SelectMany(
+                    h =>
+                        {
+                            var singleHeader = $"{this.OrderedTreeNodes[h.headerIndex]}";
+                            if (h.headerLength <= 1)
+                            {
+                                return new[] { singleHeader };
+                            }
+
+                            return Enumerable.Range(1, h.headerLength).Select(i => $"{singleHeader}_{i}");
+                        }).ToArray();
+
+            return headers;
+        }
+
+        /// <summary>
         /// Restore the internal dictionaries with correct comparers.
         /// </summary>
         public void RestoreInternalDictionariesWithCorrectComparers()

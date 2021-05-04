@@ -134,11 +134,11 @@ namespace Optano.Algorithm.Tuner.Tests.Configuration.ArgumentParsers
             var reader = new StringReader(this._consoleOutput.ToString());
             var line = reader.ReadLine();
             Assert.Equal(
-                "Invalid options: ",
+                "Invalid option:",
                 line);
             line = reader.ReadLine();
             Assert.Equal(
-                "Seed host name must be provided. Where is the master located?",
+                "Seed host name must be provided for worker. Where is the master located?",
                 line);
             line = reader.ReadLine();
             Assert.Equal(

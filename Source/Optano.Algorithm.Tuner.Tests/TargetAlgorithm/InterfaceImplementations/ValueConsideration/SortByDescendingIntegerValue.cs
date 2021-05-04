@@ -41,10 +41,10 @@ namespace Optano.Algorithm.Tuner.Tests.TargetAlgorithm.InterfaceImplementations.
     using Optano.Algorithm.Tuner.TargetAlgorithm.RunEvaluators;
 
     /// <summary>
-    /// An implementation of <see cref="IRunEvaluator{TInstance,TResult}"/> that sorts genomes by descending average integer value.
+    /// An implementation of <see cref="IRunEvaluator{TInstance,TResult}"/> that sorts genomes by the descending average integer value.
     /// </summary>
     /// <typeparam name="TInstance">The instance type.</typeparam>
-    public class SortByValue<TInstance> : IMetricRunEvaluator<TInstance, IntegerResult>
+    public class SortByDescendingIntegerValue<TInstance> : IMetricRunEvaluator<TInstance, IntegerResult>
         where TInstance : InstanceBase
     {
         #region Public Methods and Operators
@@ -54,9 +54,10 @@ namespace Optano.Algorithm.Tuner.Tests.TargetAlgorithm.InterfaceImplementations.
             IEnumerable<ImmutableGenomeStats<TInstance, IntegerResult>> allGenomeStatsOfMiniTournament)
         {
             return allGenomeStatsOfMiniTournament
-                .OrderByDescending(gs => gs.FinishedInstances.Values.Count(SortByValue<TInstance>.HasValidResultValue))
+                .OrderByDescending(gs => gs.FinishedInstances.Values.Count(SortByDescendingIntegerValue<TInstance>.HasValidResultValue))
                 .ThenByDescending(
-                    gs => gs.FinishedInstances.Values.Where(SortByValue<TInstance>.HasValidResultValue).Select(this.GetMetricRepresentation)
+                    gs => gs.FinishedInstances.Values.Where(SortByDescendingIntegerValue<TInstance>.HasValidResultValue)
+                        .Select(this.GetMetricRepresentation)
                         .DefaultIfEmpty().Average());
         }
 

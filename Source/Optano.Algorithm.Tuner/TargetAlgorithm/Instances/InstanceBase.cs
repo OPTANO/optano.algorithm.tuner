@@ -62,6 +62,15 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm.Instances
         /// <returns>true if the specified object is equal to the current instance; otherwise, false.</returns>
         public abstract override bool Equals(object obj);
 
+        /// <summary>
+        /// Returns the unique ID of the current instance.
+        /// </summary>
+        /// <returns>The ID.</returns>
+        public virtual string ToId()
+        {
+            return this.ToString();
+        }
+
         #endregion
     }
 }

@@ -32,19 +32,29 @@
 namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
 {
     using System;
+    using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
+    using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
 
     using Akka.Actor;
 
+    using Optano.Algorithm.Tuner.AkkaConfiguration;
     using Optano.Algorithm.Tuner.Configuration;
     using Optano.Algorithm.Tuner.GenomeEvaluation.Messages;
     using Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage.Messages;
+    using Optano.Algorithm.Tuner.GrayBox;
+    using Optano.Algorithm.Tuner.GrayBox.DataRecordTypes;
     using Optano.Algorithm.Tuner.Logging;
     using Optano.Algorithm.Tuner.Parameters;
+    using Optano.Algorithm.Tuner.Parameters.ParameterConverters;
     using Optano.Algorithm.Tuner.TargetAlgorithm;
     using Optano.Algorithm.Tuner.TargetAlgorithm.Instances;
     using Optano.Algorithm.Tuner.TargetAlgorithm.Results;
+    using Optano.Algorithm.Tuner.Tuning;
+
+    using SharpLearning.RandomForest.Models;
 
     /// <summary>
     /// The evaluation actor is responsible for evaluating single genome instance pairs.
@@ -55,6 +65,20 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
     public class EvaluationActor<TTargetAlgorithm, TInstance, TResult> : ReceiveActor, ILogReceive
         where TTargetAlgorithm : ITargetAlgorithm<TInstance, TResult> where TInstance : InstanceBase where TResult : ResultBase<TResult>, new()
     {
+        #region Static Fields
+
+        /// <summary>
+        /// The id counter.
+        /// </summary>
+        [SuppressMessage(
+            "NDepend",
+            "ND1210:DontAssignStaticFieldsFromInstanceMethods",
+            Justification = "This static field needs to be incremented in the constructor.")]
+        // ReSharper disable once StaticMemberInGenericType
+        private static int idCounter = -1;
+
+        #endregion
+
         #region Fields
 
         /// <summary>
@@ -73,19 +97,40 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
         private readonly ITargetAlgorithmFactory<TTargetAlgorithm, TInstance, TResult> _targetAlgorithmFactory;
 
         /// <summary>
+        /// The id of the current <see cref="EvaluationActor{TTargetAlgorithm,TInstance,TResult}"/>.
+        /// </summary>
+        private readonly int _id;
+
+        /// <summary>
+        /// The <see cref="ICustomGrayBoxMethods{TResult}"/>.
+        /// </summary>
+        private readonly ICustomGrayBoxMethods<TResult> _customGrayBoxMethods;
+
+        /// <summary>
         /// The target algorithm that was configured using the current genome.
         /// </summary>
         private TTargetAlgorithm _configuredTargetAlgorithm;
 
         /// <summary>
-        /// Actor that issued the current evaluation.
+        /// The current evaluation.
         /// </summary>
-        private IActorRef _currentEvaluationIssuer;
+        private GenomeInstancePairEvaluation<TInstance> _currentEvaluation;
 
         /// <summary>
-        /// Genome that currently gets evaluated.
+        /// The generation of the last gray box random forest deserialization try.
+        /// This field is used to ensure that it is only tried once per generation per evaluation actor to deserialize the gray box random forest from file.
         /// </summary>
-        private GenomeInstancePair<TInstance> _currentGenomeInstancePair;
+        private int _generationOfLastGrayBoxRandomForestDeserializationTry = -1;
+
+        /// <summary>
+        /// The gray box random forest.
+        /// </summary>
+        private ClassificationForestModel _grayBoxRandomForest;
+
+        /// <summary>
+        /// The gray box handler.
+        /// </summary>
+        private GrayBoxHandler<TInstance, TResult> _grayBoxHandler;
 
         /// <summary>
         /// The evaluation cancellation token source.
@@ -97,6 +142,11 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
         /// </summary>
         private int _evaluationTries;
 
+        /// <summary>
+        /// Boolean, indicating whether gray box random forest was successfully deserialized in the current generation.
+        /// </summary>
+        private bool _successfullyDeserializedGrayBoxRandomForest = false;
+
         #endregion
 
         #region Constructors and Destructors
@@ -107,11 +157,13 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
         /// <param name="targetAlgorithmFactory">The target algorithm factory.</param>
         /// <param name="configuration">The algorithm tuner configuration.</param>
         /// <param name="parameterTree">The parameter tree.</param>
+        /// <param name="customGrayBoxMethods">The <see cref="ICustomGrayBoxMethods{TResult}"/>.</param>
         /// <param name="generationEvaluationActor">The generation evaluation actor.</param>
         public EvaluationActor(
             ITargetAlgorithmFactory<TTargetAlgorithm, TInstance, TResult> targetAlgorithmFactory,
             AlgorithmTunerConfiguration configuration,
             ParameterTree parameterTree,
+            ICustomGrayBoxMethods<TResult> customGrayBoxMethods,
             IActorRef generationEvaluationActor)
         {
             LoggingHelper.WriteLine(VerbosityLevel.Info, $"Starting new evaluation actor! Address: {this.Self}");
@@ -119,6 +171,16 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
             this._targetAlgorithmFactory = targetAlgorithmFactory ?? throw new ArgumentNullException(nameof(targetAlgorithmFactory));
             this._configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             this._parameterTree = parameterTree ?? throw new ArgumentNullException(nameof(parameterTree));
+
+            if (generationEvaluationActor == null)
+            {
+                throw new ArgumentNullException(nameof(generationEvaluationActor));
+            }
+
+            // No need to check for null. Might be null by purpose.
+            this._customGrayBoxMethods = customGrayBoxMethods;
+
+            this._id = Interlocked.Increment(ref EvaluationActor<TTargetAlgorithm, TInstance, TResult>.idCounter);
 
             this.Become(this.Ready);
             generationEvaluationActor.Tell(new HelloWorld());
@@ -134,9 +196,11 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
         /// </summary>
         protected override void PostStop()
         {
+            LoggingHelper.WriteLine(VerbosityLevel.Info, $"Stopping evaluation actor! Address: {this.Self}");
+
             this._evaluationCancellationTokenSource?.Cancel();
             this._evaluationCancellationTokenSource?.Dispose();
-            this.DisposeTargetAlgorithm();
+            this.DisposeTargetAlgorithmAndGrayBoxHandler();
 
             base.PostStop();
         }
@@ -159,11 +223,10 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
         /// </summary>
         private void WaitingForEvaluation()
         {
-            this.Receive<GenomeInstancePair<TInstance>>(
+            this.Receive<GenomeInstancePairEvaluation<TInstance>>(
                 evaluation =>
                     {
-                        this._currentGenomeInstancePair = evaluation;
-                        this._currentEvaluationIssuer = this.Sender;
+                        this._currentEvaluation = evaluation;
                         this._evaluationTries = 0;
                         this.ConfigureTargetAlgorithm();
                         this.Become(this.Evaluating);
@@ -179,34 +242,33 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
         /// </summary>
         private void Evaluating()
         {
-            // ignore all messages
             this.Receive<EvaluationResult<TInstance, TResult>>(
-                r =>
+                result =>
                     {
-                        this.DisposeTargetAlgorithm();
+                        this.DisposeTargetAlgorithmAndGrayBoxHandler();
                         this.Become(this.Ready);
-                        this._currentEvaluationIssuer.Tell(r);
+                        this.Sender.Tell(result);
                     });
 
             this.Receive<Faulted<TInstance>>(
-                f =>
+                faulted =>
                     {
                         if (Interlocked.Increment(ref this._evaluationTries) > this._configuration.MaximumNumberConsecutiveFailuresPerEvaluation)
                         {
                             LoggingHelper.WriteLine(
                                 VerbosityLevel.Warn,
-                                $"Genome {this._currentGenomeInstancePair.Genome.ToFilteredGeneString(this._parameterTree)} does not work with instance {this._currentGenomeInstancePair.Instance}: {f.Reason}.");
-                            var ex = f.Reason ?? (Exception)new TaskCanceledException(
-                                         $"Aborting evaluation of {this._currentGenomeInstancePair.Genome} on {this._currentGenomeInstancePair.Instance}, since it failed {this._configuration.MaximumNumberConsecutiveFailuresPerEvaluation} times.");
-
+                                $"Genome {this._currentEvaluation.GenomeInstancePair.Genome.ToFilteredGeneString(this._parameterTree)} does not work with instance {this._currentEvaluation.GenomeInstancePair.Instance}: {faulted.Reason}.");
+                            var exception = faulted.Reason ?? new TaskCanceledException(
+                                                $"Aborting evaluation of {this._currentEvaluation.GenomeInstancePair.Genome} on {this._currentEvaluation.GenomeInstancePair.Instance}, since it failed {this._configuration.MaximumNumberConsecutiveFailuresPerEvaluation} times.");
+                            this.DisposeTargetAlgorithmAndGrayBoxHandler();
                             this.Become(this.Ready);
-                            this.Sender.Tell(new Status.Failure(ex));
+                            this.Sender.Tell(new Status.Failure(exception));
                             return;
                         }
 
                         LoggingHelper.WriteLine(
                             VerbosityLevel.Debug,
-                            $"Evaluating {this._currentGenomeInstancePair.Genome.ToFilteredGeneString(this._parameterTree)} on {this._currentGenomeInstancePair.Instance} failed for the {this._evaluationTries} time. Reason: {f.Reason}. Trying again.");
+                            $"Evaluating {this._currentEvaluation.GenomeInstancePair.Genome.ToFilteredGeneString(this._parameterTree)} on {this._currentEvaluation.GenomeInstancePair.Instance} failed for the {this._evaluationTries} time. Reason: {faulted.Reason}. Trying again.");
                         this.StartEvaluation();
                     });
         }
@@ -218,28 +280,41 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
         {
             LoggingHelper.WriteLine(
                 VerbosityLevel.Trace,
-                $"Starting target algorithm run with configuration {this._currentGenomeInstancePair.Genome.ToFilteredGeneString(this._parameterTree)} on instance {this._currentGenomeInstancePair.Instance}.");
+                $"Starting target algorithm run with configuration {this._currentEvaluation.GenomeInstancePair.Genome.ToFilteredGeneString(this._parameterTree)} on instance {this._currentEvaluation.GenomeInstancePair.Instance}.");
+
+            if (this._configuration.EnableDataRecording)
+            {
+                if (this._currentEvaluation.UseGrayBoxInEvaluation)
+                {
+                    this.UpdateGrayBoxRandomForest();
+                }
+
+                this.ConfigureGrayBoxHandler();
+            }
 
             // Set the CPU timeout.
             this._evaluationCancellationTokenSource = new CancellationTokenSource(this._configuration.CpuTimeout);
 
             // Start the target algorithm run.
-            this._configuredTargetAlgorithm.Run(this._currentGenomeInstancePair.Instance, this._evaluationCancellationTokenSource.Token)
+            this._configuredTargetAlgorithm.Run(this._currentEvaluation.GenomeInstancePair.Instance, this._evaluationCancellationTokenSource.Token)
                 .ContinueWith<object>(
                     finishedTask =>
                         {
-                            if (finishedTask.IsCanceled)
-                            {
-                                var cancellationResult = ResultBase<TResult>.CreateCancelledResult(this._configuration.CpuTimeout);
-                                return new EvaluationResult<TInstance, TResult>(this._currentGenomeInstancePair, cancellationResult);
-                            }
-
                             if (finishedTask.IsFaulted)
                             {
-                                return new Faulted<TInstance>(this._currentGenomeInstancePair, finishedTask.Exception);
+                                return new Faulted<TInstance>(this._currentEvaluation.GenomeInstancePair, finishedTask.Exception);
                             }
 
-                            return new EvaluationResult<TInstance, TResult>(this._currentGenomeInstancePair, finishedTask.Result);
+                            var result = finishedTask.IsCanceled
+                                             ? ResultBase<TResult>.CreateCancelledResult(this._configuration.CpuTimeout)
+                                             : finishedTask.Result;
+
+                            if (this._configuration.EnableDataRecording)
+                            {
+                                this._grayBoxHandler.WriteListOfDataRecordsToFile(result);
+                            }
+
+                            return new EvaluationResult<TInstance, TResult>(this._currentEvaluation.GenomeInstancePair, result);
                         })
                 .PipeTo(this.Self, sender: this.Sender);
         }
@@ -250,17 +325,111 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation
         private void ConfigureTargetAlgorithm()
         {
             this._configuredTargetAlgorithm =
-                this._targetAlgorithmFactory.ConfigureTargetAlgorithm(this._currentGenomeInstancePair.Genome.GetFilteredGenes(this._parameterTree));
+                this._targetAlgorithmFactory.ConfigureTargetAlgorithm(
+                    this._currentEvaluation.GenomeInstancePair.Genome.GetFilteredGenes(this._parameterTree));
         }
 
         /// <summary>
-        /// Disposes the current target algorithm.
+        /// Configures the current gray box handler.
         /// </summary>
-        private void DisposeTargetAlgorithm()
+        private void ConfigureGrayBoxHandler()
+        {
+            var genomeTransformation = new GenomeTransformation<CategoricalBinaryEncoding>(this._parameterTree);
+            var genomeDoubleRepresentation =
+                genomeTransformation.ConvertGenomeToArray(this._currentEvaluation.GenomeInstancePair.Genome.CreateMutableGenome());
+
+            var tunerDataRecord = new TunerDataRecord<TResult>(
+                NetworkUtils.GetFullyQualifiedDomainName(),
+                this._currentEvaluation.GenerationId,
+                this._currentEvaluation.TournamentId,
+                this._currentEvaluation.GenomeInstancePair.Instance.ToId(),
+                double.NaN,
+                genomeTransformation.GetConverterColumnHeader(),
+                genomeDoubleRepresentation,
+                null);
+
+            this._grayBoxHandler = new GrayBoxHandler<TInstance, TResult>(
+                this._configuration,
+                this._configuredTargetAlgorithm as IGrayBoxTargetAlgorithm<TInstance, TResult>,
+                this._id,
+                tunerDataRecord,
+                this._currentEvaluation.UseGrayBoxInEvaluation && this._successfullyDeserializedGrayBoxRandomForest,
+                this._customGrayBoxMethods,
+                this._grayBoxRandomForest);
+        }
+
+        /// <summary>
+        /// Disposes the current target algorithm and gray box handler.
+        /// </summary>
+        private void DisposeTargetAlgorithmAndGrayBoxHandler()
         {
             if (this._configuredTargetAlgorithm is IDisposable disposableTargetAlgorithm)
             {
                 disposableTargetAlgorithm.Dispose();
+            }
+
+            this._grayBoxHandler?.Dispose();
+        }
+
+        /// <summary>
+        /// Updates the gray box random forest.
+        /// </summary>
+        private void UpdateGrayBoxRandomForest()
+        {
+            // Try to update gray box random forest only once per generation per evaluation actor.
+            if (this._currentEvaluation.GenerationId == this._generationOfLastGrayBoxRandomForestDeserializationTry)
+            {
+                return;
+            }
+
+            this._generationOfLastGrayBoxRandomForestDeserializationTry = this._currentEvaluation.GenerationId;
+            this._successfullyDeserializedGrayBoxRandomForest = this.TryToDeserializeGrayBoxRandomForest(out this._grayBoxRandomForest);
+
+            if (!this._successfullyDeserializedGrayBoxRandomForest)
+            {
+                LoggingHelper.WriteLine(
+                    VerbosityLevel.Warn,
+                    $"Disable desired gray box tuning in generation {this._currentEvaluation.GenerationId} on evaluation actor with address {this.Self}!");
+            }
+        }
+
+        /// <summary>
+        /// Tries to deserialize the gray box random forest. This method is the counterpart of TryToSerializeGrayBoxRandomForest in <see cref="AlgorithmTuner{TTargetAlgorithm,TInstance,TResult}"/>.
+        /// </summary>
+        /// <param name="grayBoxRandomForest">The gray box random forest.</param>
+        /// <returns>True, if successful.</returns>
+        private bool TryToDeserializeGrayBoxRandomForest(out ClassificationForestModel grayBoxRandomForest)
+        {
+            try
+            {
+                var timer = Stopwatch.StartNew();
+                using (var file = File.OpenRead(this._configuration.GrayBoxRandomForestFile.FullName))
+                {
+                    grayBoxRandomForest = new Hyperion.Serializer().Deserialize<ClassificationForestModel>(file);
+                }
+
+                timer.Stop();
+
+                if (grayBoxRandomForest != null)
+                {
+                    LoggingHelper.WriteLine(
+                        VerbosityLevel.Info,
+                        $"The deserialization of the gray box random forest before generation {this._currentEvaluation.GenerationId} on evaluation actor with address {this.Self} took {timer.Elapsed.TotalSeconds} seconds.");
+                    return true;
+                }
+
+                LoggingHelper.WriteLine(
+                    VerbosityLevel.Warn,
+                    $"Cannot deserialize gray box random forest before generation {this._currentEvaluation.GenerationId} on evaluation actor with address {this.Self}, because it is null.");
+                return false;
+            }
+            catch (Exception exception)
+            {
+                LoggingHelper.WriteLine(
+                    VerbosityLevel.Warn,
+                    $"Cannot deserialize gray box random forest before generation {this._currentEvaluation.GenerationId} on evaluation actor with address {this.Self}, because: {exception.Message}");
+                grayBoxRandomForest = null;
+                return false;
             }
         }
 

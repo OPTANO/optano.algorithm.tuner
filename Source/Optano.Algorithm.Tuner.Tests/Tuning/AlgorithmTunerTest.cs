@@ -39,10 +39,13 @@ namespace Optano.Algorithm.Tuner.Tests.Tuning
     using System.Threading;
     using System.Threading.Tasks;
 
+    using Moq;
+
     using Optano.Algorithm.Tuner.Configuration;
     using Optano.Algorithm.Tuner.ContinuousOptimization.DifferentialEvolution;
     using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.Genomes.Values;
+    using Optano.Algorithm.Tuner.GrayBox;
     using Optano.Algorithm.Tuner.Logging;
     using Optano.Algorithm.Tuner.MachineLearning;
     using Optano.Algorithm.Tuner.MachineLearning.Prediction;
@@ -74,7 +77,6 @@ namespace Optano.Algorithm.Tuner.Tests.Tuning
     /// <summary>
     /// Contains tests for <see cref="AlgorithmTuner{TTargetAlgorithm,TInstance,TResult}"/>.
     /// </summary>
-    [Collection(TestUtils.NonParallelCollectionGroupOneName)]
     public class AlgorithmTunerTest : TestBase
     {
         #region Static Fields
@@ -243,6 +245,104 @@ namespace Optano.Algorithm.Tuner.Tests.Tuning
             // Try to call algorithm tuner constructor.
             Assert.Throws<ArgumentException>(
                 () => new AlgorithmTunerBuilder().SetParameterTree(duplicateParametersTree).ExecuteAlgorithmTunerConstructor());
+        }
+
+        /// <summary>
+        /// Checks that enabling data recording without providing a gray box target algorithm throws an <see cref="ArgumentException"/>.
+        /// </summary>
+        [Fact]
+        public void DataRecordingWithoutGrayBoxTargetAlgorithmThrowsException()
+        {
+            var configuration = new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder()
+                .AddDetailedConfigurationBuilder(
+                    RegressionForestArgumentParser.Identifier,
+                    new GenomePredictionRandomForestConfig.GenomePredictionRandomForestConfigBuilder())
+                .SetEnableDataRecording(true)
+                .Build(maximumNumberParallelEvaluations: 1);
+
+            Assert.Throws<ArgumentException>(
+                () => new AlgorithmTuner<NoOperation, TestInstance, TestResult>(
+                    new Mock<ITargetAlgorithmFactory<NoOperation, TestInstance, TestResult>>().Object,
+                    new Mock<IRunEvaluator<TestInstance, TestResult>>().Object,
+                    AlgorithmTunerTest.BuildEmptyInstances(number: 100),
+                    AlgorithmTunerTest.SimpleParameterTree,
+                    configuration,
+                    null));
+        }
+
+        /// <summary>
+        /// Checks that enabling data recording while providing a gray box target algorithm throws no <see cref="ArgumentException"/>.
+        /// </summary>
+        [Fact]
+        public void DataRecordingWithGrayBoxTargetAlgorithmThrowsNoException()
+        {
+            var configuration = new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder()
+                .AddDetailedConfigurationBuilder(
+                    RegressionForestArgumentParser.Identifier,
+                    new GenomePredictionRandomForestConfig.GenomePredictionRandomForestConfigBuilder())
+                .SetEnableDataRecording(true)
+                .Build(maximumNumberParallelEvaluations: 1);
+
+            var tuner = new AlgorithmTuner<GrayBoxNoOperation, TestInstance, TestResult>(
+                new Mock<ITargetAlgorithmFactory<GrayBoxNoOperation, TestInstance, TestResult>>().Object,
+                new Mock<IRunEvaluator<TestInstance, TestResult>>().Object,
+                AlgorithmTunerTest.BuildEmptyInstances(number: 100),
+                AlgorithmTunerTest.SimpleParameterTree,
+                configuration,
+                null);
+
+            Assert.NotNull(tuner);
+            tuner.Dispose();
+        }
+
+        /// <summary>
+        /// Checks that enabling gray box tuning without providing custom gray box methods throws an <see cref="ArgumentException"/>.
+        /// </summary>
+        [Fact]
+        public void GrayBoxTuningWithoutCustomGrayBoxMethodsThrowsException()
+        {
+            var configuration = new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder()
+                .AddDetailedConfigurationBuilder(
+                    RegressionForestArgumentParser.Identifier,
+                    new GenomePredictionRandomForestConfig.GenomePredictionRandomForestConfigBuilder())
+                .SetEnableDataRecording(true)
+                .SetEnableGrayBox(true)
+                .Build(maximumNumberParallelEvaluations: 1);
+
+            Assert.Throws<ArgumentException>(
+                () => new AlgorithmTuner<GrayBoxNoOperation, TestInstance, TestResult>(
+                    new Mock<ITargetAlgorithmFactory<GrayBoxNoOperation, TestInstance, TestResult>>().Object,
+                    new Mock<IRunEvaluator<TestInstance, TestResult>>().Object,
+                    AlgorithmTunerTest.BuildEmptyInstances(number: 100),
+                    AlgorithmTunerTest.SimpleParameterTree,
+                    configuration,
+                    null));
+        }
+
+        /// <summary>
+        /// Checks that enabling gray box tuning while providing custom gray box methods throws no <see cref="ArgumentException"/>.
+        /// </summary>
+        [Fact]
+        public void GrayBoxTuningWithCustomGrayBoxMethodsThrowsNoException()
+        {
+            var configuration = new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder()
+                .AddDetailedConfigurationBuilder(
+                    RegressionForestArgumentParser.Identifier,
+                    new GenomePredictionRandomForestConfig.GenomePredictionRandomForestConfigBuilder())
+                .SetEnableDataRecording(true)
+                .SetEnableGrayBox(true)
+                .Build(maximumNumberParallelEvaluations: 1);
+
+            var tuner = new AlgorithmTuner<GrayBoxNoOperation, TestInstance, TestResult>(
+                new Mock<ITargetAlgorithmFactory<GrayBoxNoOperation, TestInstance, TestResult>>().Object,
+                new Mock<IRunEvaluator<TestInstance, TestResult>>().Object,
+                AlgorithmTunerTest.BuildEmptyInstances(number: 100),
+                AlgorithmTunerTest.SimpleParameterTree,
+                configuration,
+                new Mock<ICustomGrayBoxMethods<TestResult>>().Object);
+
+            Assert.NotNull(tuner);
+            tuner.Dispose();
         }
 
         /// <summary>
@@ -550,7 +650,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tuning
                 .Build(maximumNumberParallelEvaluations: 1);
             var runner = new AlgorithmTuner<ExtractIntegerValue, TestInstance, IntegerResult>(
                 new ExtractIntegerValueCreator(),
-                new TargetAlgorithm.InterfaceImplementations.ValueConsideration.SortByValue<TestInstance>(),
+                new TargetAlgorithm.InterfaceImplementations.ValueConsideration.SortByDescendingIntegerValue<TestInstance>(),
                 AlgorithmTunerTest.BuildEmptyInstances(number: 2),
                 AlgorithmTunerTest.SimpleParameterTree,
                 configuration,
@@ -869,7 +969,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tuning
 
             var metricTuner = new AlgorithmTuner<ExtractIntegerValue, TestInstance, IntegerResult>(
                 new ExtractIntegerValueCreator(),
-                new TargetAlgorithm.InterfaceImplementations.ValueConsideration.SortByValue<TestInstance>(),
+                new TargetAlgorithm.InterfaceImplementations.ValueConsideration.SortByDescendingIntegerValue<TestInstance>(),
                 AlgorithmTunerTest.BuildEmptyInstances(number: 1),
                 AlgorithmTunerTest.SimpleParameterTree,
                 configuration);
@@ -902,7 +1002,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tuning
 
             var plainTuner = new AlgorithmTuner<ExtractIntegerValue, TestInstance, IntegerResult>(
                 new ExtractIntegerValueCreator(),
-                new TargetAlgorithm.InterfaceImplementations.ValueConsideration.SortByValue<TestInstance>(),
+                new TargetAlgorithm.InterfaceImplementations.ValueConsideration.SortByDescendingIntegerValue<TestInstance>(),
                 AlgorithmTunerTest.BuildEmptyInstances(number: 1),
                 AlgorithmTunerTest.SimpleParameterTree,
                 configurationBuilder.Build(maximumNumberParallelEvaluations: 1));
@@ -915,7 +1015,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tuning
 
             var tunerWithScores = new AlgorithmTuner<ExtractIntegerValue, TestInstance, IntegerResult>(
                 new ExtractIntegerValueCreator(),
-                new TargetAlgorithm.InterfaceImplementations.ValueConsideration.SortByValue<TestInstance>(),
+                new TargetAlgorithm.InterfaceImplementations.ValueConsideration.SortByDescendingIntegerValue<TestInstance>(),
                 AlgorithmTunerTest.BuildEmptyInstances(number: 1),
                 AlgorithmTunerTest.SimpleParameterTree,
                 configurationBuilder.SetScoreGenerationHistory(true).Build(maximumNumberParallelEvaluations: 1));
@@ -951,7 +1051,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tuning
                 .Build(maximumNumberParallelEvaluations: 1);
             var tuner = new AlgorithmTuner<MultiplyIntegerWithSeed, InstanceSeedFile, IntegerResult>(
                 new MultiplyIntegerWithSeedCreator(),
-                new TargetAlgorithm.InterfaceImplementations.ValueConsideration.SortByValue<InstanceSeedFile>(),
+                new TargetAlgorithm.InterfaceImplementations.ValueConsideration.SortByDescendingIntegerValue<InstanceSeedFile>(),
                 new List<InstanceSeedFile> { new InstanceSeedFile("train", 12) },
                 AlgorithmTunerTest.SimpleParameterTree,
                 configuration,

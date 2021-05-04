@@ -44,8 +44,9 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm.Results
         /// Initializes a new instance of the <see cref="RuntimeResult"/> class.
         /// </summary>
         /// <param name="runtime">The runtime.</param>
-        public RuntimeResult(TimeSpan runtime)
-            : base(runtime)
+        /// <param name="targetAlgorithmStatus">The <see cref="TargetAlgorithmStatus"/>.</param>
+        public RuntimeResult(TimeSpan runtime, TargetAlgorithmStatus targetAlgorithmStatus = TargetAlgorithmStatus.Finished)
+            : base(runtime, targetAlgorithmStatus)
         {
         }
 
@@ -54,7 +55,7 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm.Results
         /// Empty ctor required for <see cref="ResultBase{TResultType}.CreateCancelledResult"/>.
         /// </summary>
         public RuntimeResult()
-            : this(TimeSpan.MaxValue)
+            : this(TimeSpan.MaxValue, TargetAlgorithmStatus.CancelledByTimeout)
         {
         }
 

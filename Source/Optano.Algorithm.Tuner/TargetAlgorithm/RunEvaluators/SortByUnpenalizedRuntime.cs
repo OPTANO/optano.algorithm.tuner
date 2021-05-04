@@ -41,32 +41,30 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm.RunEvaluators
     using Optano.Algorithm.Tuner.TargetAlgorithm.Results;
 
     /// <summary>
-    /// An implementation of <see cref="IRunEvaluator{I,R}"/> that sorts genomes by (penalized) average runtime on target algorithm runs, lower runtime first.
+    /// An implementation of <see cref="IRunEvaluator{I,R}"/> that sorts genomes by the higher number of uncancelled runs first and the lower average runtime second.
     /// </summary>
     /// <typeparam name="TInstance">The instance type.</typeparam>
-    public class SortByRuntime<TInstance> : IMetricRunEvaluator<TInstance, RuntimeResult>
+    public class SortByUnpenalizedRuntime<TInstance> : IRunEvaluator<TInstance, RuntimeResult>
         where TInstance : InstanceBase
     {
         #region Fields
 
         /// <summary>
-        /// The penalization factor for timed out runs' runtime.
+        /// The cpu timeout.
         /// </summary>
-        private readonly int _factorPar;
+        private readonly TimeSpan _cpuTimeout;
 
         #endregion
 
         #region Constructors and Destructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SortByRuntime{TInstance}"/> class.
+        /// Initializes a new instance of the <see cref="SortByUnpenalizedRuntime{TInstance}"/> class.
         /// </summary>
-        /// <param name="factorPar">
-        /// The penalization factor for timed out runs' runtime.
-        /// </param>
-        public SortByRuntime(int factorPar)
+        /// <param name="cpuTimeout">The cpu timeout.</param>
+        public SortByUnpenalizedRuntime(TimeSpan cpuTimeout)
         {
-            this._factorPar = factorPar;
+            this._cpuTimeout = cpuTimeout;
         }
 
         #endregion
@@ -77,12 +75,18 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm.RunEvaluators
         public IEnumerable<ImmutableGenomeStats<TInstance, RuntimeResult>> Sort(
             IEnumerable<ImmutableGenomeStats<TInstance, RuntimeResult>> allGenomeStatsOfMiniTournament)
         {
-            // The lower the (penalized) average runtime, the better.
+            /* This implementation uses the following sorting criteria:
+
+            1.) The higher the number of uncancelled runs, the better.
+            2.) The lower the averaged runtime, the better.
+
+            NOTE: No need to penalize the average runtime, since the number of uncancelled runs is a superior sorting criterion.*/
+
             return allGenomeStatsOfMiniTournament
-                .OrderByDescending(gs => gs.FinishedInstances.Count)
+                .OrderByDescending(gs => gs.FinishedInstances.Values.Count(result => !result.IsCancelled))
                 .ThenBy(
                     gs => gs.FinishedInstances.Values
-                        .Select(this.GetMetricRepresentation)
+                        .Select(result => result.Runtime.TotalSeconds)
                         .DefaultIfEmpty(double.PositiveInfinity)
                         .Average());
         }
@@ -94,18 +98,28 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm.RunEvaluators
         {
             var canBeCancelledByRacing = new List<ImmutableGenome>();
 
-            var racingCandidate = this.Sort(allGenomeStatsOfMiniTournament.Where(g => g.AllInstancesFinishedWithoutCancelledResult))
-                .Skip(numberOfMiniTournamentWinners - 1).FirstOrDefault();
-
-            if (racingCandidate == null)
-            {
-                return canBeCancelledByRacing;
-            }
+            var racingIncumbent = this.Sort(allGenomeStatsOfMiniTournament).Skip(numberOfMiniTournamentWinners - 1).First();
+            var minimumNumberOfUncancelledResultsOfRacingIncumbent = racingIncumbent.FinishedInstances.Values.Count(result => !result.IsCancelled);
+            var maximumTotalRuntimeOfRacingIncumbent = racingIncumbent.RuntimeOfFinishedInstances
+                                                       + ((racingIncumbent.OpenInstances.Count + racingIncumbent.RunningInstances.Count)
+                                                          * this._cpuTimeout);
 
             foreach (var genomeStats in allGenomeStatsOfMiniTournament.Where(g => !g.IsCancelledByRacing && g.HasOpenOrRunningInstances))
             {
-                if (genomeStats.RuntimeOfFinishedInstances > racingCandidate.RuntimeOfFinishedInstances)
+                var maximumNumberOfUncancelledResults = genomeStats.FinishedInstances.Values.Count(result => !result.IsCancelled)
+                                                        + genomeStats.OpenInstances.Count + genomeStats.RunningInstances.Count;
+                var minimumTotalRuntime = genomeStats.RuntimeOfFinishedInstances;
+
+                if (maximumNumberOfUncancelledResults < minimumNumberOfUncancelledResultsOfRacingIncumbent)
                 {
+                    // Cancel by racing, because the current genome cannot have more uncancelled results than the racing incumbent.
+                    canBeCancelledByRacing.Add(genomeStats.Genome);
+                }
+
+                if (maximumNumberOfUncancelledResults == minimumNumberOfUncancelledResultsOfRacingIncumbent
+                    && minimumTotalRuntime > maximumTotalRuntimeOfRacingIncumbent)
+                {
+                    // Cancel by racing, because the current genome cannot have a lower total run time than the racing incumbent.
                     canBeCancelledByRacing.Add(genomeStats.Genome);
                 }
             }
@@ -140,13 +154,6 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm.RunEvaluators
 
             // The lower the priority, the earlier the genome will start.
             return priority;
-        }
-
-        /// <inheritdoc />
-        public double GetMetricRepresentation(RuntimeResult result)
-        {
-            var factor = result.IsCancelled ? this._factorPar : 1;
-            return factor * result.Runtime.TotalSeconds;
         }
 
         #endregion

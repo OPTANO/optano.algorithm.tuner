@@ -31,7 +31,11 @@
 
 namespace Optano.Algorithm.Tuner.MachineLearning.GenomeRepresentation
 {
+    using System;
     using System.Diagnostics.CodeAnalysis;
+    using System.Linq;
+
+    using Newtonsoft.Json;
 
     using Optano.Algorithm.Tuner.Genomes;
 
@@ -159,6 +163,17 @@ namespace Optano.Algorithm.Tuner.MachineLearning.GenomeRepresentation
         }
 
         /// <summary>
+        /// Gets the genome double representation from the given genome identifier string representation. This method is the counterpart to <see cref="GenomeDoubleRepresentation.ToGenomeIdentifierStringRepresentation"/>.
+        /// </summary>
+        /// <param name="genomeIdentifierStringRepresentation"> The genome identifier string representation.</param>
+        /// <returns>The genome double representation.</returns>
+        public static GenomeDoubleRepresentation GetGenomeDoubleRepresentationFromGenomeIdentifierStringRepresentation(
+            string genomeIdentifierStringRepresentation)
+        {
+            return JsonConvert.DeserializeObject<double[]>(genomeIdentifierStringRepresentation);
+        }
+
+        /// <summary>
         /// Uses a <see cref="DoubleArrayEqualityComparer"/> to check for equality.
         /// </summary>
         /// <param name="other">
@@ -196,6 +211,16 @@ namespace Optano.Algorithm.Tuner.MachineLearning.GenomeRepresentation
         public override int GetHashCode()
         {
             return EqualityComparer.GetHashCode(this._convertedGenome);
+        }
+
+        /// <summary>
+        /// Returns the genome identifier string representation.
+        /// </summary>
+        /// <returns>The genome identifier string representation.</returns>
+        public string ToGenomeIdentifierStringRepresentation()
+        {
+            var roundedValues = this._convertedGenome.Select(g => Math.Round(g, 6)).ToArray();
+            return JsonConvert.SerializeObject(roundedValues);
         }
 
         #endregion

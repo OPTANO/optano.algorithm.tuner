@@ -1693,6 +1693,19 @@
       "Comment": null
     },
     {
+      "PackageId": "TinyCsvParser",
+      "VersionString": "2.6.0",
+      "LicenceUrl": "https://licenses.nuget.org/MIT",
+      "ProjectUrl": "https://github.com/bytefish/TinyCsvParser",
+      "CopyrightOrOwner": "Copyright © 2019 Philipp Wagner",
+      "UsedInProjects": [
+        "Optano.Algorithm.Tuner.Tests.csproj",
+        "Optano.Algorithm.Tuner.csproj"
+      ],
+      "SourceCodeUrl": "git://github.com/bytefish/TinyCsvParser",
+      "Comment": null
+    },
+    {
       "PackageId": "Validation",
       "VersionString": "2.4.18",
       "LicenceUrl": "https://raw.githubusercontent.com/AArnott/Validation/69e6a2c4f3/LICENSE.txt",

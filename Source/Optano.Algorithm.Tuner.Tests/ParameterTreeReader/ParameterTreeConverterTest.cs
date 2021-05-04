@@ -46,7 +46,6 @@ namespace Optano.Algorithm.Tuner.Tests.ParameterTreeReader
     /// <summary>
     /// Contains tests for the <see cref="ParameterTreeConverter"/> class.
     /// </summary>
-    [Collection(TestUtils.NonParallelCollectionGroupOneName)]
     public class ParameterTreeConverterTest
     {
         #region Constants
@@ -370,6 +369,7 @@ namespace Optano.Algorithm.Tuner.Tests.ParameterTreeReader
         [Fact]
         public void DomainsReturnXmlDefaultValues()
         {
+            Randomizer.Reset();
             Randomizer.Configure(42);
             var tree = ParameterTreeConverter.ConvertToParameterTree(ParameterTreeConverterTest.PathPrefix + "treeWithDefaults.xml");
             var nodes = tree.Root.Children.ToList();

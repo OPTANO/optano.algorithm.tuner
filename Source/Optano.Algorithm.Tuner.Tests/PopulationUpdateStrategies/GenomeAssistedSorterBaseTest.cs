@@ -60,7 +60,6 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
     /// The type of <see cref="SearchPoint"/> handled by the
     /// <see cref="GenomeAssistedSorterBase{TSearchPoint, TInstance, TResult}"/>.
     /// </typeparam>
-    [Collection(TestUtils.NonParallelCollectionGroupOneName)]
     public abstract class GenomeAssistedSorterBaseTest<TSearchPoint> : SearchPointSorterTestBase<TSearchPoint>
         where TSearchPoint : SearchPoint
     {
@@ -80,7 +79,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
         /// <see cref="IRunEvaluator{TInstance,TResult}"/> used in test.
         /// </summary>
         private readonly IRunEvaluator<TestInstance, IntegerResult> _runEvaluator =
-            new TargetAlgorithm.InterfaceImplementations.ValueConsideration.SortByValue<TestInstance>();
+            new TargetAlgorithm.InterfaceImplementations.ValueConsideration.SortByDescendingIntegerValue<TestInstance>();
 
         #endregion
 
@@ -147,7 +146,8 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies
                         this._runEvaluator,
                         configuration,
                         resultStorageActor,
-                        this.ParameterTree)),
+                        this.ParameterTree,
+                        null)),
                 AkkaNames.GenerationEvaluationActor);
 
             this.GenomeBuilder = this.CreateGenomeBuilderWithForbiddenValue(configuration);

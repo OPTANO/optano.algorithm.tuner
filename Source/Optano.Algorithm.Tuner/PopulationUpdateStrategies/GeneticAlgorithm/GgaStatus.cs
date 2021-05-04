@@ -61,7 +61,7 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.GeneticAlgorithm
         /// <param name="population">The current population.</param>
         /// <param name="iterationCounter">
         /// The number of times
-        /// <see cref="GgaStrategy{TInstance, TResult}.PerformIteration(int, IEnumerable{TInstance})"/> has been
+        /// <see cref="GgaStrategy{TInstance, TResult}.PerformIteration"/> has been
         /// called in this GGA phase.
         /// </param>
         /// <param name="incumbentKeptCounter">
@@ -110,7 +110,7 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.GeneticAlgorithm
 
         /// <summary>
         /// Gets the number of times
-        /// <see cref="GgaStrategy{TInstance, TResult}.PerformIteration(int, IEnumerable{TInstance})"/> has been
+        /// <see cref="GgaStrategy{TInstance, TResult}.PerformIteration"/> has been
         /// called in this GGA phase.
         /// </summary>
         public int IterationCounter { get; }

@@ -1,0 +1,2 @@
+NodeID;GenerationID;TournamentID;RunID;InstanceID;GenomeID;GrayBoxConfidence;Genome_GenomeFeature_1;Genome_GenomeFeature_2;FinalResult_TargetAlgorithmStatus;FinalResult_Runtime;TargetAlgorithmName;TargetAlgorithmStatus;ExpendedCpuTime;ExpendedWallClockTime;TimeStamp;AdapterFeature_Feature_1;AdapterFeature_Feature_2;CurrentGrayBoxResult_TargetAlgorithmStatus;CurrentGrayBoxResult_Runtime
+TestNodeID;0;0;TestInstanceID_[15.0,22.0];TestInstanceID;[15.0,22.0];0.5;15;22;Finished;30000;TestAlgorithm;Running;10000;5000;00010101000000;5;12;Finished;10000

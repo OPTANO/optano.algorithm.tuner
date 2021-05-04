@@ -57,7 +57,6 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
     /// <summary>
     /// Contains tests for the <see cref="PartialGenomeSearchPoint"/> class.
     /// </summary>
-    [Collection(TestUtils.NonParallelCollectionGroupOneName)]
     public class PartialGenomeSearchPointTest : IDisposable
     {
         #region Fields
@@ -106,6 +105,7 @@ namespace Optano.Algorithm.Tuner.Tests.PopulationUpdateStrategies.CovarianceMatr
         /// </summary>
         public PartialGenomeSearchPointTest()
         {
+            Randomizer.Reset();
             Randomizer.Configure();
 
             this._parameterTree = this.CreateParameterTree();

@@ -56,19 +56,19 @@ namespace Optano.Algorithm.Tuner.Configuration.ArgumentParsers
             {
                 argsParser.ParseArguments(args);
             }
-            catch (OptionException e)
+            catch (OptionException exception)
             {
-                LoggingHelper.WriteLine(VerbosityLevel.Warn, "Invalid options: ");
-                LoggingHelper.WriteLine(VerbosityLevel.Warn, e.Message);
+                LoggingHelper.WriteLine(VerbosityLevel.Warn, "Invalid option:");
+                LoggingHelper.WriteLine(VerbosityLevel.Warn, exception.Message);
                 LoggingHelper.WriteLine(VerbosityLevel.Warn, $"Try adding '--help' for more information.");
                 return false;
             }
-            catch (AggregateException e)
+            catch (AggregateException exception)
             {
                 LoggingHelper.WriteLine(VerbosityLevel.Warn, "One or more arguments could not be interpreted:");
-                foreach (var exception in e.InnerExceptions)
+                foreach (var innerException in exception.InnerExceptions)
                 {
-                    LoggingHelper.WriteLine(VerbosityLevel.Warn, exception.Message);
+                    LoggingHelper.WriteLine(VerbosityLevel.Warn, innerException.Message);
                 }
 
                 LoggingHelper.WriteLine(VerbosityLevel.Warn, $"Try adding '--help' for more information.");
