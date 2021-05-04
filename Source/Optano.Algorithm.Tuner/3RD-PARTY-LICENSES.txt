@@ -7,6 +7,7 @@ MathNet.Numerics, https://www.nuget.org/packages/MathNet.Numerics/
 NDesk.Options.Patched, https://www.nuget.org/packages/NDesk.Options.Patched/
 OPTANO.Modeling.Gurobi, https://www.nuget.org/packages/OPTANO.Modeling.Gurobi/
 OptimizedPriorityQueue, https://www.nuget.org/packages/OptimizedPriorityQueue/
+TinyCsvParser, https://www.nuget.org/packages/TinyCsvParser/
 StyleCop.Analyzers, https://www.nuget.org/packages/StyleCop.Analyzers/
 
 Moreover its test project links to the following nuget packages:
