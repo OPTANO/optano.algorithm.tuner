@@ -3,9 +3,7 @@
   <OutputDir KeepXmlFiles="False">.\NDependOut</OutputDir>
   <Assemblies>
     <Name>Optano.Algorithm.Tuner</Name>
-    <Name>Optano.Algorithm.Tuner.Application</Name>
-    <Name>Optano.Algorithm.Tuner.Gurobi</Name>
-    <Name>Optano.Algorithm.Tuner.Saps</Name>
+    <Name>Optano.Algorithm.Tuner.Test</Name>
   </Assemblies>
   <FrameworkAssemblies>
     <Name>mscorlib</Name>
@@ -27,8 +25,8 @@
   <Dirs>
     <Dir>C:\Windows\Microsoft.NET\Framework\v4.0.30319</Dir>
     <Dir>C:\Windows\Microsoft.NET\Framework\v4.0.30319\WPF</Dir>
-	<Dir>.\Source\Optano.Algorithm.Tuner\bin\Debug\netstandard2.1</Dir>
-    <Dir>.\Source\Optano.Algorithm.Tuner.Tests\bin\Debug\netcoreapp3.1</Dir>
+	<Dir>.\Optano.Algorithm.Tuner\bin\Debug\netstandard2.1</Dir>
+    <Dir>.\Optano.Algorithm.Tuner.Tests\bin\Debug\netcoreapp3.1</Dir>
   </Dirs>
   <MergeCodeGeneratedByCompiler>True</MergeCodeGeneratedByCompiler>
   <Report Kind="0" SectionsEnabled="45055" XslPath="" Flags="64768" />
@@ -78,8 +76,8 @@
   <SourceFileRebasing FromPath="" ToPath="" />
   <PathVariables />
   <RuleFiles>
-    <RuleFile Active="True" Path=".\NDependRuleFile.ndrules" />
-    <RuleFile Active="True" Path=".\OrcNDependRuleFile.ndrules" />
+    <RuleFile Active="True" Path="..\NDependRuleFile.ndrules" />
+    <RuleFile Active="True" Path="..\OrcNDependRuleFile.ndrules" />
   </RuleFiles>
   <ProjectRules AreActive="True" /><Queries>
     <Group Name="Customized" Active="True" ShownInReport="False">      
