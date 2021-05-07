@@ -37,7 +37,6 @@ deactivate EvaluationActor
 loop WHILE NOT IsGenerationFinished
 GenerationEvaluationActor->MiniTournamentManager:Get next evaluation
 activate MiniTournamentManager
-note right of MiniTournamentManager:cf. UML 004
 MiniTournamentManager->MiniTournamentManager:Pop next GIP\n[GenomeInstancePair]
 MiniTournamentManager->MiniTournamentManager:Update GenomePriorityQueue
 MiniTournamentManager-->GenerationEvaluationActor:GIP

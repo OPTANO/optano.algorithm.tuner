@@ -4,7 +4,7 @@
 
 Our example concentrates on tuning Gurobi on LPs, tuning for success rate first, then for quality and finally runtime.
 
-We tune Gurobi via the Gurobi90.NET package, integrated in [OPTANO.Modeling.Gurobi](https://www.nuget.org/packages/OPTANO.Modeling.Gurobi/9.0.1.23).
+We tune Gurobi via the `gurobi91.netstandard20` package, integrated in [OPTANO.Modeling.Gurobi](https://www.nuget.org/packages/OPTANO.Modeling.Gurobi/9.1.2.26).
 
 Please consider the [technical preparations](unittests.md) before using *OPTANO Algorithm Gurobi Tuner*.
 
@@ -29,7 +29,7 @@ In addition, it provides
 - `GurobiInstanceFeatures.cs`, implementing `AdapterFeaturesBase` and containing some rudimentary instance features.
 
 ## Tuneable Parameters
-*OPTANO Algorithm Gurobi Tuner* tunes 55 Gurobi parameters relevant for LP solving, many of them influencing each other. Explanations for each parameter are given as comments in the `parameterTree.xml` file and can also be found at the [official Gurobi website](http://www.gurobi.com/documentation/9.0/refman/parameters.html#sec:Parameters).
+*OPTANO Algorithm Gurobi Tuner* tunes 55 Gurobi parameters relevant for LP solving, many of them influencing each other. Explanations for each parameter are given as comments in the `parameterTree.xml` file and can also be found at the [official Gurobi website](http://www.gurobi.com/documentation/9.1/refman/parameters.html#sec:Parameters).
 
 ### Parameter Tree
 Due to the variety and interdependencies of Gurobi's parameters, its [parameter tree](../userDoc/basic_usage.md#xml) is a good example for the expressive power you have in defining parameters to tune for *OPTANO Algorithm Tuner*. In its definition in `parameterTree.xml`, you can find OR nodes, AND nodes and value nodes; the used domains are categorical, continuous and discrete; and the interdependencies result in a tree that is both wide and has several levels.
@@ -95,13 +95,13 @@ For parsing the parameters, a `GurobiRunnerConfigurationParser` is implemented w
 
 ## Error Handling
 
-To handle upcoming errors (e.g. crash of target algorithm) reasonable, the method `CreateGurobiResult()` is implemented in `GurobiRunner`. This method checks the [status codes of Gurobi](https://www.gurobi.com/documentation/9.0/refman/optimization_status_codes.html) and handles the result accordingly. If the status of Gurobi is `"LOADED"`, `"TIME_LIMIT"`, `"INTERRUPTED"`, `"NUMERIC"` or `"INPROGRESS"` it creates a cancelled result and sets the corresponding runtime to the given timeout.
+To handle upcoming errors (e.g. crash of target algorithm) reasonable, the method `CreateGurobiResult()` is implemented in `GurobiRunner`. This method checks the [status codes of Gurobi](https://www.gurobi.com/documentation/9.1/refman/optimization_status_codes.html) and handles the result accordingly. If the status of Gurobi is `"LOADED"`, `"TIME_LIMIT"`, `"INTERRUPTED"`, `"NUMERIC"` or `"INPROGRESS"` it creates a cancelled result and sets the corresponding runtime to the given timeout.
 
 ## Gray Box Tuning
 
 As mentioned in the [gray box tuning](gray_box_tuning.md) section, *OPTANO Algorithm Gurobi Tuner* gives an example on how to implement the `IGrayBoxTargetAlgorithm` and `ICustomGrayBoxMethods` interfaces to support gray box tuning.
 
-In this example we use the [callback codes of Gurobi](https://www.gurobi.com/documentation/9.0/refman/cb_codes.html) in `GurobiCallback` to receive the desired runtime features and pass them to the `GurobiRunner`, which implements the `IGrayBoxTargetAlgorithm` interface. Moreover, the `GurobiGrayBoxMethods` implement the `ICustomGrayBoxMethods` interface and returns the desired gray box features and feature names from a given [data record entry](gray_box_tuning.md#DataRecordEntry).
+In this example we use the [callback codes of Gurobi](https://www.gurobi.com/documentation/9.1/refman/cb_codes.html) in `GurobiCallback` to receive the desired runtime features and pass them to the `GurobiRunner`, which implements the `IGrayBoxTargetAlgorithm` interface. Moreover, the `GurobiGrayBoxMethods` implement the `ICustomGrayBoxMethods` interface and returns the desired gray box features and feature names from a given [data record entry](gray_box_tuning.md#DataRecordEntry).
 
 More precisecly, *OPTANO Algorithm Gurobi Tuner* makes use of the following runtime and instance features to detect timeouts at runtime.
 * Current expended wall clock time
