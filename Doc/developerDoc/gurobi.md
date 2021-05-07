@@ -86,11 +86,11 @@ For parsing the parameters, a `GurobiRunnerConfigurationParser` is implemented w
  <dt>--rngSeed={VALUE} [42]</dt>
  <dd>Sets the random number generator seed, which generates #numberOfSeeds seeds for every instance of the Gurobi algorithm.</dd>
  <dt>--grbNodefileDirectory={PATH} [<i>current directory</i>/nodefiles]</dt>
- <dd>Sets the [nodefile directory of Gurobi](https://www.gurobi.com/documentation/8.1/refman/nodefiledir.html).</dd>
+ <dd>Sets the [nodefile directory of Gurobi](https://www.gurobi.com/documentation/9.1/refman/nodefiledir.html).</dd>
  <dt>--grbNodefileStartSizeGigabyte={VALUE} [0.5]</dt>
- <dd>Sets the [memory threshold in gigabyte of Gurobi](https://www.gurobi.com/documentation/8.1/refman/nodefilestart.html) for writing MIP tree nodes in nodefile on disk. Needs to be greater than or equal to 0.</dd>
+ <dd>Sets the [memory threshold in gigabyte of Gurobi](https://www.gurobi.com/documentation/9.1/refman/nodefilestart.html) for writing MIP tree nodes in nodefile on disk. Needs to be greater than or equal to 0.</dd>
  <dt>--grbTerminationMipGap={VALUE} [0.01]</dt>
- <dd>Sets the [termination mip gap of Gurobi](https://www.gurobi.com/documentation/8.1/refman/mipgap2.html). Needs to be greater than or equal to 0.</dd>
+ <dd>Sets the [termination mip gap of Gurobi](https://www.gurobi.com/documentation/9.1/refman/mipgap2.html). Needs to be greater than or equal to 0.</dd>
 </dl>
 
 ## Error Handling
