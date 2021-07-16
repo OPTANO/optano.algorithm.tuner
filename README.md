@@ -14,7 +14,7 @@ The following links may be useful:
 
 * [The nuget.org package](https://www.nuget.org/packages/OPTANO.Algorithm.Tuner)
 
-* [The OAT Examples documentation](https://docs.optano.com/algorithm.tuner/current/userDoc/examples.html)
+* [The OAT Examples documentation](https://docs.optano.com/algorithm.tuner/current/developerDoc/examples.html)
 
 * [The OAT Examples source code](https://github.com/OPTANO/optano.algorithm.tuner.examples)
 
