@@ -41,13 +41,14 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
     using Optano.Algorithm.Tuner.Configuration;
     using Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage.Messages;
     using Optano.Algorithm.Tuner.Genomes;
-    using Optano.Algorithm.Tuner.Genomes.Values;
     using Optano.Algorithm.Tuner.Parameters;
     using Optano.Algorithm.Tuner.Parameters.Domains;
     using Optano.Algorithm.Tuner.Parameters.ParameterTreeNodes;
     using Optano.Algorithm.Tuner.TargetAlgorithm.Instances;
     using Optano.Algorithm.Tuner.TargetAlgorithm.Results;
     using Optano.Algorithm.Tuner.Tracking;
+
+    using Shouldly;
 
     using Xunit;
 
@@ -59,39 +60,33 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
         #region Static Fields
 
         /// <summary>
-        /// Path to log file that gets written in some tests.
+        /// The path to log file, used in tests.
         /// </summary>
         private static readonly string LogFilePath = PathUtils.GetAbsolutePathFromCurrentDirectory("tunerLog.txt");
-
-        /// <summary>
-        /// An empty instance of <see cref="GenomeResults{TInstance,TResult}"/>, useful in tests.
-        /// </summary>
-        private static readonly GenomeResults<InstanceFile, RuntimeResult> EmptyResults =
-            new GenomeResults<InstanceFile, RuntimeResult>(new ImmutableGenome(new Genome()), new Dictionary<InstanceFile, RuntimeResult>());
 
         #endregion
 
         #region Fields
 
         /// <summary>
-        /// <see cref="ParameterTree"/> that can be used in tests.
+        /// The <see cref="GenomeResults{TInstance,TResult}"/>, used in tests.
         /// </summary>
-        private readonly ParameterTree _parameterTree = LogWriterTest.CreateParameterTree();
+        private readonly GenomeResults<InstanceFile, RuntimeResult> _testGenomeResults;
 
         /// <summary>
-        /// <see cref="AlgorithmTunerConfiguration"/> that can be used in tests.
+        /// The <see cref="ParameterTree"/>, used in tests.
         /// </summary>
-        private AlgorithmTunerConfiguration _configuration;
+        private readonly ParameterTree _parameterTree;
 
         /// <summary>
-        /// A <see cref="GenomeBuilder"/> to create <see cref="Genome"/>s used in tests.
+        /// The <see cref="AlgorithmTunerConfiguration"/>, used in tests.
         /// </summary>
-        private GenomeBuilder _genomeBuilder;
+        private readonly AlgorithmTunerConfiguration _configuration;
 
         /// <summary>
-        /// The <see cref="LogWriter{I,R}"/> used in tests.
+        /// The <see cref="LogWriter{I,R}"/>, used in tests.
         /// </summary>
-        private LogWriter<InstanceFile, RuntimeResult> _writer;
+        private readonly LogWriter<InstanceFile, RuntimeResult> _writer;
 
         #endregion
 
@@ -102,14 +97,25 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
         /// </summary>
         public LogWriterTest()
         {
+            Randomizer.Reset();
+            Randomizer.Configure(0);
+
+            this._parameterTree = LogWriterTest.CreateParameterTree();
+
             this._configuration = new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder()
                 .SetGenerations(24)
                 .SetGoalGeneration(17)
                 .SetLogFilePath(LogWriterTest.LogFilePath)
-                .Build(maximumNumberParallelEvaluations: 1);
-            this._genomeBuilder = new GenomeBuilder(this._parameterTree, this._configuration);
-            Randomizer.Reset();
-            Randomizer.Configure(0);
+                .Build(1);
+
+            this._testGenomeResults = new GenomeResults<InstanceFile, RuntimeResult>(
+                new ImmutableGenome(new GenomeBuilder(this._parameterTree, this._configuration).CreateRandomGenome(4)),
+                new SortedDictionary<InstanceFile, RuntimeResult>(
+                    Comparer<InstanceFile>.Create((file1, file2) => string.CompareOrdinal(file1.ToString(), file2.ToString())))
+                    {
+                        { new InstanceFile("a"), new RuntimeResult(TimeSpan.FromMilliseconds(42)) },
+                        { new InstanceFile("foo/bar"), ResultBase<RuntimeResult>.CreateCancelledResult(TimeSpan.FromMilliseconds(11)) },
+                    });
 
             this._writer = new LogWriter<InstanceFile, RuntimeResult>(this._parameterTree, this._configuration);
         }
@@ -124,6 +130,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
         public void Dispose()
         {
             Randomizer.Reset();
+
             if (File.Exists(LogWriterTest.LogFilePath))
             {
                 File.Delete(LogWriterTest.LogFilePath);
@@ -137,9 +144,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
         public void ConstructorThrowsOnMissingParameterTree()
         {
             Assert.Throws<ArgumentNullException>(
-                () => new LogWriter<InstanceFile, RuntimeResult>(
-                    parameterTree: null,
-                    configuration: this._configuration));
+                () => new LogWriter<InstanceFile, RuntimeResult>(null, this._configuration));
         }
 
         /// <summary>
@@ -149,7 +154,22 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
         public void ConstructorThrowsOnMissingConfiguration()
         {
             Assert.Throws<ArgumentNullException>(
-                () => new LogWriter<InstanceFile, RuntimeResult>(this._parameterTree, configuration: null));
+                () => new LogWriter<InstanceFile, RuntimeResult>(this._parameterTree, null));
+        }
+
+        /// <summary>
+        /// Checks that <see cref="LogWriter{I,R}.LogFinishedGeneration"/> throws an 
+        /// <see cref="ArgumentOutOfRangeException"/> if the number of finished generations is provided as zero.
+        /// </summary>
+        [Fact]
+        public void LogFinishedGenerationThrowsOnZeroGenerations()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => this._writer.LogFinishedGeneration(
+                    0,
+                    1,
+                    this._testGenomeResults,
+                    true));
         }
 
         /// <summary>
@@ -161,178 +181,332 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
         {
             Assert.Throws<ArgumentOutOfRangeException>(
                 () => this._writer.LogFinishedGeneration(
+                    1,
                     0,
-                    totalEvaluationCount: 0,
-                    fittestGenome: this._genomeBuilder.CreateRandomGenome(0),
-                    results: LogWriterTest.EmptyResults));
+                    this._testGenomeResults,
+                    true));
+        }
+
+        /// <summary>
+        /// Checks that <see cref="LogWriter{I,R}.LogFinalIncumbentGeneration"/> throws an 
+        /// <see cref="ArgumentOutOfRangeException"/> if the number of evaluations is provided as zero.
+        /// </summary>
+        [Fact]
+        public void LogFinalIncumbentGenerationThrowsOnZeroEvaluations()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => this._writer.LogFinalIncumbentGeneration(
+                    0,
+                    this._testGenomeResults,
+                    1,
+                    2,
+                    true));
         }
 
         /// <summary>
         /// Checks that <see cref="LogWriter{I,R}.LogFinishedGeneration"/> throws an 
-        /// <see cref="ArgumentNullException"/> if no genome is provided on call.
+        /// <see cref="ArgumentNullException"/> if no genome results are provided on call.
         /// </summary>
         [Fact]
-        public void LogFinishedGenerationThrowsOnMissingGenome()
+        public void LogFinishedGenerationThrowsOnMissingGenomeResults()
         {
             Assert.Throws<ArgumentNullException>(
-                () => this._writer.LogFinishedGeneration(0, 1, fittestGenome: null, results: LogWriterTest.EmptyResults));
+                () => this._writer.LogFinishedGeneration(1, 1, null, true));
         }
 
         /// <summary>
-        /// Checks that <see cref="LogWriter{I,R}.LogFinishedGeneration"/> throws an 
-        /// <see cref="ArgumentNullException"/> if no results are provided on call.
+        /// Checks that <see cref="LogWriter{I,R}.LogFinalIncumbentGeneration"/> throws an 
+        /// <see cref="ArgumentNullException"/> if no genome results are provided on call.
         /// </summary>
         [Fact]
-        public void LogFinishedGenerationThrowsOnMissingResults()
+        public void LogFinalIncumbentGenerationThrowsOnMissingGenomeResults()
         {
             Assert.Throws<ArgumentNullException>(
-                () => this._writer.LogFinishedGeneration(0, 1, this._genomeBuilder.CreateRandomGenome(0), results: null));
+                () => this._writer.LogFinalIncumbentGeneration(1, null, 1, 2, true));
+        }
+
+        /// <summary>
+        /// Checks that <see cref="LogWriter{I,R}.LogFinalIncumbentGeneration"/> throws an 
+        /// <see cref="ArgumentOutOfRangeException"/> if the first generation as incumbent is provided, but the last generation as incumbent is null.
+        /// </summary>
+        [Fact]
+        public void LogFinalIncumbentGenerationThrowsOnPositiveFirstGenerationAsIncumbentAndNullLastGenerationAsIncumbent()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => this._writer.LogFinalIncumbentGeneration(
+                    1,
+                    this._testGenomeResults,
+                    1,
+                    null,
+                    true));
+        }
+
+        /// <summary>
+        /// Checks that <see cref="LogWriter{I,R}.LogFinalIncumbentGeneration"/> throws an 
+        /// <see cref="ArgumentOutOfRangeException"/> if the first generation as incumbent is null, but the last generation as incumbent is provided.
+        /// </summary>
+        [Fact]
+        public void LogFinalIncumbentGenerationThrowsOnNullFirstGenerationAsIncumbentAndPositiveLastGenerationAsIncumbent()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => this._writer.LogFinalIncumbentGeneration(
+                    1,
+                    this._testGenomeResults,
+                    null,
+                    1,
+                    true));
+        }
+
+        /// <summary>
+        /// Checks that <see cref="LogWriter{I,R}.LogFinalIncumbentGeneration"/> throws an 
+        /// <see cref="ArgumentOutOfRangeException"/> if the first generation as incumbent is provided as zero.
+        /// </summary>
+        [Fact]
+        public void LogFinalIncumbentGenerationThrowsOnZeroFirstGenerationAsIncumbent()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => this._writer.LogFinalIncumbentGeneration(
+                    1,
+                    this._testGenomeResults,
+                    0,
+                    1,
+                    true));
+        }
+
+        /// <summary>
+        /// Checks that <see cref="LogWriter{I,R}.LogFinalIncumbentGeneration"/> throws an 
+        /// <see cref="ArgumentOutOfRangeException"/> if the first generation as incumbent is greater than the last generation as incumbent.
+        /// </summary>
+        [Fact]
+        public void LogFinalIncumbentGenerationThrowsOnFirstGenerationAsIncumbentGreaterThanLastGenerationAsIncumbent()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => this._writer.LogFinalIncumbentGeneration(
+                    1,
+                    this._testGenomeResults,
+                    2,
+                    1,
+                    true));
+        }
+
+        /// <summary>
+        /// Checks that <see cref="LogWriter{I,R}.LogFinalIncumbentGeneration"/> throws an 
+        /// <see cref="InvalidOperationException"/> if the first and last generation as incumbent is provided as null and the fittest incumbent genome does not equal the default genome.
+        /// </summary>
+        [Fact]
+        public void LogFinalIncumbentGenerationThrowsOnNullFirstAndLastGenerationAsIncumbentIfFittestIncumbentGenomeDoesNotEqualDefaultGenome()
+        {
+            Assert.Throws<InvalidOperationException>(
+                () => this._writer.LogFinalIncumbentGeneration(
+                    1,
+                    this._testGenomeResults,
+                    null,
+                    null,
+                    false));
+        }
+
+        /// <summary>
+        /// Checks that <see cref="LogWriter{I,R}.LogFinishedGeneration"/> and <see cref="LogWriter{I,R}.LogFinalIncumbentGeneration"/> throw a
+        /// <see cref="DirectoryNotFoundException"/> if called with a log file path to a non-existing directory.
+        /// </summary>
+        /// <param name="useLogFinishedGeneration">Whether to use <see cref="LogWriter{I,R}.LogFinishedGeneration"/>.</param>
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void LogFinishedGenerationAndLogFinalIncumbentGenerationThrowForUnknownDirectory(bool useLogFinishedGeneration)
+        {
+            var configuration = new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder()
+                .SetLogFilePath("foo/bar.txt")
+                .Build(1);
+            var writer = new LogWriter<InstanceFile, RuntimeResult>(this._parameterTree, configuration);
+
+            if (useLogFinishedGeneration)
+            {
+                Assert.Throws<DirectoryNotFoundException>(
+                    () => writer.LogFinishedGeneration(1, 1, this._testGenomeResults, true));
+            }
+            else
+            {
+                Assert.Throws<DirectoryNotFoundException>(
+                    () => writer.LogFinalIncumbentGeneration(1, this._testGenomeResults, 1, 2, true));
+            }
         }
 
         /// <summary>
         /// Checks that <see cref="LogWriter{I,R}.LogFinishedGeneration"/> logs the finished generation to file.
         /// </summary>
         [Fact]
-        public void GenerationIsLoggedCorrectly()
+        public void LogFinishedGenerationLogsGenerationCorrectly()
         {
-            // Log at a specific generation.
-            int generation = 3;
-            this._writer.LogFinishedGeneration(generation, 1, this._genomeBuilder.CreateRandomGenome(0), LogWriterTest.EmptyResults);
+            this._writer.LogFinishedGeneration(3, 1, this._testGenomeResults, true);
 
             var linesInFile = File.ReadLines(LogWriterTest.LogFilePath);
             Assert.Equal(
-                $"Finished generation {generation} / 24",
+                "Finished generation 3 / 24",
                 linesInFile.First());
         }
 
         /// <summary>
-        /// Checks that <see cref="LogWriter{I,R}.LogFinishedGeneration"/> logs the total number of evaluations if an
-        /// evaluation limit exists.
+        /// Checks that <see cref="LogWriter{I,R}.LogFinalIncumbentGeneration"/> logs the finished generation to file.
         /// </summary>
         [Fact]
-        public void NumberEvaluationsIsLoggedCorrectly()
+        public void LogFinalIncumbentGenerationLogsGenerationCorrectly()
         {
-            // Ensure evaluation limit exists.
-            this._configuration = new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder()
-                .SetLogFilePath(LogWriterTest.LogFilePath)
-                .SetEvaluationLimit(25)
-                .Build(maximumNumberParallelEvaluations: 1);
-            this._writer = new LogWriter<InstanceFile, RuntimeResult>(this._parameterTree, this._configuration);
-
-            // Log at a specific number of evaluations.
-            int evaluations = 3;
-            this._writer.LogFinishedGeneration(1, evaluations, this._genomeBuilder.CreateRandomGenome(0), LogWriterTest.EmptyResults);
+            this._writer.LogFinalIncumbentGeneration(1, this._testGenomeResults, 1, 2, true);
 
             var linesInFile = File.ReadLines(LogWriterTest.LogFilePath);
             Assert.Equal(
-                $"Evaluations: {evaluations} / 25",
+                "Finished final incumbent generation",
+                linesInFile.First());
+        }
+
+        /// <summary>
+        /// Checks that <see cref="LogWriter{I,R}.LogFinishedGeneration"/> and <see cref="LogWriter{I,R}.LogFinalIncumbentGeneration"/> log the total number of evaluations if an
+        /// evaluation limit exists.
+        /// </summary>
+        /// <param name="useLogFinishedGeneration">Whether to use <see cref="LogWriter{I,R}.LogFinishedGeneration"/>.</param>
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void LogFinishedGenerationAndLogFinalIncumbentGenerationLogTotalNumberOfEvaluationsIfDesired(bool useLogFinishedGeneration)
+        {
+            var configuration = new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder()
+                .SetLogFilePath(LogWriterTest.LogFilePath)
+                .SetEvaluationLimit(25)
+                .Build(1);
+
+            var writer = new LogWriter<InstanceFile, RuntimeResult>(this._parameterTree, configuration);
+
+            if (useLogFinishedGeneration)
+            {
+                writer.LogFinishedGeneration(1, 3, this._testGenomeResults, true);
+            }
+            else
+            {
+                writer.LogFinalIncumbentGeneration(3, this._testGenomeResults, 1, 2, true);
+            }
+
+            var linesInFile = File.ReadLines(LogWriterTest.LogFilePath);
+            Assert.Equal(
+                "Evaluations: 3 / 25",
                 linesInFile.ElementAt(1));
         }
 
         /// <summary>
-        /// Checks that <see cref="LogWriter{I,R}.LogFinishedGeneration"/> does not log the total number of evaluations
-        /// without an evaluation limit.
+        /// Checks that <see cref="LogWriter{I,R}.LogFinishedGeneration"/> and <see cref="LogWriter{I,R}.LogFinalIncumbentGeneration"/> do not log the total number of evaluations
+        /// if no evaluation limit exists.
         /// </summary>
-        [Fact]
-        public void NumberEvaluationsIsNotLoggedOnUnlimitedEvaluations()
+        /// <param name="useLogFinishedGeneration">Whether to use <see cref="LogWriter{I,R}.LogFinishedGeneration"/>.</param>
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void LogFinishedGenerationAndLogFinalIncumbentGenerationDoNotLogTotalNumberOfEvaluationsIfNotDesired(bool useLogFinishedGeneration)
         {
-            // Log at a specific number of evaluations.
-            int evaluations = 3;
-            this._writer.LogFinishedGeneration(1, evaluations, this._genomeBuilder.CreateRandomGenome(0), LogWriterTest.EmptyResults);
+            if (useLogFinishedGeneration)
+            {
+                this._writer.LogFinishedGeneration(1, 3, this._testGenomeResults, true);
+            }
+            else
+            {
+                this._writer.LogFinalIncumbentGeneration(3, this._testGenomeResults, 1, 2, true);
+            }
 
             var linesInFile = File.ReadLines(LogWriterTest.LogFilePath);
             Assert.NotEqual(
-                $"Evaluations: {evaluations} / 25",
+                "Evaluations: 3 / 25",
                 linesInFile.ElementAt(1));
         }
 
         /// <summary>
-        /// Checks that <see cref="LogWriter{I,R}.LogFinishedGeneration"/> correctly logs the elapsed time to file.
+        /// Checks that <see cref="LogWriter{I,R}.LogFinishedGeneration"/> and <see cref="LogWriter{I,R}.LogFinalIncumbentGeneration"/> log the elapsed time to file.
         /// </summary>
-        [Fact]
-        public void ElapsedTimeIsLoggedCorrectly()
+        /// <param name="useLogFinishedGeneration">Whether to use <see cref="LogWriter{I,R}.LogFinishedGeneration"/>.</param>
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void LogFinishedGenerationAndLogFinalIncumbentGenerationLogElapsedTimeCorrectly(bool useLogFinishedGeneration)
         {
             Thread.Sleep(1000);
-            this._writer.LogFinishedGeneration(0, 1, this._genomeBuilder.CreateRandomGenome(0), LogWriterTest.EmptyResults);
 
+            if (useLogFinishedGeneration)
+            {
+                this._writer.LogFinishedGeneration(1, 1, this._testGenomeResults, true);
+            }
+            else
+            {
+                this._writer.LogFinalIncumbentGeneration(1, this._testGenomeResults, 1, 2, true);
+            }
+
+            var linesInFile = File.ReadLines(LogWriterTest.LogFilePath);
             var passedTime = DateTime.Now.ToUniversalTime() - Process.GetCurrentProcess().StartTime.ToUniversalTime();
-            var secondLine = File.ReadLines(LogWriterTest.LogFilePath).Skip(1).First();
-            var loggedTime = TimeSpan.Parse(secondLine.Split(' ').Last());
-            Assert.True(
-                Math.Abs(passedTime.TotalSeconds - loggedTime.TotalSeconds) < passedTime.TotalSeconds * 0.05,
-                "Generation was not logged correctly.");
+            var loggedTime = TimeSpan.Parse(linesInFile.ElementAt(1).Split(' ').Last());
+
+            Assert.True(Math.Abs(passedTime.TotalSeconds - loggedTime.TotalSeconds) < passedTime.TotalSeconds * 0.05);
         }
 
         /// <summary>
-        /// Checks that <see cref="LogWriter{I,R}.LogFinishedGeneration"/> correctly logs the fittest genome to file.
+        /// Checks that <see cref="LogWriter{I,R}.LogFinishedGeneration"/> logs the given information about the fittest genome to file.
         /// </summary>
         [Fact]
-        public void FittestGenomeIsLoggedCorrectly()
+        public void LogFinishedGenerationLogsGenomeInformationCorrectly()
         {
-            // Log a genome as fittest.
-            var fittestGenome = this._genomeBuilder.CreateRandomGenome(2);
-            fittestGenome.SetGene("decision", new Allele<bool>(true));
-            this._writer.LogFinishedGeneration(0, 1, fittestGenome, LogWriterTest.EmptyResults);
+            this._writer.LogFinishedGeneration(1, 1, this._testGenomeResults, true);
 
-            // Check genome was logged correctly.
-            // Ignore first three lines as they do not describe the genome.
-            var relevantLinesInFile = File.ReadLines(LogWriterTest.LogFilePath).Skip(4).ToList();
+            // Skip first two lines as they do not describe the genome.
+            var relevantLinesInFile = File.ReadLines(LogWriterTest.LogFilePath).Skip(2).ToList();
+            relevantLinesInFile.Count.ShouldBe(8);
+            Assert.Equal($"Fittest genome's age: {this._testGenomeResults.Genome.Age}", relevantLinesInFile[0]);
+            Assert.Equal("Fittest genome is default genome: True", relevantLinesInFile[1]);
+            Assert.Equal("Fittest genome according to last tournament:", relevantLinesInFile[2]);
             Assert.Equal(
-                "\tdecision: True",
-                relevantLinesInFile[0]);
+                $"\tdecision: {this._testGenomeResults.Genome.CreateMutableGenome().GetGeneValue("decision")}",
+                relevantLinesInFile[3]);
             Assert.Equal(
-                $"\ta: {fittestGenome.GetGeneValue("a")}",
-                relevantLinesInFile[1]);
-            Assert.True(
-                "Fittest genome's results on instances so far:" == relevantLinesInFile[2],
-                "Inactive parameter values should not be printed.");
+                $"\tb: {this._testGenomeResults.Genome.CreateMutableGenome().GetGeneValue("b")}",
+                relevantLinesInFile[4]);
+            // Inactive parameter 'a' should not be printed.
+            Assert.Equal(
+                "Fittest genome's results on instances so far:",
+                relevantLinesInFile[5]);
+            Assert.Equal(
+                FormattableString.Invariant($"\ta:\t{TimeSpan.FromMilliseconds(42):G}"),
+                relevantLinesInFile[6]);
+            Assert.Equal(
+                FormattableString.Invariant($"\tfoo/bar:\tCancelled after {TimeSpan.FromMilliseconds(11):G}"),
+                relevantLinesInFile[7]);
         }
 
         /// <summary>
-        /// Checks that <see cref="LogWriter{I,R}.LogFinishedGeneration"/> correctly logs the fittest genome's results 
-        /// to file.
+        /// Checks that <see cref="LogWriter{I,R}.LogFinalIncumbentGeneration"/> logs the given information about the fittest genome to file.
         /// </summary>
         [Fact]
-        public void ResultsAreLoggedCorrectly()
+        public void LogFinalIncumbentGenerationLogsGenomeInformationCorrectly()
         {
-            var results = new SortedDictionary<InstanceFile, RuntimeResult>(
-                              Comparer<InstanceFile>.Create((file1, file2) => string.Compare(file1.ToString(), file2.ToString())))
-                              {
-                                  { new InstanceFile("a"), new RuntimeResult(TimeSpan.FromMilliseconds(42)) },
-                                  { new InstanceFile("foo/bar"), ResultBase<RuntimeResult>.CreateCancelledResult(TimeSpan.FromMilliseconds(11)) },
-                              };
+            this._writer.LogFinalIncumbentGeneration(1, this._testGenomeResults, null, null, true);
 
-            var resultMessage = new GenomeResults<InstanceFile, RuntimeResult>(new ImmutableGenome(new Genome()), results);
-            this._writer.LogFinishedGeneration(0, 1, this._genomeBuilder.CreateRandomGenome(0), resultMessage);
-
-            // Check results were logged correclty.
-            // Ignore first six lines as they do not describe the results.
-            var relevantLinesInFile = File.ReadLines(LogWriterTest.LogFilePath).Skip(6).ToList();
-            Assert.True(
-                relevantLinesInFile.Contains(
-                    FormattableString.Invariant($"\ta:\t{TimeSpan.FromMilliseconds(42):G}")),
-                "Expected first result to be printed.");
-            Assert.True(
-                relevantLinesInFile.Contains(
-                    FormattableString.Invariant($"\tfoo/bar:\tCancelled after {TimeSpan.FromMilliseconds(11):G}")),
-                "Expected second result to be printed.");
-        }
-
-        /// <summary>
-        /// Checks that <see cref="LogWriter{I,R}.LogFinishedGeneration"/> throws a
-        /// <see cref="DirectoryNotFoundException"/> if called with a log file path to a non-existing directory.
-        /// </summary>
-        [Fact]
-        public void LogFinishedGenerationThrowsForUnknownDirectory()
-        {
-            // Set non existing log file path, then log finished generation.
-            this._configuration = new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder()
-                .SetLogFilePath("foo/bar.txt")
-                .Build(maximumNumberParallelEvaluations: 1);
-            this._genomeBuilder = new GenomeBuilder(this._parameterTree, this._configuration);
-            this._writer = new LogWriter<InstanceFile, RuntimeResult>(this._parameterTree, this._configuration);
-            Assert.Throws<DirectoryNotFoundException>(
-                () => this._writer.LogFinishedGeneration(0, 1, this._genomeBuilder.CreateRandomGenome(0), LogWriterTest.EmptyResults));
+            // Skip first two lines as they do not describe the genome.
+            var relevantLinesInFile = File.ReadLines(LogWriterTest.LogFilePath).Skip(2).ToList();
+            relevantLinesInFile.Count.ShouldBe(9);
+            Assert.Equal("Fittest genome's first generation as incumbent: none", relevantLinesInFile[0]);
+            Assert.Equal("Fittest genome's last generation as incumbent: none", relevantLinesInFile[1]);
+            Assert.Equal("Fittest genome is default genome: True", relevantLinesInFile[2]);
+            Assert.Equal("Fittest genome according to final incumbent generation:", relevantLinesInFile[3]);
+            Assert.Equal(
+                $"\tdecision: {this._testGenomeResults.Genome.CreateMutableGenome().GetGeneValue("decision")}",
+                relevantLinesInFile[4]);
+            Assert.Equal(
+                $"\tb: {this._testGenomeResults.Genome.CreateMutableGenome().GetGeneValue("b")}",
+                relevantLinesInFile[5]);
+            // Inactive parameter 'a' should not be printed.
+            Assert.Equal(
+                "Fittest genome's results on instances:",
+                relevantLinesInFile[6]);
+            Assert.Equal(
+                FormattableString.Invariant($"\ta:\t{TimeSpan.FromMilliseconds(42):G}"),
+                relevantLinesInFile[7]);
+            Assert.Equal(
+                FormattableString.Invariant($"\tfoo/bar:\tCancelled after {TimeSpan.FromMilliseconds(11):G}"),
+                relevantLinesInFile[8]);
         }
 
         #endregion
@@ -340,8 +514,8 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
         #region Methods
 
         /// <summary>
-        /// Creates a parameter tree which root is an OR node "decision". If that is true, a value node "a" is 
-        /// evaluated, otherwise a value node "b".
+        /// Creates a parameter tree which root is an OR node "decision".
+        /// If that is true, a value node "a" is evaluated, otherwise a value node "b".
         /// </summary>
         /// <returns>The created parameter tree.</returns>
         private static ParameterTree CreateParameterTree()

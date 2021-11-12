@@ -4,15 +4,23 @@ This page contains some advice on how to choose [parameters](parameters.md) for 
 
 Note that there exist some parameters which change the employed tuning algorithm. These are not discussed here. Hints about selecting the best tuning algorithm for your application can be found on the [page presenting the different algorithms](algorithms.md).
 
-## Introductory Remarks: Overall Tuning Runtime
+## <a name="runtime-estimation"></a>Introductory Remarks: Overall Tuning Runtime Estimation
 
-The overall tuning runtime mainly depends on the number of sequentially started target algorithm evaluations and their runtime. While you can limit the target algorithm runtime by providing a cpu timeout with `--cpuTimeout`, the number of sequential started target algorithm evaluations depends on multiple parameters: A rough upper bound for the number of needed target algorithm evaluations is given by: `numGens` * (`popSize` / 2) * `averageNumberOfInstancesPerGeneration`.
+To estimate a rough upper bound for the overall tuning runtime, please [download the prepared Excel file](../download.md) and follow the instructions in this section.
 
-Since already evaluated genome instance pairs will not be evaluated again in subsequent generations, the real number of needed evaluations will be far below this upper bound. Moreover, enabling [racing](parameters.md#racing) will drastically reduce this number.
+In general, the overall tuning runtime mainly depends on three factors: the number of performed target algorithm evaluations, their runtime and the tuner's `Degree of Parallelism`.
 
-Finally, *OPTANO Algorithm Tuner* will start `--maxParallelEvaluations` per computing node at the same time and can even make use of multiple computing nodes, if executed in [distributed fashion](distributed.md). Hence, a rough upper bound of the overall tuning runtime is given by:
+While you can limit the target algorithm's runtime by providing a [cpu timeout](parameters.md#racing), the number of performed target algorithm evaluations depends on multiple parameters: A rough upper bound is given by `numGens` * (`popSize` / 2) * `Average Number of Instances per Generation`. Here, the `Average Number of Instances per Generation` can be determined by [(`startInstanceNumber` + `endInstanceNumber`) / 2 * `goalGen` + `endInstanceNumber` * (`numGens` – `goalGen`)] / `numGens`.
 
-* `cpuTimeout` * `numGens` * (`popSize` / 2) * `averageNumberOfInstancesPerGeneration` / (`maxParallelEvaluations` * `numberOfNodes`)
+Moreover, the *OPTANO Algorithm Tuner* will start `maxParallelEvaluations` per computing node at the same time and can even make use of multiple computing nodes, if executed in [distributed fashion](distributed.md). Hence, the tuner's `Degree of Parallelism` is given by `maxParallelEvaluations` * `Number of Nodes`. Here, the `Number of Nodes` can be determined by `Number of Worker Nodes` + 1, if local evaluations on the master node are allowed (see `--allowLocalEvaluations` for details).
+
+Finally, a rough upper bound for the overall tuning runtime is given by:
+* `numGens` * (`popSize` / 2) * `Average Number of Instances per Generation` * `cpuTimeout` / `Degree of Parallelism`
+
+In practice, the actual tuning runtime is often less than half of this estimated tuning runtime for several reasons:
+1) Already evaluated genome instance pairs will not be evaluated again in subsequent generations.
+1) Enabling [racing](parameters.md#racing) can significantly reduce the number of performed target algorithm evaluations.
+1) _Good_ configurations will likely finish (at least some of the) instances before reaching the `cpuTimeout`.
 
 ## maxParallelEvaluations
 The parameter `--maxParallelEvaluations` specifies how many instances of your target algorithm may be executed in parallel. To set it, you should be aware of

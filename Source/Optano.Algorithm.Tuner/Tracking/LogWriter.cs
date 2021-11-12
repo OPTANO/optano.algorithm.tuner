@@ -38,7 +38,6 @@ namespace Optano.Algorithm.Tuner.Tracking
 
     using Optano.Algorithm.Tuner.Configuration;
     using Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage.Messages;
-    using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.Parameters;
     using Optano.Algorithm.Tuner.TargetAlgorithm.Instances;
     using Optano.Algorithm.Tuner.TargetAlgorithm.Results;
@@ -131,33 +130,35 @@ namespace Optano.Algorithm.Tuner.Tracking
         /// </summary>
         /// <param name="numberFinishedGenerations">The number of finished generations so far.</param>
         /// <param name="totalEvaluationCount">The total number of evaluations so far.</param>
-        /// <param name="fittestGenome">The fittest genome found in the generation.</param>
-        /// <param name="results">All results of the fittest genome so far.</param>
+        /// <param name="genomeResults">The genome results of the fittest genome so far.</param>
+        /// <param name="fittestGenomeEqualsDefaultGenome">Whether the fittest genome so far equals the default genome.</param>
         public void LogFinishedGeneration(
             int numberFinishedGenerations,
             int totalEvaluationCount,
-            Genome fittestGenome,
-            GenomeResults<TInstance, TResult> results)
+            GenomeResults<TInstance, TResult> genomeResults,
+            bool fittestGenomeEqualsDefaultGenome)
         {
+            if (numberFinishedGenerations <= 0)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(numberFinishedGenerations),
+                    $"{nameof(numberFinishedGenerations)} must be positive, but was {numberFinishedGenerations}.");
+            }
+
             if (totalEvaluationCount <= 0)
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(totalEvaluationCount),
-                    $"Evaluation count must be positive, but was {totalEvaluationCount}.");
+                    $"{nameof(totalEvaluationCount)} must be positive, but was {totalEvaluationCount}.");
             }
 
-            if (fittestGenome == null)
+            if (genomeResults == null)
             {
-                throw new ArgumentNullException(nameof(fittestGenome));
-            }
-
-            if (results == null)
-            {
-                throw new ArgumentNullException(nameof(results));
+                throw new ArgumentNullException(nameof(genomeResults));
             }
 
             // Write to file.
-            var wipFilePath = this._configuration.LogFilePath + WorkInProgressSuffix;
+            var wipFilePath = this._configuration.LogFilePath + LogWriter<TInstance, TResult>.WorkInProgressSuffix;
             using (var file = new StreamWriter(wipFilePath))
             {
                 file.WriteLine($"Finished generation {numberFinishedGenerations} / {this._configuration.Generations}");
@@ -167,17 +168,88 @@ namespace Optano.Algorithm.Tuner.Tracking
                 }
 
                 file.WriteLine($"Elapsed (d:hh:mm:ss): {this.TotalElapsedTime:G}");
-                file.WriteLine($"Age of fittest genome: {fittestGenome.Age}");
+                file.WriteLine($"Fittest genome's age: {genomeResults.Genome.Age}");
+                file.WriteLine($"Fittest genome is default genome: {fittestGenomeEqualsDefaultGenome}");
                 file.WriteLine("Fittest genome according to last tournament:");
-                foreach (var gene in fittestGenome.GetFilteredGenes(this._parameterTree))
+                foreach (var (key, value) in genomeResults.Genome.GetFilteredGenes(this._parameterTree))
                 {
-                    file.WriteLine($"\t{gene.Key}: {gene.Value}");
+                    file.WriteLine($"\t{key}: {value}");
                 }
 
                 file.WriteLine("Fittest genome's results on instances so far:");
-                foreach (var result in results.RunResults.OrderBy(r => r.Key.ToString()))
+                foreach (var (key, value) in genomeResults.RunResults.OrderBy(r => r.Key.ToString()))
                 {
-                    file.WriteLine($"\t{result.Key}:\t{result.Value}");
+                    file.WriteLine($"\t{key}:\t{value}");
+                }
+            }
+
+            // Replace last log file after writing has completed.
+            if (File.Exists(this._configuration.LogFilePath))
+            {
+                File.Delete(this._configuration.LogFilePath);
+            }
+
+            File.Move(wipFilePath, this._configuration.LogFilePath);
+        }
+
+        /// <summary>
+        /// Logs the final incumbent generation to file.
+        /// </summary>
+        /// <param name="totalEvaluationCount">The total number of evaluations so far.</param>
+        /// <param name="genomeResults">The genome results of the fittest incumbent genome.</param>
+        /// <param name="firstGenerationAsIncumbent">The fittest incumbent genome's first generation as incumbent, if any.</param>
+        /// <param name="lastGenerationAsIncumbent">The fittest incumbent genome's last generation as incumbent, if any.</param>
+        /// <param name="fittestIncumbentGenomeEqualsDefaultGenome">Whether the fittest incumbent genome equals the default genome.</param>
+        public void LogFinalIncumbentGeneration(
+            int totalEvaluationCount,
+            GenomeResults<TInstance, TResult> genomeResults,
+            int? firstGenerationAsIncumbent,
+            int? lastGenerationAsIncumbent,
+            bool fittestIncumbentGenomeEqualsDefaultGenome)
+        {
+            if (totalEvaluationCount <= 0)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(totalEvaluationCount),
+                    $"{nameof(totalEvaluationCount)} must be positive, but was {totalEvaluationCount}.");
+            }
+
+            if (genomeResults == null)
+            {
+                throw new ArgumentNullException(nameof(genomeResults));
+            }
+
+            LogWriter<TInstance, TResult>.CheckConsistencyOfFirstAndLastGenerationAsIncumbent(
+                firstGenerationAsIncumbent,
+                lastGenerationAsIncumbent,
+                fittestIncumbentGenomeEqualsDefaultGenome);
+
+            // Write to file.
+            var wipFilePath = this._configuration.LogFilePath + LogWriter<TInstance, TResult>.WorkInProgressSuffix;
+            using (var file = new StreamWriter(wipFilePath))
+            {
+                file.WriteLine("Finished final incumbent generation");
+                if (this._configuration.EvaluationLimit != int.MaxValue)
+                {
+                    file.WriteLine($"Evaluations: {totalEvaluationCount} / {this._configuration.EvaluationLimit}");
+                }
+
+                file.WriteLine($"Elapsed (d:hh:mm:ss): {this.TotalElapsedTime:G}");
+                file.WriteLine(
+                    $"Fittest genome's first generation as incumbent: {(firstGenerationAsIncumbent.HasValue ? $"{firstGenerationAsIncumbent.Value}" : "none")}");
+                file.WriteLine(
+                    $"Fittest genome's last generation as incumbent: {(lastGenerationAsIncumbent.HasValue ? $"{lastGenerationAsIncumbent.Value}" : "none")}");
+                file.WriteLine($"Fittest genome is default genome: {fittestIncumbentGenomeEqualsDefaultGenome}");
+                file.WriteLine("Fittest genome according to final incumbent generation:");
+                foreach (var (key, value) in genomeResults.Genome.GetFilteredGenes(this._parameterTree))
+                {
+                    file.WriteLine($"\t{key}: {value}");
+                }
+
+                file.WriteLine("Fittest genome's results on instances:");
+                foreach (var (key, value) in genomeResults.RunResults.OrderBy(r => r.Key.ToString()))
+                {
+                    file.WriteLine($"\t{key}:\t{value}");
                 }
             }
 
@@ -210,6 +282,50 @@ namespace Optano.Algorithm.Tuner.Tracking
             }
 
             this._elapsedTimeFromPreviousTuningSession = elapsedTimeFromPreviousSession;
+        }
+
+        /// <summary>
+        /// Checks the first and last generation as incumbent for consistency.
+        /// </summary>
+        /// <param name="firstGenerationAsIncumbent">The fittest incumbent genome's first generation as incumbent, if any.</param>
+        /// <param name="lastGenerationAsIncumbent">The fittest incumbent genome's last generation as incumbent, if any.</param>
+        /// <param name="fittestIncumbentGenomeEqualsDefaultGenome">Whether the fittest incumbent genome equals the default genome.</param>
+        private static void CheckConsistencyOfFirstAndLastGenerationAsIncumbent(
+            int? firstGenerationAsIncumbent,
+            int? lastGenerationAsIncumbent,
+            bool fittestIncumbentGenomeEqualsDefaultGenome)
+        {
+            if (firstGenerationAsIncumbent.HasValue != lastGenerationAsIncumbent.HasValue)
+            {
+                throw new ArgumentOutOfRangeException(
+                    $"{nameof(firstGenerationAsIncumbent)} and {nameof(lastGenerationAsIncumbent)}",
+                    $"Either both {nameof(firstGenerationAsIncumbent)} and {nameof(lastGenerationAsIncumbent)} must be null or both must be not null!");
+            }
+
+            if (firstGenerationAsIncumbent.HasValue)
+            {
+                if (firstGenerationAsIncumbent.Value <= 0)
+                {
+                    throw new ArgumentOutOfRangeException(
+                        nameof(firstGenerationAsIncumbent),
+                        $"{nameof(firstGenerationAsIncumbent)} must be null or positive, but was {firstGenerationAsIncumbent.Value}.");
+                }
+
+                if (firstGenerationAsIncumbent.Value > lastGenerationAsIncumbent.Value)
+                {
+                    throw new ArgumentOutOfRangeException(
+                        nameof(firstGenerationAsIncumbent),
+                        $"{nameof(firstGenerationAsIncumbent)} must be null or less than {nameof(lastGenerationAsIncumbent)}, but {nameof(firstGenerationAsIncumbent)} was {firstGenerationAsIncumbent.Value} and {nameof(lastGenerationAsIncumbent)} was {lastGenerationAsIncumbent.Value}.");
+                }
+            }
+            else
+            {
+                if (!fittestIncumbentGenomeEqualsDefaultGenome)
+                {
+                    throw new InvalidOperationException(
+                        "The fittest incumbent genome was never an incumbent genome and is also not the default genome!");
+                }
+            }
         }
 
         #endregion

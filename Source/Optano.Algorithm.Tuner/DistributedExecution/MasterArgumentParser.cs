@@ -652,6 +652,11 @@ namespace Optano.Algorithm.Tuner.DistributedExecution
                     "The 0-indexed {GENERATION} at which the maximum number instances per genome evaluation will be reached.\nDefault is 74.\nThis must be an integer.",
                 (int gg) => this.InternalConfigurationBuilder.SetGoalGeneration(gg));
             options.Add(
+                "addFinalIncumbentGeneration=",
+                () =>
+                    "If set to true, the last regular generation is followed by a final incumbent generation, in which all incumbent genomes get evaluated on all provided training instances within a single mini tournament. By using a random subset of instances per generation, the current incumbent genome does not need to be stricly better than its predecessor. For example, the current incumbent genome may outperform its predecessor on the current instance set, but perform worse on all provided training instances. While using a random subset of instances per generation to avoid overfitting is still recommended, adding a final incumbent generation ensures that OPTANO Algorithm Tuner always returns the fittest incumbent genome. The number of additional evaluations is kept low by caching previous results and applying racing, if enabled.",
+                (bool b) => this.InternalConfigurationBuilder.SetAddFinalIncumbentGeneration(b));
+            options.Add(
                 "tuningRandomSeed=",
                 () =>
                     "The random seed to control the initial population and the subset of instances, used per generation.\nIf not specified, a time-dependent seed is used.\nThis must be an integer.",
@@ -819,10 +824,15 @@ namespace Optano.Algorithm.Tuner.DistributedExecution
                     $"The CPU timeout per target algorithm run in {{SECONDS}}.\nDefault is {TimeSpan.FromMilliseconds(int.MaxValue).TotalSeconds:0} seconds.\nThis must be a double.",
                 (double t) => this.InternalConfigurationBuilder.SetCpuTimeout(TimeSpan.FromSeconds(t)));
             options.Add(
-                "addDefaultGenome=",
+                "addDefaultGenomeToFirstGeneration=",
                 () =>
-                    "If set to true, a genome that uses the target algorithm's default values (if specified), is added to the competitive population when the tuning is started.",
-                (bool b) => this.InternalConfigurationBuilder.SetAddDefaultGenome(b));
+                    "If set to true, a genome that uses the target algorithm's default parameter values (if specified), is included in the competitive population of the first generation. If a parameter does not have a specified default value, a randomized value from its domain is used instead.",
+                (bool b) => this.InternalConfigurationBuilder.SetAddDefaultGenomeToFirstGeneration(b));
+            options.Add(
+                "addDefaultGenomeToFinalIncumbentGeneration=",
+                () =>
+                    "If set to true, a genome that uses the target algorithm's default parameter values (if specified), is added to the final incumbent generation. If a parameter does not have a specified default value, a randomized value from its domain is used instead.",
+                (bool b) => this.InternalConfigurationBuilder.SetAddDefaultGenomeToFinalIncumbentGeneration(b));
         }
 
         /// <summary>

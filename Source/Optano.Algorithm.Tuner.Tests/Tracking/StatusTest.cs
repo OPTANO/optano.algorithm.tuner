@@ -73,9 +73,28 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
         private readonly List<GenerationInformation> _informationHistory = new List<GenerationInformation>();
 
         /// <summary>
+        /// The default genome, used in tests.
+        /// </summary>
+        private readonly ImmutableGenome _defaultGenome;
+
+        /// <summary>
         /// Configuration that can be used in tests.
         /// </summary>
         private AlgorithmTunerConfiguration _configuration;
+
+        #endregion
+
+        #region Constructors and Destructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StatusTest"/> class.
+        /// </summary>
+        public StatusTest()
+        {
+            var mutableDefaultGenome = new Genome(1);
+            mutableDefaultGenome.SetGene("default", new Allele<int>(0));
+            this._defaultGenome = new ImmutableGenome(mutableDefaultGenome);
+        }
 
         #endregion
 
@@ -192,6 +211,18 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
             Assert.Equal(
                 this._configuration,
                 status.Configuration);
+        }
+
+        /// <summary>
+        /// Checks that
+        /// <see cref="Status{TInstance, TResult, TLearnerModel, TPredictorModel, TSamplingStrategy}.DefaultGenome"/>
+        /// returns the default genome provided on initialization.
+        /// </summary>
+        [Fact]
+        public void DefaultGenomeIsSetCorrectly()
+        {
+            var status = this.CreateStatus(0, this._population, this._configuration, 0, this._informationHistory, this._defaultGenome);
+            Assert.True(ImmutableGenome.GenomeComparer.Equals(this._defaultGenome, status.DefaultGenome));
         }
 
         /// <summary>
@@ -316,13 +347,15 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
             generation0.IncumbentTestScore = 345.8;
             this._informationHistory.Add(generation0);
             this._informationHistory.Add(generation1);
+            /* (4) default genome */
             var status = this.CreateStatus(
                 generation,
                 this._population,
                 this._configuration,
                 strategyIndex,
-                this._informationHistory);
-            /* (4) run results */
+                this._informationHistory,
+                this._defaultGenome);
+            /* (5) run results */
             var instance = new TestInstance("1");
             var result = new TestResult(TimeSpan.FromMilliseconds(3));
             var results = new Dictionary<TestInstance, TestResult> { { instance, result } };
@@ -372,7 +405,9 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
             Assert.Equal(
                 this._informationHistory.Select(information => information.ToString()).ToArray(),
                 deserializedStatus.InformationHistory.Select(information => information.ToString()).ToArray());
-            /* (e) run results */
+            /* (e) default genome */
+            Assert.True(ImmutableGenome.GenomeComparer.Equals(this._defaultGenome, deserializedStatus.DefaultGenome));
+            /* (f) run results */
             var instanceToResult = deserializedStatus.RunResults.Single().Value.Single();
             Assert.Equal(instance.ToString(), instanceToResult.Key.ToString());
             Assert.Equal(result.Runtime, instanceToResult.Value.Runtime);
@@ -443,6 +478,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
         /// Index of the current <see cref="IPopulationUpdateStrategy{TInstance,TResult}"/>.
         /// </param>
         /// <param name="informationHistory">Information history to use.</param>
+        /// <param name="defaultGenome">The default genome, if any. Can be null.</param>
         /// <returns>The created <see cref="Status{TInstance,TResult,TLearnerModel,TPredictorModel,TSamplingStrategy}"/>.</returns>
         private Status<TestInstance, TestResult, GenomePredictionRandomForest<ReuseOldTreesStrategy>,
             GenomePredictionForestModel<GenomePredictionTree>,
@@ -451,7 +487,8 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
             Population population,
             AlgorithmTunerConfiguration configuration,
             int currentUpdateStrategyIndex,
-            List<GenerationInformation> informationHistory)
+            List<GenerationInformation> informationHistory,
+            ImmutableGenome defaultGenome = null)
         {
             if (this.DummyEngineering == null)
             {
@@ -475,7 +512,8 @@ namespace Optano.Algorithm.Tuner.Tests.Tracking
                         IncumbentInstanceResults = new List<TestResult>().ToImmutableList(),
                     },
                 informationHistory,
-                elapsedTime: TimeSpan.Zero);
+                elapsedTime: TimeSpan.Zero,
+                defaultGenome);
         }
 
         #endregion

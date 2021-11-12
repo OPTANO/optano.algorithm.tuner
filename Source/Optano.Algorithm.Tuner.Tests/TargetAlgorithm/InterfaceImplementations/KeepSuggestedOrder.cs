@@ -71,9 +71,8 @@ namespace Optano.Algorithm.Tuner.Tests.TargetAlgorithm.InterfaceImplementations
         /// Uses the <paramref name="genomeStats"/>.Genome.Age - OpenInstances.Count as priority.
         /// </summary>
         /// <param name="genomeStats">The genome stats.</param>
-        /// <param name="cpuTimeout">The timeout.</param>
         /// <returns><see cref="ImmutableGenomeStats{TInstance,TResult}.Genome"/>.Age.</returns>
-        public double ComputeEvaluationPriorityOfGenome(ImmutableGenomeStats<TInstance, TResult> genomeStats, TimeSpan cpuTimeout)
+        public double ComputeEvaluationPriorityOfGenome(ImmutableGenomeStats<TInstance, TResult> genomeStats)
         {
             return genomeStats.Genome.Age - genomeStats.OpenInstances.Count;
         }

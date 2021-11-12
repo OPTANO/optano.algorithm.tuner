@@ -118,11 +118,13 @@ If your sorting depends on a single value, implementing `IMetricRunEvaluator` pr
 
 to the `IRunEvaluator` interface.
 
-If you decided to use the already implemented `RuntimeResult` or `ContinuousResult`, you can use `SortByRuntime` resp. `SortByValue` (descending or ascending) instead of implementing the interface by yourself.
+If you decided to use the already implemented `RuntimeResult` or `ContinuousResult`, you can use `SortByUnpenalizedRuntime`, `SortByPenalizedRuntime` or `SortByValue` (descending or ascending) instead of implementing the interface by yourself.
 
 In case you do implement the interface yourself, note that the argument `allGenomeStatsOfMiniTournament` contains all genomes (i.e. parameter combinations) evaluated in the current generation / mini tournament along with their respective genome stats. If [racing](../userDoc/parameters.md#racing) is enabled (i.e. `--enableRacing=true`), the number of finished instances per genome may vary. Moreover The finished instances may include results cancelled due to CPU timeouts. For those the <see cref="ResultBase{TResult}.IsCancelled"/>-Boolean is true.
 
-**Example:** You can find an example of a custom `IRunEvaluator` implementation in the [Gurobi example](gurobi.md).
+Finally, *OAT* provides the abstract base class `RacingRunEvaluatorBase` to support the implementation of custom racing strategies. When using this abstract base class, you only need to provide your custom `Sort` method and the corresponding best and worst possible result, in order to implement a full-featured racing strategy.
+
+**Example:** You can find an example of a custom `IRunEvaluator`/`RacingRunEvaluatorBase` implementation in the [Gurobi example](gurobi.md).
 
 ## <a name="paramtree"></a>Build up a parameter tree
 In order to tune your algorithm, *OAT* needs to be aware of the tuneable parameters and their relationships.

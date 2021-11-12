@@ -36,7 +36,6 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm.RunEvaluators
     using System.Linq;
 
     using Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation;
-    using Optano.Algorithm.Tuner.Genomes;
     using Optano.Algorithm.Tuner.TargetAlgorithm.Instances;
     using Optano.Algorithm.Tuner.TargetAlgorithm.Results;
 
@@ -44,35 +43,40 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm.RunEvaluators
     /// An implementation of <see cref="IRunEvaluator{I,R}"/> that sorts genomes by the higher number of uncancelled runs first and the lower average runtime second.
     /// </summary>
     /// <typeparam name="TInstance">The instance type.</typeparam>
-    public class SortByUnpenalizedRuntime<TInstance> : IRunEvaluator<TInstance, RuntimeResult>
+    public class SortByUnpenalizedRuntime<TInstance> : RacingRunEvaluatorBase<TInstance, RuntimeResult>
         where TInstance : InstanceBase
     {
-        #region Fields
-
-        /// <summary>
-        /// The cpu timeout.
-        /// </summary>
-        private readonly TimeSpan _cpuTimeout;
-
-        #endregion
-
         #region Constructors and Destructors
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SortByUnpenalizedRuntime{TInstance}"/> class.
         /// </summary>
         /// <param name="cpuTimeout">The cpu timeout.</param>
-        public SortByUnpenalizedRuntime(TimeSpan cpuTimeout)
+        /// <param name="getPlaceholderInstance">
+        /// The GetPlaceholderInstance func, used in <see cref="RacingRunEvaluatorBase{TInstance, TResult}.GetExtendedGenomeStats"/>: Gets a placeholder instance from a unique ID integer.
+        /// If null, a fallback func, implemented for <see cref="InstanceFile"/> and <see cref="InstanceSeedFile"/>, is used.
+        /// </param>
+        public SortByUnpenalizedRuntime(TimeSpan cpuTimeout, Func<int, TInstance> getPlaceholderInstance = null)
+            : base(cpuTimeout, getPlaceholderInstance)
         {
-            this._cpuTimeout = cpuTimeout;
         }
+
+        #endregion
+
+        #region Properties
+
+        /// <inheritdoc />
+        protected override RuntimeResult BestPossibleResult => new RuntimeResult(TimeSpan.Zero);
+
+        /// <inheritdoc />
+        protected override RuntimeResult WorstPossibleResult => new RuntimeResult(this.CpuTimeout);
 
         #endregion
 
         #region Public Methods and Operators
 
         /// <inheritdoc />
-        public IEnumerable<ImmutableGenomeStats<TInstance, RuntimeResult>> Sort(
+        public override IEnumerable<ImmutableGenomeStats<TInstance, RuntimeResult>> Sort(
             IEnumerable<ImmutableGenomeStats<TInstance, RuntimeResult>> allGenomeStatsOfMiniTournament)
         {
             /* This implementation uses the following sorting criteria:
@@ -89,71 +93,6 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm.RunEvaluators
                         .Select(result => result.Runtime.TotalSeconds)
                         .DefaultIfEmpty(double.PositiveInfinity)
                         .Average());
-        }
-
-        /// <inheritdoc />
-        public IEnumerable<ImmutableGenome> GetGenomesThatCanBeCancelledByRacing(
-            IReadOnlyList<ImmutableGenomeStats<TInstance, RuntimeResult>> allGenomeStatsOfMiniTournament,
-            int numberOfMiniTournamentWinners)
-        {
-            var canBeCancelledByRacing = new List<ImmutableGenome>();
-
-            var racingIncumbent = this.Sort(allGenomeStatsOfMiniTournament).Skip(numberOfMiniTournamentWinners - 1).First();
-            var minimumNumberOfUncancelledResultsOfRacingIncumbent = racingIncumbent.FinishedInstances.Values.Count(result => !result.IsCancelled);
-            var maximumTotalRuntimeOfRacingIncumbent = racingIncumbent.RuntimeOfFinishedInstances
-                                                       + ((racingIncumbent.OpenInstances.Count + racingIncumbent.RunningInstances.Count)
-                                                          * this._cpuTimeout);
-
-            foreach (var genomeStats in allGenomeStatsOfMiniTournament.Where(g => !g.IsCancelledByRacing && g.HasOpenOrRunningInstances))
-            {
-                var maximumNumberOfUncancelledResults = genomeStats.FinishedInstances.Values.Count(result => !result.IsCancelled)
-                                                        + genomeStats.OpenInstances.Count + genomeStats.RunningInstances.Count;
-                var minimumTotalRuntime = genomeStats.RuntimeOfFinishedInstances;
-
-                if (maximumNumberOfUncancelledResults < minimumNumberOfUncancelledResultsOfRacingIncumbent)
-                {
-                    // Cancel by racing, because the current genome cannot have more uncancelled results than the racing incumbent.
-                    canBeCancelledByRacing.Add(genomeStats.Genome);
-                }
-
-                if (maximumNumberOfUncancelledResults == minimumNumberOfUncancelledResultsOfRacingIncumbent
-                    && minimumTotalRuntime > maximumTotalRuntimeOfRacingIncumbent)
-                {
-                    // Cancel by racing, because the current genome cannot have a lower total run time than the racing incumbent.
-                    canBeCancelledByRacing.Add(genomeStats.Genome);
-                }
-            }
-
-            return canBeCancelledByRacing;
-        }
-
-        /// <inheritdoc />
-        public double ComputeEvaluationPriorityOfGenome(ImmutableGenomeStats<TInstance, RuntimeResult> genomeStats, TimeSpan cpuTimeout)
-        {
-            if (genomeStats.IsCancelledByRacing)
-            {
-                return 1000;
-            }
-
-            // First decision criterion: The higher the cancelled instance rate, the later the genome will start.
-            var cancelledCount = genomeStats.FinishedInstances.Values.Count(r => r.IsCancelled);
-            var cancelledInstanceRate = (double)cancelledCount / genomeStats.TotalInstanceCount;
-
-            // Second decision criterion: The higher the running instance rate, the later the genome will start.
-            var runningInstanceRate = (double)genomeStats.RunningInstances.Count / genomeStats.TotalInstanceCount;
-
-            // Third decision criterion: The higher the total runtime rate, the later the genome will start.
-            var totalRuntimeRate = genomeStats.RuntimeOfFinishedInstances.TotalMilliseconds
-                                   / (genomeStats.TotalInstanceCount * cpuTimeout.TotalMilliseconds);
-
-            RunEvaluatorUtils.CheckIfRateIsOutOfBounds(cancelledInstanceRate, nameof(cancelledInstanceRate));
-            RunEvaluatorUtils.CheckIfRateIsOutOfBounds(runningInstanceRate, nameof(runningInstanceRate));
-            RunEvaluatorUtils.CheckIfRateIsOutOfBounds(totalRuntimeRate, nameof(totalRuntimeRate));
-
-            var priority = (100 * cancelledInstanceRate) + (10 * runningInstanceRate) + (1 * totalRuntimeRate);
-
-            // The lower the priority, the earlier the genome will start.
-            return priority;
         }
 
         #endregion

@@ -55,8 +55,12 @@ Note: For most applications, if you execute <i>OAT</i> in a distributed fashion,
  <dt>--instanceNumbers={NUMBER:NUMBER} (-i) [5:100]</dt>
  <dd>The number of instances to use at the first generation and the number of instances to use at the end. Instance numbers increase linearly from the start until <i>goalGen</i> and then stay at maximum size until the end of the tuning.</dd>
 
- <dt>--addDefaultGenome={BOOLEAN} [true]</dt>
- <dd>Value indicating whether to include a genome that uses the target algorithm's default parameter values, if they are specified. If a parameter does not have a specified default value, a randomized value from its domain is used instead.</dd>
+ <dt>--addDefaultGenomeToFirstGeneration={BOOLEAN} [true]</dt>
+ <dd>If set to true, a genome that uses the target algorithm's default parameter values (if specified), is included in the competitive population of the first generation. If a parameter does not have a specified default value, a randomized value from its domain is used instead.</dd>
+ 
+  <dt>--addDefaultGenomeToFinalIncumbentGeneration={BOOLEAN} [true]</dt>
+ <dd>If set to true, a genome that uses the target algorithm's default parameter values (if specified), is added to the final incumbent generation. If a parameter does not have a specified default value, a randomized value from its domain is used instead.</dd>
+
 </dl>
 
 #### <a name="racing"></a>Speedups in Tuning
@@ -84,6 +88,9 @@ Note: For most applications, if you execute <i>OAT</i> in a distributed fashion,
 
  <dt>--goalGen={INDEX} [74]</dt>
  <dd>The first generation (0-indexed) at which the maximum number instances per genome evaluation will be reached.</dd>
+ 
+  <dt>--addFinalIncumbentGeneration={BOOLEAN} [true]</dt>
+ <dd>If set to true, the last regular generation is followed by a final incumbent generation, in which all incumbent genomes get evaluated on all provided training instances within a single mini tournament. By using a random subset of instances per generation, the current incumbent genome does not need to be stricly better than its predecessor. For example, the current incumbent genome may outperform its predecessor on the current instance set, but perform worse on all provided training instances. While using a random subset of instances per generation to avoid overfitting is still recommended, adding a final incumbent generation ensures that OPTANO Algorithm Tuner always returns the fittest incumbent genome. The number of additional evaluations is kept low by caching previous results and applying racing, if enabled.</dd>
 
  <dt>--tuningRandomSeed={NUMBER} [None]</dt>
  <dd>The random seed to control the initial population and the subset of instances, used per generation. If not specified, a time-dependent seed is used.</dd>

@@ -582,7 +582,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tuning
             Skip.IfNot(Environment.OSVersion.Platform == PlatformID.Win32NT);
 
             // Build up an algorithm tuner instance with few generations.
-            var tuner = AlgorithmTunerTest.CreateSmallAlgorithmTuner(generations: 2);
+            var tuner = AlgorithmTunerTest.CreateSmallAlgorithmTuner(generations: 2, addFinalIncumbentGeneration: false);
 
             // Add watcher to find out when log files are written.
             var writtenFiles = new List<ICollection<string>>(2);
@@ -665,13 +665,32 @@ namespace Optano.Algorithm.Tuner.Tests.Tuning
                 lines[1]);
             Assert.Equal(
                 $"\t{ExtractIntegerValue.ParameterName}: 42",
-                lines[5]);
-            Assert.Equal(
-                $"\t0:\t42",
                 lines[7]);
             Assert.Equal(
+                $"\t0:\t42",
+                lines[9]);
+            Assert.Equal(
                 $"\t1:\t42",
-                lines[8]);
+                lines[10]);
+        }
+
+        /// <summary>
+        /// Checks that the final incumbent generation is only performed, if desired.
+        /// </summary>
+        /// <param name="performFinalIncumbentGeneration">Whether to perform final incumbent generation.</param>
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void FinalIncumbentGenerationIsOnlyPerformedIfDesired(bool performFinalIncumbentGeneration)
+        {
+            var tuner = AlgorithmTunerTest.CreateSmallAlgorithmTuner(generations: 2, addFinalIncumbentGeneration: performFinalIncumbentGeneration);
+            tuner.Run();
+            tuner.Dispose();
+
+            var linesInFile = File.ReadLines(PathUtils.GetAbsolutePathFromCurrentDirectory("tunerLog.txt"));
+            Assert.Equal(
+                performFinalIncumbentGeneration ? "Finished final incumbent generation" : "Finished generation 2 / 2",
+                linesInFile.First());
         }
 
         /// <summary>
@@ -1243,11 +1262,13 @@ namespace Optano.Algorithm.Tuner.Tests.Tuning
         /// <param name="generations">The number of generations to execute.</param>
         /// <param name="allowConfigChangeForSubsequentRun">Whether subsequent "continue" runs should override the
         /// configuration.</param>
+        /// <param name="addFinalIncumbentGeneration">Whether to add a final incumbent generation.</param>
         /// <returns>The created <see cref="AlgorithmTuner{NoOperation, TestInstance, TestResult}"/> instance.</returns>
         private static AlgorithmTuner<NoOperation, TestInstance, TestResult, GenomePredictionRandomForest<ReuseOldTreesStrategy>,
             GenomePredictionForestModel<GenomePredictionTree>, ReuseOldTreesStrategy> CreateSmallAlgorithmTuner(
             int generations,
-            bool allowConfigChangeForSubsequentRun = false)
+            bool allowConfigChangeForSubsequentRun = false,
+            bool addFinalIncumbentGeneration = true)
         {
             LoggingHelper.Configure("test.txt");
             var config = new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder()
@@ -1257,6 +1278,7 @@ namespace Optano.Algorithm.Tuner.Tests.Tuning
                 .SetGoalGeneration(1)
                 .SetEngineeredProportion(0)
                 .SetEnableRacing(true)
+                .SetAddFinalIncumbentGeneration(addFinalIncumbentGeneration)
                 .AddDetailedConfigurationBuilder(
                     RegressionForestArgumentParser.Identifier,
                     new GenomePredictionRandomForestConfig.GenomePredictionRandomForestConfigBuilder())

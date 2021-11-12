@@ -36,7 +36,6 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments
     using System.Collections.Immutable;
     using System.Linq;
 
-    using Optano.Algorithm.Tuner.Configuration;
     using Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation;
     using Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments.Results;
     using Optano.Algorithm.Tuner.Genomes;
@@ -68,9 +67,9 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments
         private readonly IRunEvaluator<TInstance, TResult> _runEvaluator;
 
         /// <summary>
-        /// The algorithm tuner configuration.
+        /// Boolean indicating whether racing is enabled.
         /// </summary>
-        private readonly AlgorithmTunerConfiguration _configuration;
+        private readonly bool _enableRacing;
 
         /// <summary>
         /// The desired number of winners.
@@ -104,38 +103,35 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments
         /// <summary>
         /// Initializes a new instance of the <see cref="MiniTournamentManager{I, R}"/> class.
         /// </summary>
-        /// <param name="participants">The tournament's participants.</param>
+        /// <param name="participants">The tournament's participants. Do not need to be distinct.</param>
         /// <param name="instances">The tournament's instances.</param>
         /// <param name="miniTournamentId">The mini tournament id.</param>
         /// <param name="generationId">The generation id.</param>
         /// <param name="runEvaluator">The <see cref="IRunEvaluator{TInstance,TResult}"/>.</param>
-        /// <param name="configuration">The algorithm tuner configuration.</param>
+        /// <param name="enableRacing">Boolean indicating whether racing is enabled.</param>
+        /// <param name="desiredNumberOfWinners">The desired number of winners.</param>
         public MiniTournamentManager(
-            IEnumerable<ImmutableGenome> participants,
+            IReadOnlyList<ImmutableGenome> participants,
             IEnumerable<TInstance> instances,
             int miniTournamentId,
             int generationId,
             IRunEvaluator<TInstance, TResult> runEvaluator,
-            AlgorithmTunerConfiguration configuration)
+            bool enableRacing,
+            int desiredNumberOfWinners)
         {
-            if (participants == null)
-            {
-                throw new ArgumentNullException(nameof(participants));
-            }
+            this.Participants = participants ?? throw new ArgumentNullException(nameof(participants));
 
             if (instances == null)
             {
                 throw new ArgumentNullException(nameof(instances));
             }
 
-            this.Participants = participants.ToList();
             this.MiniTournamentId = miniTournamentId;
             this._generationId = generationId;
 
             this._runEvaluator = runEvaluator ?? throw new ArgumentNullException(nameof(runEvaluator));
-            this._configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-
-            this._desiredNumberOfWinners = (int)Math.Ceiling(this.Participants.Count() * this._configuration.TournamentWinnerPercentage);
+            this._enableRacing = enableRacing;
+            this._desiredNumberOfWinners = desiredNumberOfWinners;
 
             this._genomeToGenomeTournamentKey =
                 this.Participants.Distinct(ImmutableGenome.GenomeComparer).ToDictionary(
@@ -155,7 +151,7 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments
         #region Public properties
 
         /// <summary>
-        /// Gets the tournament's participants.
+        /// Gets the tournament's participants. Do not need to be distinct.
         /// </summary>
         public IEnumerable<ImmutableGenome> Participants { get; }
 
@@ -203,7 +199,7 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments
                         $"Trying to finish instance {evaluation.Instance} with result {result}, but it was not in GenomeStats.RunningInstances.");
                 }
 
-                if (this._configuration.EnableRacing)
+                if (this._enableRacing)
                 {
                     var currentExpandedImmutableGenomeStats = this.GetExpandedImmutableGenomeStats().ToList();
                     var canBeCancelledByRacing = this._runEvaluator
@@ -297,7 +293,7 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments
                 }
 
                 var genomeKey = new GenomeTournamentKey(evaluation.Genome, this.MiniTournamentId);
-                var genomePriority = this._runEvaluator.ComputeEvaluationPriorityOfGenome(genomeStats.ToImmutable(), this._configuration.CpuTimeout);
+                var genomePriority = this._runEvaluator.ComputeEvaluationPriorityOfGenome(genomeStats.ToImmutable());
 
                 if (genomeStats.RequeueInstance(evaluation.Instance))
                 {
@@ -405,8 +401,7 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments
                     genomeTournament.Value,
                     this._runEvaluator
                         .ComputeEvaluationPriorityOfGenome(
-                            this._genomeToGenomeStats[genomeTournament.Key].ToImmutable(),
-                            this._configuration.CpuTimeout));
+                            this._genomeToGenomeStats[genomeTournament.Key].ToImmutable()));
             }
         }
 
@@ -434,8 +429,7 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments
             {
                 var genomePriority = this._runEvaluator
                     .ComputeEvaluationPriorityOfGenome(
-                        this._genomeToGenomeStats[genomeTournamentKey.Genome].ToImmutable(),
-                        this._configuration.CpuTimeout);
+                        this._genomeToGenomeStats[genomeTournamentKey.Genome].ToImmutable());
                 this._globalPriorityQueue.UpdatePriority(genomeTournamentKey, genomePriority);
             }
         }

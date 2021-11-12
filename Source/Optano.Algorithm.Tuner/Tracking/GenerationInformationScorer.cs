@@ -38,7 +38,6 @@ namespace Optano.Algorithm.Tuner.Tracking
     using Akka.Actor;
 
     using Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation;
-    using Optano.Algorithm.Tuner.GenomeEvaluation.Messages;
     using Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage;
     using Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage.Messages;
     using Optano.Algorithm.Tuner.GenomeEvaluation.Sorting;
@@ -150,7 +149,12 @@ namespace Optano.Algorithm.Tuner.Tracking
                 throw new ArgumentOutOfRangeException(nameof(trainingInstances), "No training instances provided.");
             }
 
-            this.EvaluateAllIncumbentCandidates(informationHistory, trainingInstances.Concat(testInstances));
+            var incumbentEvaluator = new SortingIncumbentEvaluator<TInstance, TResult>(this._generationEvaluationActor);
+
+            incumbentEvaluator.EvaluateAllIncumbentGenomes(
+                informationHistory.Select(x => x.Incumbent).Distinct(ImmutableGenome.GenomeComparer),
+                trainingInstances.Concat(testInstances));
+
             foreach (var information in informationHistory)
             {
                 information.IncumbentTrainingScore = this.AverageResultsOn(trainingInstances, information.Incumbent);
@@ -164,45 +168,6 @@ namespace Optano.Algorithm.Tuner.Tracking
         #endregion
 
         #region Methods
-
-        /// <summary>
-        /// Provokes evaluations on all incumbent candidates on the provided instances.
-        /// </summary>
-        /// <param name="informationHistory">
-        /// <see cref="GenerationInformation"/> objects storing the incumbent candidates.
-        /// </param>
-        /// <param name="instances">The instances to evaluate the candidates on.</param>
-        private void EvaluateAllIncumbentCandidates(
-            IEnumerable<GenerationInformation> informationHistory,
-            IEnumerable<TInstance> instances)
-        {
-            // Set generationId to -1, since this is a post tuning "generation".
-            // Set useGrayBoxInGeneration to false, since we do not want to use gray box tuning here.
-            var generationEvaluationMessage = new GenerationEvaluation<TInstance, TResult>(
-                informationHistory.Select(information => information.Incumbent),
-                instances,
-                (runEvaluator, participantsOfGeneration, instancesOfGeneration) =>
-                    new SortingGenerationEvaluationStrategy<TInstance, TResult>(
-                        runEvaluator,
-                        participantsOfGeneration,
-                        instancesOfGeneration,
-                        -1,
-                        false));
-
-            var generationEvaluationTask = this._generationEvaluationActor.Ask(generationEvaluationMessage).ContinueWith(
-                task =>
-                    {
-                        if (task.IsFaulted)
-                        {
-                            throw new InvalidOperationException(
-                                $"The evaluation of all incumbent genomes resulted in an exception!{Environment.NewLine}Message: {task.Exception?.Message}");
-                        }
-
-                        return task.Result;
-                    });
-
-            generationEvaluationTask.Wait();
-        }
 
         /// <summary>
         /// Averages the compare values of a certain genome's results on the provided instances.

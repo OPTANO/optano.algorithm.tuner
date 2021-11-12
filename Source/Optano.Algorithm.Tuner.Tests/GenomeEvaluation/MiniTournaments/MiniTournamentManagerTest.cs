@@ -37,7 +37,6 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.MiniTournaments
 
     using Moq;
 
-    using Optano.Algorithm.Tuner.Configuration;
     using Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation;
     using Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments;
     using Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage;
@@ -85,11 +84,6 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.MiniTournaments
         private IPriorityQueue<GenomeTournamentKey, double> _globalQueue;
 
         /// <summary>
-        /// The test configuration.
-        /// </summary>
-        private AlgorithmTunerConfiguration _configuration;
-
-        /// <summary>
         /// The run evaluator.
         /// </summary>
         private IRunEvaluator<TestInstance, ContinuousResult> _runEvaluator;
@@ -113,14 +107,14 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.MiniTournaments
             this._globalQueue = new SimplePriorityQueue<GenomeTournamentKey, double>();
             this._runEvaluator = new KeepSuggestedOrder<TestInstance, ContinuousResult>();
 
-            this._configuration = new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder().SetMaxGenomeAge(64).Build(42);
             this._defaultManager = new MiniTournamentManager<TestInstance, ContinuousResult>(
                 this._participants,
                 this._instances,
                 42,
                 0,
                 this._runEvaluator,
-                this._configuration);
+                false,
+                1);
         }
 
         #endregion
@@ -224,18 +218,14 @@ namespace Optano.Algorithm.Tuner.Tests.GenomeEvaluation.MiniTournaments
                         It.IsAny<int>()))
                 .Returns(new[] { participants[1] });
 
-            var configWithRacing =
-                new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder()
-                    .SetEnableRacing(true)
-                    .SetMaxGenomeAge(64)
-                    .Build(1);
             var manager = new MiniTournamentManager<TestInstance, ContinuousResult>(
                 participants,
                 instances,
                 0,
                 0,
                 evaluatorMock.Object,
-                configWithRacing);
+                true,
+                1);
 
             this.RequeueAllEvaluations(manager);
             manager.StartSynchronizingQueue(queue);

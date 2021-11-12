@@ -225,7 +225,9 @@ log-received-messages = on
                 .SetEvaluationLimit(13)
                 .SetZipOldStatusFiles(true)
                 .SetScoreGenerationHistory(true)
-                .SetAddDefaultGenome(false)
+                .SetAddDefaultGenomeToFirstGeneration(false)
+                .SetAddDefaultGenomeToFinalIncumbentGeneration(false)
+                .SetAddFinalIncumbentGeneration(false)
                 .Build();
 
             // Check the values in the configuration.
@@ -326,13 +328,15 @@ log-received-messages = on
             Assert.Equal(
                 16,
                 config.MaximumNumberGgaGenerationsWithSameIncumbent);
+            Assert.False(config.AddDefaultGenomeToFirstGeneration);
+            Assert.False(config.AddDefaultGenomeToFinalIncumbentGeneration);
+            Assert.False(config.AddFinalIncumbentGeneration);
 
             // Only check a single value of the detailed config. Rest is tested in its own test.
             var randomForestConfig = (GenomePredictionRandomForestConfig)config.DetailedConfigurations["a"];
             Assert.Equal(
                 0.19,
                 randomForestConfig.FeaturesPerSplitRatio);
-            Assert.False(config.AddDefaultGenome);
         }
 
         /// <summary>
@@ -438,7 +442,9 @@ log-received-messages = on
                 config.MaximumNumberGgaGenerationsWithSameIncumbent);
             Assert.False(config.ScoreGenerationHistory);
             Assert.False(config.ZipOldStatusFiles);
-            Assert.True(config.AddDefaultGenome);
+            Assert.True(config.AddDefaultGenomeToFirstGeneration);
+            Assert.True(config.AddDefaultGenomeToFinalIncumbentGeneration);
+            Assert.True(config.AddFinalIncumbentGeneration);
         }
 
         /// <summary>
@@ -527,7 +533,9 @@ log-received-messages = on
                 .SetMaximumNumberGgaGenerationsWithSameIncumbent(16)
                 .SetScoreGenerationHistory(true)
                 .SetZipOldStatusFiles(true)
-                .SetAddDefaultGenome(false)
+                .SetAddDefaultGenomeToFirstGeneration(false)
+                .SetAddDefaultGenomeToFinalIncumbentGeneration(false)
+                .SetAddFinalIncumbentGeneration(false)
                 .Build();
 
             // Create a new builder based on it and let it build a configuration.
@@ -627,8 +635,14 @@ log-received-messages = on
                 fallback.ZipOldStatusFiles,
                 config.ZipOldStatusFiles);
             Assert.Equal(
-                fallback.AddDefaultGenome,
-                config.AddDefaultGenome);
+                fallback.AddDefaultGenomeToFirstGeneration,
+                config.AddDefaultGenomeToFirstGeneration);
+            Assert.Equal(
+                fallback.AddDefaultGenomeToFinalIncumbentGeneration,
+                config.AddDefaultGenomeToFinalIncumbentGeneration);
+            Assert.Equal(
+                fallback.AddFinalIncumbentGeneration,
+                config.AddFinalIncumbentGeneration);
 
             // Only check a single value of the detailed config. Rest is tested in its own test.
             var randomForestConfig = (GenomePredictionRandomForestConfig)config.DetailedConfigurations["a"];
@@ -1299,18 +1313,50 @@ log-received-messages = on
 
         /// <summary>
         /// Checks that <see cref="AlgorithmTunerConfiguration.IsCompatible"/> returns false if the
-        /// add default genome value is different.
+        /// add default genome to first generation value is different.
         /// </summary>
         [Fact]
-        public void IsCompatibleReturnsFalseNewAddDefaultGenomeValue()
+        public void IsCompatibleReturnsFalseNewAddDefaultGenomeToFirstGenerationValue()
         {
             var defaultConfig = this._builder.SetTrainModel(false).Build(maximumNumberParallelEvaluations: 1);
             var otherConfig = new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder()
-                .SetAddDefaultGenome(false)
+                .SetAddDefaultGenomeToFirstGeneration(false)
                 .SetMaximumNumberParallelEvaluations(1)
                 .BuildWithFallback(defaultConfig);
             Assert.False(otherConfig.IsCompatible(defaultConfig), "Configurations should not be compatible.");
             Assert.False(defaultConfig.IsCompatible(otherConfig), "Configurations should not be compatible.");
+        }
+
+        /// <summary>
+        /// Checks that <see cref="AlgorithmTunerConfiguration.IsCompatible"/> returns true if the
+        /// add default genome to final incumbent value is different.
+        /// </summary>
+        [Fact]
+        public void IsCompatibleReturnsTrueNewAddDefaultGenomeToFinalIncumbentGenerationValue()
+        {
+            var defaultConfig = this._builder.SetTrainModel(false).Build(maximumNumberParallelEvaluations: 1);
+            var otherConfig = new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder()
+                .SetAddDefaultGenomeToFinalIncumbentGeneration(false)
+                .SetMaximumNumberParallelEvaluations(1)
+                .BuildWithFallback(defaultConfig);
+            Assert.True(otherConfig.IsCompatible(defaultConfig), "Configurations should be compatible.");
+            Assert.True(defaultConfig.IsCompatible(otherConfig), "Configurations should be compatible.");
+        }
+
+        /// <summary>
+        /// Checks that <see cref="AlgorithmTunerConfiguration.IsCompatible"/> returns true if the
+        /// add final incumbent generation value is different.
+        /// </summary>
+        [Fact]
+        public void IsCompatibleReturnsTrueNewAddFinalIncumbentGenerationValue()
+        {
+            var defaultConfig = this._builder.SetTrainModel(false).Build(maximumNumberParallelEvaluations: 1);
+            var otherConfig = new AlgorithmTunerConfiguration.AlgorithmTunerConfigurationBuilder()
+                .SetAddFinalIncumbentGeneration(false)
+                .SetMaximumNumberParallelEvaluations(1)
+                .BuildWithFallback(defaultConfig);
+            Assert.True(otherConfig.IsCompatible(defaultConfig), "Configurations should be compatible.");
+            Assert.True(defaultConfig.IsCompatible(otherConfig), "Configurations should be compatible.");
         }
 
         /// <summary>
@@ -2041,6 +2087,32 @@ log-received-messages = on
         public void UndefinedContinuousOptimizationMethodThrowsError()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => this._builder.SetContinuousOptimizationMethod((ContinuousOptimizationMethod)42));
+        }
+
+        /// <summary>
+        /// Verifies that adding the default genome to the final incumbent generation without adding the final incumbent generation at all writes out a warning.
+        /// </summary>
+        [Fact]
+        public void AddingDefaultGenomeToFinalIncumbentGenerationWithoutAddingFinalIncumbentGenerationWritesWarning()
+        {
+            TestUtils.CheckOutput(
+                action: () =>
+                    {
+                        // Build configuration with suspicious settings.
+                        this._builder
+                            .SetAddFinalIncumbentGeneration(false)
+                            .SetAddDefaultGenomeToFinalIncumbentGeneration(true)
+                            .Build(maximumNumberParallelEvaluations: 1);
+                    },
+                check: consoleOutput =>
+                    {
+                        // Check that a warning is written to console.
+                        Assert.True(
+                            consoleOutput.ToString()
+                                .Contains(
+                                    "Warning: You specified to add a default genome to the final incumbent generation, while you did not specify to add a final incumbent generation at all."),
+                            "No warning was written to console.");
+                    });
         }
 
         /// <summary>

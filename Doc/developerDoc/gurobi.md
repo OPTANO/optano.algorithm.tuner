@@ -22,9 +22,9 @@ In addition, it provides
 
 - `parameterTree.xml`, the XML definition of the Gurobi parameter tree;
 - `GurobiRunEvaluator.cs`, describing the custom tuning metric and racing strategy;
-- `GurobiResult.cs`, storing all run properties relevant to the tuning metric; and
-- `GurobiCallback.cs`, responsible for checking for cancellations in Gurobi runs; and
-- `GurobiGrayBoxMethods.cs`, implementing `ICustomGrayBoxMethods` to support [gray box tuning](gray_box_tuning.md); and
+- `GurobiResult.cs`, storing all run properties relevant to the tuning metric;
+- `GurobiCallback.cs`, responsible for checking for cancellations in Gurobi runs;
+- `GurobiGrayBoxMethods.cs`, implementing `ICustomGrayBoxMethods` to support [gray box tuning](gray_box_tuning.md);
 - `GurobiRuntimeFeatures.cs`, implementing `AdapterFeaturesBase` and containing the runtime features of Gurobi; and
 - `GurobiInstanceFeatures.cs`, implementing `AdapterFeaturesBase` and containing some rudimentary instance features.
 
@@ -50,13 +50,24 @@ The translation of non-artificial parameters defined by the tree into ones accep
 
 A Gurobi run may return in various different states and tuning can easily get more complex than just looking at a single metric. These facts are evident both in our extension of `Result`, called `GurobiResult`, and in the implementation of `IRunEvaluator`, called `GurobiRunEvaluator`.
 
-`GurobiResult`, apart from the usual properties of `Runtime` and `IsCancelled`, also stores whether the run found a valid solution (`HasValidSolution`) and the gap that resulted (`Gap`). As those properties can still be interesting if the run was cancelled, we do not allow automatically generated `GurobiResults` in case of cancellations and throw an exception if the parameterless constructor used for those gets called.
+`GurobiResult`, apart from the usual properties of `Runtime` and `IsCancelled`, also stores whether the run found a valid solution (`HasValidSolution`), the optimization sense (`OptimizationSenseIsMinimize`), the gap (`Gap`), the best objective (`BestObjective`) and best objective bound (`BestObjectiveBound`). As those properties can still be interesting if the run was cancelled, we do not allow automatically generated `GurobiResults` in case of cancellations and throw an exception if the parameterless constructor used for those gets called.
 
 Of course the choice of your tuning metric strongly depends on your desired tuning goal. For example tuning for robustness in the sense of runtime or tuning for runtime speed-up both imply totally different tuning metrics. One big advantage of *OAT* is its flexibility concerning the tuning goal due to the possibility of implementing your own tuning metric and our own [racing strategy](../userDoc/parameters.md#racing). In this example we focus on tuning for runtime speed-up and therefore implemented the following version of `IRunEvaluator`.
 
-When presented with parameter combinations and their `GurobiResults` in `GurobiRunEvaluator`, we first sort by success rate, i.e. number of valid solutions found. Then, we sort by the number of cancellations. A run without a cancellation means that a valid solution was found and proven to be (almost) optimal. Parameter combinations with same success and cancellation rates are compared using the average remaining gap on cancelled runs which found a solution. Finally, the least important factor in tuning is average runtime.
+Our custom tuning metric makes use of the following sorting criteria:
 
-Since we implemented a custom tuning metric, we also want to customize our racing strategy. We can customize it by specifying the method `GetGenomesThatCanBeCancelledByRacing` of `IRunEvaluator` in the following way. In our implementation a genome should be cancelled by racing once it becomes clear that it can not beat the current numberOfTournamentWinner-best genome and therefore won't get to be a mini tournament winner. Thereby we ensure to not cancel any target algorithm evaluations of possible mini tournament winners by racing such that all mini tournament winners will see all instances. Moreover we implement the method `ComputeEvaluationPriorityOfGenome` of `IRunEvaluator` such that genomes that might become a racing threshold candidate get evaluated first. By enabling this custom racing strategy (i.e. `--enableRacing=true`) you can speed-up the whole tuning drastically.
+    1.) The higher the number of results with valid solution, the better.
+    2.) The lower the number of cancelled results, the better.
+    3.) Apply tertiary tune criterion of cancelled results (see below).
+    4.) The lower the averaged runtime, the better.
+
+Here, the tertiary tune criterion of cancelled results can be adjusted by the `--tertiaryTuneCriterion` parameter. Valid criterions are:
+* `MipGap`, yielding for the lowest average mip gap over all cancelled results
+* `BestObjective`, yielding for the lowest (or highest, if maximization) average best objective over all cancelled results
+* `BestObjectiveBound`, yielding for the highest (or lowest, if maximization) average best objective bound over all cancelled results
+* `None`, disabling the tertiary tune criterion
+
+Since we implemented a custom tuning metric, we also want to customize our racing strategy. In this example, we make use of the abstract base class `RacingRunEvaluatorBase` to customize our racing strategy according to our tuning metric. Thereby we ensure to not cancel any target algorithm evaluations of possible mini tournament winners by racing such that all mini tournament winners will see all instances and implement the method `ComputeEvaluationPriorityOfGenome` of `IRunEvaluator` such that genomes that might become a racing incubment get evaluated first. By enabling this custom racing strategy (i.e. `--enableRacing=true`) you can speed-up the whole tuning drastically.
 
 ## Running Gurobi
 
@@ -81,6 +92,8 @@ For parsing the parameters, a `GurobiRunnerConfigurationParser` is implemented w
  <dd>Indicates that this instance of the application should act as master.</dd>
  <dt>--grbThreadCount={VALUE}</dt>
  <dd>Sets the maximum number of threads that may be used by Gurobi. Default is 4. Needs to be greater than 0.</dd>
+  <dt>--tertiaryTuneCriterion={VALUE} [MipGap]</dt>
+ <dd>Specifies the tertiary tune criterion after highest number of results with valid solution and lowest number of cancelled results. Valid values are MipGap, BestObjective, BestObjectiveBound, None.</dd>
  <dt>--numberOfSeeds={VALUE} [1]</dt>
  <dd>Sets the number of random seeds to use for every .mps file found in the instance folder. For each file, numberOfSeeds many independent seeds will be used, effectively increasing the instance count by a factor of numberOfSeeds. Needs to be greater than 0.</dd>
  <dt>--rngSeed={VALUE} [42]</dt>

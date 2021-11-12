@@ -51,6 +51,7 @@ namespace Optano.Algorithm.Tuner.Tuning
     using Optano.Algorithm.Tuner.GenomeEvaluation;
     using Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation;
     using Optano.Algorithm.Tuner.GenomeEvaluation.InstanceSelection;
+    using Optano.Algorithm.Tuner.GenomeEvaluation.MiniTournaments;
     using Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage;
     using Optano.Algorithm.Tuner.GenomeEvaluation.ResultStorage.Messages;
     using Optano.Algorithm.Tuner.Genomes;
@@ -210,6 +211,12 @@ namespace Optano.Algorithm.Tuner.Tuning
         /// The gray box random forest.
         /// </summary>
         private ClassificationForestModel _grayBoxRandomForest;
+
+        /// <summary>
+        /// The default genome.
+        /// Can be null.
+        /// </summary>
+        private ImmutableGenome _defaultGenome;
 
         #endregion
 
@@ -418,6 +425,12 @@ namespace Optano.Algorithm.Tuner.Tuning
             this.GeneticEngineering?.RestoreInternalDictionariesWithCorrectComparers();
             this._informationHistory = status.InformationHistory;
 
+            // Update default genome only if not null.
+            if (status.DefaultGenome != null)
+            {
+                this._defaultGenome ??= status.DefaultGenome;
+            }
+
             // Send all run results to storage.
             foreach (var genomeResults in status.RunResults)
             {
@@ -521,8 +534,9 @@ namespace Optano.Algorithm.Tuner.Tuning
             this.LogStatistics();
             RunStatisticTracker.ExportConvergenceBehavior(this.IncumbentQuality);
 
-            // Return best parameters.
-            return this._incumbentGenomeWrapper.IncumbentGenome.GetFilteredGenes(this._parameterTree);
+            return this._configuration.AddFinalIncumbentGeneration
+                       ? this.PerformFinalIncumbentGeneration().GetFilteredGenes(this._parameterTree)
+                       : this._incumbentGenomeWrapper.IncumbentGenome.GetFilteredGenes(this._parameterTree);
         }
 
         /// <summary>
@@ -700,6 +714,88 @@ namespace Optano.Algorithm.Tuner.Tuning
                 throw new ArgumentException(
                     "You cannot start gray box tuning without providing an implementation of the ICustomGrayBoxMethods interface.");
             }
+        }
+
+        /// <summary>
+        /// Gets the fittest incumbent genome's first generation as incumbent.
+        /// </summary>
+        /// <param name="allIncumbentGenomes">All incumbent genomes.</param>
+        /// <param name="fittestIncumbentGenome">The fittest incumbent genome.</param>
+        /// <returns>The fittest incumbent genome's first generation as incumbent, if any.</returns>
+        private static int? GetFirstGenerationAsIncumbent(List<ImmutableGenome> allIncumbentGenomes, ImmutableGenome fittestIncumbentGenome)
+        {
+            return allIncumbentGenomes.Contains(fittestIncumbentGenome, ImmutableGenome.GenomeComparer)
+                       ? allIncumbentGenomes.FindIndex(genome => ImmutableGenome.GenomeComparer.Equals(fittestIncumbentGenome, genome)) + 1
+                       : (int?)null;
+        }
+
+        /// <summary>
+        /// Gets the fittest incumbent genome's last generation as incumbent.
+        /// </summary>
+        /// <param name="allIncumbentGenomes">All incumbent genomes.</param>
+        /// <param name="fittestIncumbentGenome">The fittest incumbent genome.</param>
+        /// <returns>The fittest incumbent genome's last generation as incumbent, if any.</returns>
+        private static int? GetLastGenerationAsIncumbent(List<ImmutableGenome> allIncumbentGenomes, ImmutableGenome fittestIncumbentGenome)
+        {
+            return allIncumbentGenomes.Contains(fittestIncumbentGenome, ImmutableGenome.GenomeComparer)
+                       ? allIncumbentGenomes.FindLastIndex(genome => ImmutableGenome.GenomeComparer.Equals(fittestIncumbentGenome, genome)) + 1
+                       : (int?)null;
+        }
+
+        /// <summary>
+        /// Performs the final incumbent generation and returns the fittest incumbent genome.
+        /// </summary>
+        /// <returns>The fittest incumbent genome.</returns>
+        private Genome PerformFinalIncumbentGeneration()
+        {
+            LoggingHelper.WriteLine(VerbosityLevel.Info, "Start final incumbent generation.");
+
+            var allIncumbentGenomes = this._informationHistory.Select(x => x.Incumbent).ToList();
+            var allIncumbentGenomesToEvaluate = this.GetAllIncumbentGenomesToEvaluate(allIncumbentGenomes);
+
+            var incumbentEvaluator = new MiniTournamentIncumbentEvaluator<TInstance, TResult>(this._generationEvaluationActor, this._configuration);
+
+            var fittestIncumbentGenome = incumbentEvaluator
+                .EvaluateAllIncumbentGenomes(
+                    allIncumbentGenomesToEvaluate,
+                    this._trainingInstances)
+                .GenerationBest;
+
+            LoggingHelper.WriteLine(VerbosityLevel.Info, "Finished final incumbent generation.");
+            LoggingHelper.WriteLine(
+                VerbosityLevel.Info,
+                $"Fittest Incumbent Genome:\r\n{fittestIncumbentGenome.ToFilteredGeneString(this._parameterTree)}");
+
+            this._logWriter.LogFinalIncumbentGeneration(
+                this.GetTotalEvaluationCount(),
+                this.GetGenomeResults(fittestIncumbentGenome),
+                AlgorithmTuner<TTargetAlgorithm, TInstance, TResult, TModelLearner, TPredictorModel, TSamplingStrategy>.GetFirstGenerationAsIncumbent(
+                    allIncumbentGenomes,
+                    fittestIncumbentGenome),
+                AlgorithmTuner<TTargetAlgorithm, TInstance, TResult, TModelLearner, TPredictorModel, TSamplingStrategy>.GetLastGenerationAsIncumbent(
+                    allIncumbentGenomes,
+                    fittestIncumbentGenome),
+                this.CheckIfGenomeEqualsDefaultGenome(fittestIncumbentGenome));
+
+            return fittestIncumbentGenome.CreateMutableGenome();
+        }
+
+        /// <summary>
+        /// Gets all incumbent genomes to evaluate.
+        /// </summary>
+        /// <param name="allIncumbentGenomes">All incumbent genomes.</param>
+        /// <returns>All incumbent genomes to evaluate.</returns>
+        private IEnumerable<ImmutableGenome> GetAllIncumbentGenomesToEvaluate(IEnumerable<ImmutableGenome> allIncumbentGenomes)
+        {
+            var allIncumbentGenomesToEvaluate = new List<ImmutableGenome>(allIncumbentGenomes);
+
+            if (this._configuration.AddDefaultGenomeToFinalIncumbentGeneration)
+            {
+                this._defaultGenome ??= new ImmutableGenome(this._genomeBuilder.CreateDefaultGenome(1));
+                allIncumbentGenomesToEvaluate.Add(this._defaultGenome);
+            }
+
+            return allIncumbentGenomesToEvaluate.Distinct(ImmutableGenome.GenomeComparer);
         }
 
         /// <summary>
@@ -892,20 +988,13 @@ namespace Optano.Algorithm.Tuner.Tuning
         /// </summary>
         private void LogFinishedGeneration()
         {
-            // Ask for all run results of best genome.
-            var resultRequest = this._resultStorageActor.Ask<GenomeResults<TInstance, TResult>>(
-                new GenomeResultsRequest(new ImmutableGenome(this._incumbentGenomeWrapper.IncumbentGenome)));
-            resultRequest.Wait();
-
-            // Ask for total number evaluations.
-            var evaluationCountRequest = this._resultStorageActor.Ask<EvaluationStatistic>(new EvaluationStatisticRequest());
-            evaluationCountRequest.Wait();
+            var immutableIncumbent = new ImmutableGenome(this._incumbentGenomeWrapper.IncumbentGenome);
 
             this._logWriter.LogFinishedGeneration(
                 this._currentGeneration + 1,
-                evaluationCountRequest.Result.TotalEvaluationCount,
-                this._incumbentGenomeWrapper.IncumbentGenome,
-                resultRequest.Result);
+                this.GetTotalEvaluationCount(),
+                this.GetGenomeResults(immutableIncumbent),
+                this.CheckIfGenomeEqualsDefaultGenome(immutableIncumbent));
         }
 
         /// <summary>
@@ -932,7 +1021,8 @@ namespace Optano.Algorithm.Tuner.Tuning
                 this.IncumbentQuality,
                 this._incumbentGenomeWrapper,
                 this._informationHistory,
-                this._logWriter.TotalElapsedTime);
+                this._logWriter.TotalElapsedTime,
+                this._defaultGenome);
 
             // Ask for run results and add those.
             var resultRequest = this._resultStorageActor.Ask<AllResults<TInstance, TResult>>(new AllResultsRequest());
@@ -962,6 +1052,50 @@ namespace Optano.Algorithm.Tuner.Tuning
         }
 
         /// <summary>
+        /// Asks the result storage actor for the current total evaluation count and returns it.
+        /// </summary>
+        /// <returns>The total evaluation count.</returns>
+        private int GetTotalEvaluationCount()
+        {
+            var evaluationCountRequest = this._resultStorageActor.Ask<EvaluationStatistic>(new EvaluationStatisticRequest());
+            evaluationCountRequest.Wait();
+            return evaluationCountRequest.Result.TotalEvaluationCount;
+        }
+
+        /// <summary>
+        /// Asks the result storage actor for the current genome results of the given genome and returns them.
+        /// </summary>
+        /// <param name="genome">The genome.</param>
+        /// <returns>The genome results.</returns>
+        private GenomeResults<TInstance, TResult> GetGenomeResults(ImmutableGenome genome)
+        {
+            if (genome == null)
+            {
+                throw new ArgumentNullException(nameof(genome));
+            }
+
+            var resultRequest = this._resultStorageActor.Ask<GenomeResults<TInstance, TResult>>(
+                new GenomeResultsRequest(genome));
+            resultRequest.Wait();
+            return resultRequest.Result;
+        }
+
+        /// <summary>
+        /// Checks if the given genome equals the default genome.
+        /// </summary>
+        /// <param name="genome">The genome.</param>
+        /// <returns>True, if equal.</returns>
+        private bool CheckIfGenomeEqualsDefaultGenome(ImmutableGenome genome)
+        {
+            if (genome == null)
+            {
+                throw new ArgumentNullException(nameof(genome));
+            }
+
+            return ImmutableGenome.GenomeComparer.Equals(genome, this._defaultGenome);
+        }
+
+        /// <summary>
         /// Creates a population consisting of random genomes having an age and gender such that:
         /// * The size of the non-competitive and competitive parts of the population differs at most by 1.
         /// * The total size of the population matches the one specified by the <see cref="_configuration" />.
@@ -986,7 +1120,7 @@ namespace Optano.Algorithm.Tuner.Tuning
 
             // competitive genomes.
             var sizeOfCompetitivePopulation = this._configuration.PopulationSize - sizeOfNonCompetitivePopulation;
-            foreach (var competitive in this.CreateRandomGenomes(sizeOfCompetitivePopulation, this._configuration.AddDefaultGenome))
+            foreach (var competitive in this.CreateRandomGenomes(sizeOfCompetitivePopulation, this._configuration.AddDefaultGenomeToFirstGeneration))
             {
                 population.AddGenome(competitive, true);
             }
@@ -1011,7 +1145,9 @@ namespace Optano.Algorithm.Tuner.Tuning
 
             if (includeDefaultGenome)
             {
-                yield return this._genomeBuilder.CreateDefaultGenome(1);
+                var defaultGenome = this._genomeBuilder.CreateDefaultGenome(1);
+                this._defaultGenome ??= new ImmutableGenome(defaultGenome);
+                yield return defaultGenome;
             }
 
             // Begin with a random, legal age at least 1.

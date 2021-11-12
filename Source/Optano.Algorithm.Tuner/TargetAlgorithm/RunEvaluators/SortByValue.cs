@@ -50,7 +50,7 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm.RunEvaluators
         #region Fields
 
         /// <summary>
-        /// A value indicating whether values should be sorted ascendingly.
+        /// A value indicating whether values should be sorted ascending.
         /// </summary>
         private readonly bool _ascending;
 
@@ -61,7 +61,7 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm.RunEvaluators
         /// <summary>
         /// Initializes a new instance of the <see cref="SortByValue{TInstance}"/> class.
         /// </summary>
-        /// <param name="ascending">A value indicating whether values should be sorted ascendingly.</param>
+        /// <param name="ascending">A value indicating whether values should be sorted ascending.</param>
         public SortByValue(bool ascending = true)
         {
             this._ascending = ascending;
@@ -82,14 +82,24 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm.RunEvaluators
             {
                 return orderByNumberOfValidResults
                     .ThenBy(
-                        gs => gs.FinishedInstances.Values.Where(SortByValue<TInstance>.HasValidResultValue).Select(this.GetMetricRepresentation)
-                            .DefaultIfEmpty().Average());
+                        gs =>
+                            gs.FinishedInstances.Values
+                                .Where(SortByValue<TInstance>.HasValidResultValue)
+                                .Select(this.GetMetricRepresentation)
+                                .DefaultIfEmpty()
+                                .Average());
             }
-
-            return orderByNumberOfValidResults
-                .ThenByDescending(
-                    gs => gs.FinishedInstances.Values.Where(SortByValue<TInstance>.HasValidResultValue).Select(this.GetMetricRepresentation)
-                        .DefaultIfEmpty().Average());
+            else
+            {
+                return orderByNumberOfValidResults
+                    .ThenByDescending(
+                        gs =>
+                            gs.FinishedInstances.Values
+                                .Where(SortByValue<TInstance>.HasValidResultValue)
+                                .Select(this.GetMetricRepresentation)
+                                .DefaultIfEmpty()
+                                .Average());
+            }
         }
 
         /// <inheritdoc />
@@ -102,9 +112,10 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm.RunEvaluators
         }
 
         /// <inheritdoc />
-        public double ComputeEvaluationPriorityOfGenome(ImmutableGenomeStats<TInstance, ContinuousResult> genomeStats, TimeSpan cpuTimeout)
+        public double ComputeEvaluationPriorityOfGenome(ImmutableGenomeStats<TInstance, ContinuousResult> genomeStats)
         {
-            // Implementing a useful racing strategy is not possible without knowing the global minimum or maximum. Therefore all genomes have the same priority.
+            // Implementing a useful racing strategy is not possible without knowing the global minimum or maximum.
+            // Therefore it makes no sense to compute an explicit evaluation priority, and all genomes have the same priority.
             return 42;
         }
 

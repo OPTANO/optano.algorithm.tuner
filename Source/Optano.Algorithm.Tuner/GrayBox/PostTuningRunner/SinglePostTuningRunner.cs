@@ -184,11 +184,11 @@ namespace Optano.Algorithm.Tuner.GrayBox.PostTuningRunner
             var runnerDictionary = genome.GetFilteredGenes(parameterTree);
             this._configuredTargetAlgorithm = targetAlgorithmFactory.ConfigureTargetAlgorithm(runnerDictionary);
 
-            // Set generationId and tournamentId to -1, since this is a post tuning run.
+            // Set generation to -1, since this is a post tuning run.
             var tunerDataRecord = new TunerDataRecord<TResult>(
                 NetworkUtils.GetFullyQualifiedDomainName(),
                 -1,
-                -1,
+                0,
                 postTuningGenomeInstancePair.Instance,
                 double.NaN,
                 genomeTransformation.GetConverterColumnHeader(),

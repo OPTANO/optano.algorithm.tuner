@@ -70,7 +70,7 @@ namespace Optano.Algorithm.Tuner.Tests.TargetAlgorithm.InterfaceImplementations.
         }
 
         /// <inheritdoc />
-        public double ComputeEvaluationPriorityOfGenome(ImmutableGenomeStats<TInstance, IntegerResult> genomeStats, TimeSpan cpuTimeout)
+        public double ComputeEvaluationPriorityOfGenome(ImmutableGenomeStats<TInstance, IntegerResult> genomeStats)
         {
             return 42;
         }

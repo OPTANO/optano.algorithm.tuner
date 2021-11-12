@@ -234,7 +234,9 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
                     "--maxGgaGenerationsWithSameIncumbent=4",
                     "--scoreGenerationHistory",
                     "--zipOldStatus=true",
-                    "--addDefaultGenome=false",
+                    "--addDefaultGenomeToFirstGeneration=false",
+                    "--addDefaultGenomeToFinalIncumbentGeneration=false",
+                    "--addFinalIncumbentGeneration=false",
                 };
 
             this._parser.ParseArguments(args);
@@ -315,7 +317,9 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
             Assert.True(
                 parsedConfig.ScoreGenerationHistory);
             Assert.True(parsedConfig.ZipOldStatusFiles);
-            Assert.False(parsedConfig.AddDefaultGenome);
+            Assert.False(parsedConfig.AddDefaultGenomeToFirstGeneration);
+            Assert.False(parsedConfig.AddDefaultGenomeToFinalIncumbentGeneration);
+            Assert.False(parsedConfig.AddFinalIncumbentGeneration);
         }
 
         /// <summary>
@@ -562,7 +566,9 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
                     "--jade",
                     "--maxGenerationsPerGgaPhase=13",
                     "--maxGgaGenerationsWithSameIncumbent=4",
-                    "--addDefaultGenome=false",
+                    "--addDefaultGenomeToFirstGeneration=false",
+                    "--addDefaultGenomeToFinalIncumbentGeneration=false",
+                    "--addFinalIncumbentGeneration=false",
                     "--enableDataRecording=true",
                     "--dataRecordDirectory=test",
                     "--dataRecordUpdateInterval=3",
@@ -606,7 +612,9 @@ namespace Optano.Algorithm.Tuner.Tests.DistributedExecution
             Assert.True(parsedConfig.ContinuousOptimizationMethod == ContinuousOptimizationMethod.Jade);
             Assert.Equal(13, parsedConfig.MaximumNumberGgaGenerations);
             Assert.Equal(4, parsedConfig.MaximumNumberGgaGenerationsWithSameIncumbent);
-            Assert.False(parsedConfig.AddDefaultGenome);
+            Assert.False(parsedConfig.AddDefaultGenomeToFirstGeneration);
+            Assert.False(parsedConfig.AddDefaultGenomeToFinalIncumbentGeneration);
+            Assert.False(parsedConfig.AddFinalIncumbentGeneration);
             Assert.True(parsedConfig.EnableDataRecording);
             Assert.Equal("test", parsedConfig.DataRecordDirectoryPath);
             Assert.Equal(3, parsedConfig.DataRecordUpdateInterval.TotalSeconds);

@@ -2,6 +2,20 @@
 
 _OPTANO Algorithm Tuner_ (*OAT*) is a Genetic Algorithm implementation. It finds near-optimal parameters (a configuration) for any given target algorithm. 
 
+## Version 2.1.0 (2021-11-12)
+
+Changes:
+
+- Feature: Introduce `addFinalIncumbentGeneration` parameter to control a potential final incumbent generation.
+    - By using a random subset of instances per generation, the current incumbent genome does not need to be stricly better than its predecessor. For example, the current incumbent genome may outperform its predecessor on the current instance set, but perform worse on all provided training instances.
+	- While using a random subset of instances per generation to avoid overfitting is still recommended, adding a final incumbent generation ensures that OPTANO Algorithm Tuner always returns the fittest incumbent genome.
+	- If the final incumbent generation is enabled, the last regular generation is followed by a generation, in which all incumbent genomes get evaluated on all provided training instances within a single mini tournament. The number of additional evaluations is kept low by caching previous results and applying racing, if enabled.
+- Feature: Rename `addDefaultGenome` parameter to `addDefaultGenomeToFirstGeneration` and introduce `addDefaultGenomeToFinalIncumbentGeneration` parameter to differentiate the potential insertion of a default genome into the corresponding generation.
+- Feature: Introduce `RacingRunEvaluatorBase` to support the implementation of custom racing strategies.
+- Feature: Introduce `--tertiaryTuneCriterion` parameter in [exemplary Gurobi adapter](developerDoc/gurobi.md) to flexibly control the adapter's tuning metric. Valid criterions are `MipGap`, `BestObjective`, `BestObjectiveBound` and `None`, disabling the tertiary tune criterion.
+- Documentation: Add [prepared Excel file](download.md) to documentation to estimate a rough upper bound for the overall tuning runtime.
+- Improvement: Extend logging information by date in addition to time.
+
 ## Version 2.0.0 (2021-05-04)
 
 Changes:

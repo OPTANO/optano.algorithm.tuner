@@ -106,6 +106,7 @@ namespace Optano.Algorithm.Tuner.Tracking
         /// <param name="elapsedTime">
         /// The elapsed time of the tuning.
         /// </param>
+        /// <param name="defaultGenome">The default genome, if any. Can be null.</param>
         [SuppressMessage(
             "NDepend",
             "ND1002:MethodsWithTooManyParametersCritical",
@@ -119,7 +120,8 @@ namespace Optano.Algorithm.Tuner.Tracking
             List<double> incumbentQuality,
             IncumbentGenomeWrapper<TResult> incumbentGenomeWrapper,
             List<GenerationInformation> informationHistory,
-            TimeSpan elapsedTime)
+            TimeSpan elapsedTime,
+            ImmutableGenome defaultGenome = null)
         {
             this.Generation = generation;
             this.Population = population ??
@@ -134,13 +136,18 @@ namespace Optano.Algorithm.Tuner.Tracking
             this.IncumbentGenomeWrapper = incumbentGenomeWrapper ??
                                           throw new ArgumentNullException(nameof(incumbentGenomeWrapper));
             this.InformationHistory = informationHistory ?? throw new ArgumentNullException(nameof(informationHistory));
-
             this.ElapsedTime = elapsedTime;
+            this.DefaultGenome = defaultGenome;
         }
 
         #endregion
 
         #region Public properties
+
+        /// <summary>
+        /// Gets the default genome, if any. Can be null.
+        /// </summary>
+        public ImmutableGenome DefaultGenome { get; }
 
         /// <summary>
         /// Gets the incumbent genome wrapper.

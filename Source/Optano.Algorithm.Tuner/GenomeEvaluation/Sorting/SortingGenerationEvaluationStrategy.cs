@@ -62,7 +62,7 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Sorting
         private readonly IRunEvaluator<TInstance, TResult> _runEvaluator;
 
         /// <summary>
-        /// The genomes.
+        /// The genomes. Do not need to be distinct.
         /// </summary>
         private readonly IReadOnlyList<ImmutableGenome> _genomes;
 
@@ -94,7 +94,7 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Sorting
         /// Initializes a new instance of the <see cref="SortingGenerationEvaluationStrategy{TInstance,TResult}"/> class.
         /// </summary>
         /// <param name="runEvaluator">The <see cref="IRunEvaluator{TInstance,TResult}"/> for sorting genomes.</param>
-        /// <param name="genomes">The genomes for evaluation.</param>
+        /// <param name="genomes">The genomes for evaluation. Do not need to be distinct.</param>
         /// <param name="instances">The instances for evaluation.</param>
         /// <param name="generation">The generation number.</param>
         /// <param name="useGrayBoxInGeneration">Boolean indicating whether to use gray box tuning in current generation.</param>
@@ -179,8 +179,7 @@ namespace Optano.Algorithm.Tuner.GenomeEvaluation.Sorting
             nextEvaluation = new GenomeInstancePairEvaluation<TInstance>(
                 new GenomeInstancePair<TInstance>(nextGenomeStats.Genome, nextInstance),
                 this._generation,
-                // Set tournamentId to -1, since a sorting generation evaluation strategy does not use any tournaments.
-                -1,
+                0,
                 this._useGrayBoxInGeneration);
             return true;
         }

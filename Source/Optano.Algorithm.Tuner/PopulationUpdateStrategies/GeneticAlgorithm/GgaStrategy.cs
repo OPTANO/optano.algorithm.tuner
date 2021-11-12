@@ -472,7 +472,8 @@ namespace Optano.Algorithm.Tuner.PopulationUpdateStrategies.GeneticAlgorithm
                     instancesOfGeneration,
                     this._currentGeneration,
                     this._configuration,
-                    this._useGrayBoxInGeneration));
+                    this._useGrayBoxInGeneration,
+                    false));
 
             var generationEvaluationTask = this._tournamentSelector.Ask<GgaResult<TResult>>(generationEvaluationMessage).ContinueWith(
                 task =>

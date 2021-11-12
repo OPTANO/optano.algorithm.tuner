@@ -380,9 +380,20 @@ namespace Optano.Algorithm.Tuner.Configuration
         public double FeatureSubsetRatioForDistanceComputation { get; private set; }
 
         /// <summary>
-        /// Gets a value indicating whether to include a <see cref="Genome"/> that uses the target algorithm's default values (if specified).
+        /// Gets a value indicating whether to include a <see cref="Genome"/> that uses the target algorithm's default values (if specified) in the first generation.
         /// </summary>
-        public bool AddDefaultGenome { get; private set; }
+        public bool AddDefaultGenomeToFirstGeneration { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether to include a <see cref="Genome"/> that uses the target algorithm's default values (if specified) in the final incumbent generation.
+        /// </summary>
+        public bool AddDefaultGenomeToFinalIncumbentGeneration { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether to add a final incumbent generation, in which all incumbent genomes get evaluated on all provided training instances
+        /// within a single mini tournament, after the last regular generation.
+        /// </summary>
+        public bool AddFinalIncumbentGeneration { get; private set; }
 
         /// <summary>
         /// Gets further configurations which are relevant for specific parts of OPTANO Algorithm Tuner.
@@ -491,7 +502,7 @@ namespace Optano.Algorithm.Tuner.Configuration
                    && Math.Abs(this.FeatureSubsetRatioForDistanceComputation - otherConfig.FeatureSubsetRatioForDistanceComputation)
                    < ConfigurationBase.CompatibilityTolerance
                    && this.DistanceMetric == otherConfig.DistanceMetric
-                   && this.AddDefaultGenome == otherConfig.AddDefaultGenome
+                   && this.AddDefaultGenomeToFirstGeneration == otherConfig.AddDefaultGenomeToFirstGeneration
                    && this.EnableDataRecording == otherConfig.EnableDataRecording
                    && this.DataRecordDirectoryPath == otherConfig.DataRecordDirectoryPath
                    && this.DataRecordUpdateInterval == otherConfig.DataRecordUpdateInterval
@@ -567,14 +578,15 @@ namespace Optano.Algorithm.Tuner.Configuration
             descriptionBuilder.AppendLine(Indent + $"maxParallelEvaluations : {this._maximumNumberParallelEvaluations}");
             descriptionBuilder.AppendLine(Indent + $"instanceNumbers.Minimum : {this.StartNumInstances}");
             descriptionBuilder.AppendLine(Indent + $"instanceNumbers.Maximum : {this.EndNumInstances}");
-            descriptionBuilder.AppendLine(Indent + $"addDefaultGenome : {this.AddDefaultGenome}");
+            descriptionBuilder.AppendLine(Indent + $"addDefaultGenomeToFirstGeneration : {this.AddDefaultGenomeToFirstGeneration}");
+            descriptionBuilder.AppendLine(Indent + $"addDefaultGenomeToFinalIncumbentGeneration : {this.AddDefaultGenomeToFinalIncumbentGeneration}");
             descriptionBuilder.AppendLine("}");
 
             descriptionBuilder.AppendLine("Population-based algorithm : {");
             descriptionBuilder.AppendLine(Indent + $"popSize : {this.PopulationSize}");
             descriptionBuilder.AppendLine(Indent + $"numGens : {this.Generations}");
             descriptionBuilder.AppendLine(Indent + $"goalGen : {this.GoalGeneration}");
-
+            descriptionBuilder.AppendLine(Indent + $"addFinalIncumbentGeneration : {this.AddFinalIncumbentGeneration}");
             var tuningRandomSeedString = this.TuningRandomSeed == null ? "None" : $"{this.TuningRandomSeed}";
             descriptionBuilder.AppendLine(Indent + $"tuningRandomSeed : {tuningRandomSeedString}");
             descriptionBuilder.AppendLine(Indent + $"evaluationLimit : {this.EvaluationLimit}");
@@ -654,6 +666,13 @@ namespace Optano.Algorithm.Tuner.Configuration
         /// </summary>
         public void Validate()
         {
+            if (!this.AddFinalIncumbentGeneration && this.AddDefaultGenomeToFinalIncumbentGeneration)
+            {
+                LoggingHelper.WriteLine(
+                    VerbosityLevel.Warn,
+                    $"Warning: You specified to add a default genome to the final incumbent generation, while you did not specify to add a final incumbent generation at all.");
+            }
+
             if (this.ContinuousOptimizationMethod == ContinuousOptimizationMethod.None)
             {
                 if (this.MaximumNumberGgaGenerations < this.Generations)
@@ -783,11 +802,6 @@ namespace Optano.Algorithm.Tuner.Configuration
             /// </summary>
             private static readonly double DefaultMaxRanksCompensatedByDistance =
                 0.2 * DefaultMaximumMiniTournamentSize;
-
-            /// <summary>
-            /// The default value for <see cref="_addDefaultGenome"/>.
-            /// </summary>
-            private static readonly bool DefaultAddDefaultGenome = true;
 
             #endregion
 
@@ -1049,9 +1063,19 @@ namespace Optano.Algorithm.Tuner.Configuration
             private int? _maximumNumberParallelThreads;
 
             /// <summary>
-            /// The value to set for <see cref="AlgorithmTunerConfiguration.AddDefaultGenome"/>.
+            /// The value to set for <see cref="AlgorithmTunerConfiguration.AddDefaultGenomeToFirstGeneration"/>.
             /// </summary>
-            private bool? _addDefaultGenome;
+            private bool? _addDefaultGenomeToFirstGeneration;
+
+            /// <summary>
+            /// The value to set for <see cref="AlgorithmTunerConfiguration.AddDefaultGenomeToFinalIncumbentGeneration"/>.
+            /// </summary>
+            private bool? _addDefaultGenomeToFinalIncumbentGeneration;
+
+            /// <summary>
+            /// The value to set for <see cref="AlgorithmTunerConfiguration.AddFinalIncumbentGeneration"/>.
+            /// </summary>
+            private bool? _addFinalIncumbentGeneration;
 
             #endregion
 
@@ -1962,13 +1986,35 @@ namespace Optano.Algorithm.Tuner.Configuration
             }
 
             /// <summary>
-            /// Sets whether a default value genome is added to the population.
+            /// Sets whether a default value genome is added to the population of the first generation.
             /// </summary>
-            /// <param name="addDefaultGenome">Whether or not to add a default value genome in the population.</param>
+            /// <param name="addFinalIncumbentGeneration">Whether or not to add a default value genome to the population of the first generation.</param>
             /// <returns>The <see cref="AlgorithmTunerConfigurationBuilder" /> in its new state.</returns>
-            public AlgorithmTunerConfigurationBuilder SetAddDefaultGenome(bool addDefaultGenome)
+            public AlgorithmTunerConfigurationBuilder SetAddDefaultGenomeToFirstGeneration(bool addFinalIncumbentGeneration)
             {
-                this._addDefaultGenome = addDefaultGenome;
+                this._addDefaultGenomeToFirstGeneration = addFinalIncumbentGeneration;
+                return this;
+            }
+
+            /// <summary>
+            /// Sets whether a default value genome is added to the final incumbent generation.
+            /// </summary>
+            /// <param name="addDefaultGenomeToFinalIncumbentGeneration">Whether or not to add a default value genome to the final incumbent generation.</param>
+            /// <returns>The <see cref="AlgorithmTunerConfigurationBuilder" /> in its new state.</returns>
+            public AlgorithmTunerConfigurationBuilder SetAddDefaultGenomeToFinalIncumbentGeneration(bool addDefaultGenomeToFinalIncumbentGeneration)
+            {
+                this._addDefaultGenomeToFinalIncumbentGeneration = addDefaultGenomeToFinalIncumbentGeneration;
+                return this;
+            }
+
+            /// <summary>
+            /// Sets <see cref="AlgorithmTunerConfiguration.AddFinalIncumbentGeneration"/>.
+            /// </summary>
+            /// <param name="addFinalIncumbentGeneration">Whether or not to add a final incumbent generation.</param>
+            /// <returns>The <see cref="AlgorithmTunerConfigurationBuilder" /> in its new state.</returns>
+            public AlgorithmTunerConfigurationBuilder SetAddFinalIncumbentGeneration(bool addFinalIncumbentGeneration)
+            {
+                this._addFinalIncumbentGeneration = addFinalIncumbentGeneration;
                 return this;
             }
 
@@ -2114,10 +2160,20 @@ namespace Optano.Algorithm.Tuner.Configuration
                     ?? fallback?.MaximumNumberParallelThreads
                     ?? configuration._maximumNumberParallelEvaluations;
 
-                configuration.AddDefaultGenome =
-                    this._addDefaultGenome
-                    ?? fallback?.AddDefaultGenome
-                    ?? AlgorithmTunerConfigurationBuilder.DefaultAddDefaultGenome;
+                configuration.AddDefaultGenomeToFirstGeneration =
+                    this._addDefaultGenomeToFirstGeneration
+                    ?? fallback?.AddDefaultGenomeToFirstGeneration
+                    ?? true;
+
+                configuration.AddDefaultGenomeToFinalIncumbentGeneration =
+                    this._addDefaultGenomeToFinalIncumbentGeneration
+                    ?? fallback?.AddDefaultGenomeToFinalIncumbentGeneration
+                    ?? true;
+
+                configuration.AddFinalIncumbentGeneration =
+                    this._addFinalIncumbentGeneration
+                    ?? fallback?.AddFinalIncumbentGeneration
+                    ?? true;
 
                 this.CreateDetailedConfigurations(fallback, configuration);
 

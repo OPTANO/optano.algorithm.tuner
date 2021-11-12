@@ -247,9 +247,9 @@ namespace Optano.Algorithm.Tuner.Logging
 
             // Step 3. Set target properties
             var exportPath = PathUtils.GetAbsolutePathFromCurrentDirectory(outputFilename);
-            consoleTarget.Layout = @"[${level}] ${date:format=HH\:mm\:ss.fff}: ${message}";
+            consoleTarget.Layout = @"[${level}] ${date:format=yyyy-MM-dd HH\:mm\:ss.fff}: ${message}";
             fileTarget.FileName = exportPath;
-            fileTarget.Layout = @"[${level}][${logger}] ${date:format=HH\:mm\:ss.fff}: ${message}";
+            fileTarget.Layout = @"[${level}][${logger}] ${date:format=yyyy-MM-dd HH\:mm\:ss.fff}: ${message}";
 
             // Step 4. Define rules
             var rule1 = new LoggingRule("*", LogLevel.Info, consoleTarget);

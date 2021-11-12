@@ -31,7 +31,6 @@
 
 namespace Optano.Algorithm.Tuner.TargetAlgorithm.RunEvaluators
 {
-    using System;
     using System.Collections.Generic;
 
     using Optano.Algorithm.Tuner.GenomeEvaluation.Evaluation;
@@ -86,9 +85,8 @@ namespace Optano.Algorithm.Tuner.TargetAlgorithm.RunEvaluators
         /// That's why the implementation of this method should strongly depend on the implementations of <see cref="Sort"/> and <see cref="GetGenomesThatCanBeCancelledByRacing"/>.
         /// </summary>
         /// <param name="genomeStats">The genome stats.</param>
-        /// <param name="cpuTimeout">The CPU timeout.</param>
         /// <returns>The genome priority.</returns>
-        double ComputeEvaluationPriorityOfGenome(ImmutableGenomeStats<TInstance, TResult> genomeStats, TimeSpan cpuTimeout);
+        double ComputeEvaluationPriorityOfGenome(ImmutableGenomeStats<TInstance, TResult> genomeStats);
 
         #endregion
     }
