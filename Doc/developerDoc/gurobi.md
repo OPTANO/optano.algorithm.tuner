@@ -90,7 +90,7 @@ For parsing the parameters, a `GurobiRunnerConfigurationParser` is implemented w
 <dl>
  <dt>--master</dt>
  <dd>Indicates that this instance of the application should act as master.</dd>
- <dt>--grbThreadCount={VALUE}</dt>
+ <dt>--grbThreadCount={VALUE} [4]</dt>
  <dd>Sets the maximum number of threads that may be used by Gurobi. Default is 4. Needs to be greater than 0.</dd>
   <dt>--tertiaryTuneCriterion={VALUE} [MipGap]</dt>
  <dd>Specifies the tertiary tune criterion after highest number of results with valid solution and lowest number of cancelled results. Valid values are MipGap, BestObjective, BestObjectiveBound, None.</dd>
