@@ -21,7 +21,7 @@
 	Source Code: https://github.com/OPTANO/optano.algorithm.tuner
 	
 	License details: https://optano.com/en/algorithm-tuner-mit-license</summary>
-    <releaseNotes>http://docs.optano.com/algorithm.tuner/current/changelog.html</releaseNotes>
+    <releaseNotes>http://docs.optano.com/algorithm.tuner/VERSION_PLACEHOLDER/changelog.html</releaseNotes>
     <language>en-US</language>
     <dependencies>
       <group targetFramework="netstandard21">
